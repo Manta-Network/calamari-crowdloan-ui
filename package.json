@@ -24,6 +24,8 @@
     "@polkadot/ui-settings": "^0.82.1",
     "@polkadot/util": "^6.10.1",
     "@polkadot/util-crypto": "^6.10.1",
+    "node-sass": "^6.0.1",
+    "prettier": "^2.3.2",
     "prop-types": "^15.7.2",
     "query-string": "^6.13.5",
     "react": "^16.14.0",
@@ -48,6 +50,11 @@
     "gh-pages": "^3.1.0",
     "react-app-rewired": "^2.1.8",
     "semistandard": "^16.0.0"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
   },
   "eslintConfig": {
     "extends": [

@@ -1,0 +1,10 @@
+@import "./colors.scss";
+@import "./text.scss";
+@import "./fonts.scss";
+@import "./common.scss";
+
+body {
+  font-family: "Ubuntu Mono", monospace;
+  min-height: 100vh;
+  background-color: $gray-color;
+}

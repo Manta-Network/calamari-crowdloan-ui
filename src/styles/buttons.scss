@@ -1,0 +1,23 @@
+.btn-primary {
+  padding: 0.75rem;
+  background-color: $primary-color;
+  border-radius: 6px;
+  color: white;
+  font-weight: semi-bold;
+  -moz-transition: all 0.2s ease-in;
+  -o-transition: all 0.2s ease-in;
+  -webkit-transition: all 0.2s ease-in;
+  transition: all 0.2s ease-in;
+  text-align: center;
+  &:hover {
+    background-color: #2771e7 !important;
+    color: white;
+  }
+  &.rounded-none {
+    border-radius: 0;
+  }
+  &.mw-100 {
+    min-width: 100px;
+  }
+}
+
