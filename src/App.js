@@ -1,7 +1,8 @@
 import React, { useState, useEffect, createRef } from 'react';
 import { Container, Dimmer, Loader, Grid, Sticky, Message, Button, Input } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
-
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
 import { SubstrateContextProvider, useSubstrate } from './substrate-lib';
 import { DeveloperConsole } from './substrate-lib/components';
 import getFromAccount from './utils/GetFromAccount';
@@ -190,7 +191,12 @@ function Main () {
 export default function App () {
   return (
     <SubstrateContextProvider>
-      <Main />
+      <Router>
+        <Switch>
+          <Route path="/" component={HomePage} exact />
+          <Route path="/app" component={Main} exact />
+        </Switch>
+      </Router>
     </SubstrateContextProvider>
   );
 }

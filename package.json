@@ -29,6 +29,7 @@
     "react": "^16.14.0",
     "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^16.14.0",
+    "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.3"
@@ -72,10 +73,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "homepage": "https://substrate-developer-hub.github.io/substrate-front-end-template",
-  "bugs": {
-    "url": "https://github.com/substrate-developer-hub/substrate-front-end-template/issues"
   },
   "keywords": [
     "substrate",
