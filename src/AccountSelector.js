@@ -53,9 +53,6 @@ function Main (props) {
       }}
     >
       <Container>
-        <Menu.Menu>
-          <Image src={`${process.env.PUBLIC_URL}/assets/substrate-logo.png`} size='mini' />
-        </Menu.Menu>
         <Menu.Menu position='right' style={{ alignItems: 'center' }}>
           { !accountSelected
             ? <span>
@@ -105,9 +102,11 @@ function BalanceAnnotation (props) {
   useEffect(() => {
     let unsubscribe;
 
+    
     // If the user has selected an address, create a new subscription
     accountSelected &&
-      api.query.system.account(accountSelected, balance => {
+    api.query.system.account(accountSelected, balance => {
+        console.log(balance.data.free.toHuman(), accountSelected)
         setAccountBalance(balance.data.free.toHuman());
       })
         .then(unsub => {
