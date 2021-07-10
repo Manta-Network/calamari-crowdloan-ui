@@ -1,8 +1,17 @@
 import React, { useState, useEffect, createRef } from 'react';
-import { Container, Dimmer, Loader, Grid, Sticky, Message, Button, Input } from 'semantic-ui-react';
+import {
+  Container,
+  Dimmer,
+  Loader,
+  Grid,
+  Sticky,
+  Message,
+  Button,
+  Input
+} from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import HomePage from 'pages/HomePage';
 import { SubstrateContextProvider, useSubstrate } from './substrate-lib';
 import { DeveloperConsole } from './substrate-lib/components';
 import getFromAccount from './utils/GetFromAccount';
@@ -11,10 +20,10 @@ import { makeDefaultTxResHandler } from './utils/MakeTxResHandler';
 import AccountSelector from './AccountSelector';
 import KusamaToAtomicUnits from './utils/KusamaToAtomicUnits';
 import { BN } from '@polkadot/util';
-import TxStatusDisplay from './TxStatusDisplay'
-import { decodeAddress } from '@polkadot/util-crypto'
+import TxStatusDisplay from './TxStatusDisplay';
+import { decodeAddress } from '@polkadot/util-crypto';
 
-function Main () {
+const Main = () => {
   const [accountAddress, setAccountAddress] = useState();
   const [fromAccount, setFromAccount] = useState();
   const [status, setStatus] = useState();
@@ -26,13 +35,17 @@ function Main () {
     accountAddress &&
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
-  
+
   const PARA_ID = 2000;
-  
-  console.log('decodeAddress', decodeAddress('5FBp8JTjQM3Hv3uqTQz5grhPCqJKZ1KF9Ckq8sZCHFtTNg7f'), decodeAddress('FhRncoc2i4DfhjHE7o8ap4PMRaZMg8RbabaXXq9m46x7d9e'))
+
+  console.log(
+    'decodeAddress',
+    decodeAddress('5FBp8JTjQM3Hv3uqTQz5grhPCqJKZ1KF9Ckq8sZCHFtTNg7f'),
+    decodeAddress('FhRncoc2i4DfhjHE7o8ap4PMRaZMg8RbabaXXq9m46x7d9e')
+  );
 
   useEffect(() => {
-    async function loadFromAccount (accountPair) {
+    async function loadFromAccount(accountPair) {
       if (!api || !api.isConnected || !accountPair) {
         return;
       }
@@ -42,26 +55,33 @@ function Main () {
     loadFromAccount(accountPair, api);
   }, [api, accountPair]);
 
-  const loader = text =>
+  const loader = (text) => (
     <Dimmer active>
-      <Loader size='small'>{text}</Loader>
-    </Dimmer>;
+      <Loader size="small">{text}</Loader>
+    </Dimmer>
+  );
 
-  const message = err =>
+  const message = (err) => (
     <Grid centered columns={2} padded>
       <Grid.Column>
-        <Message negative compact floating
-          header='Error Connecting to Substrate'
+        <Message
+          negative
+          compact
+          floating
+          header="Error Connecting to Substrate"
           content={`${JSON.stringify(err, null, 4)}`}
         />
       </Grid.Column>
-    </Grid>;
+    </Grid>
+  );
 
   if (apiState === 'ERROR') return message(apiError);
   else if (apiState !== 'READY') return loader('Connecting to Substrate');
 
   if (keyringState !== 'READY') {
-    return loader('Loading accounts (please review any extension\'s authorization)');
+    return loader(
+      "Loading accounts (please review any extension's authorization)",
+    );
   }
 
   const extrinsicSucceeded = (extrinsic, blockHash) => true;
@@ -69,73 +89,85 @@ function Main () {
   const getRemarks = async (address, blockHash) => {
     const signedBlock = await api.rpc.chain.getBlock(blockHash);
     signedBlock.block.extrinsics
-      .filter(extrinsic => address.includes(extrinsic.signer.toString()))
-      .filter(extrinsic => extrinsic.method._meta.name.toString() === 'remarkWithEvent' || extrinsic.method._meta.name.toString() === 'remark_with_event')
-      .filter(extrinsic => extrinsicSucceeded(extrinsic, blockHash))
+      .filter((extrinsic) => address.includes(extrinsic.signer.toString()))
+      .filter(
+        (extrinsic) =>
+          extrinsic.method._meta.name.toString() === 'remarkWithEvent' ||
+          extrinsic.method._meta.name.toString() === 'remark_with_event',
+      )
+      .filter((extrinsic) => extrinsicSucceeded(extrinsic, blockHash))
       // .map(extrinsic => new MintData(extrinsic.method.args[0]))
       .forEach((extrinsic) => {
-        console.log(extrinsic, extrinsic.signer.toHuman(), 'remark!')
+        console.log(extrinsic, extrinsic.signer.toHuman(), 'remark!');
       });
   };
-  
-  getRemarks('5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', '0x45367a39d1faaa86368a735c5bd2fee3f381d6ae44e9021ce45578e179549e1a')
+
+  getRemarks(
+    '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+    '0x45367a39d1faaa86368a735c5bd2fee3f381d6ae44e9021ce45578e179549e1a',
+  );
 
   const contextRef = createRef();
 
   const createReferrerRemark = ({ paraId, api, referrer }) => {
-    const refAcc = api.createType('AccountId', referrer)
+    const refAcc = api.createType('AccountId', referrer);
     const remark = api.createType('CalamariCrowdloanReferrerRemark', {
       magic: 'CA',
       paraId,
       referrer: refAcc,
       referrerHash: refAcc.hash.toHex(),
-    })
-    return api.createType('Bytes', remark.toHex())
-  }
+    });
+    return api.createType('Bytes', remark.toHex());
+  };
 
   const getTotalCrowdloanFunds = async () => {
-    const res = await api.query.crowdloan.funds(PARA_ID)
-    return res.isSome ? res.value.raised.toHuman() : null
-  }
+    const res = await api.query.crowdloan.funds(PARA_ID);
+    return res.isSome ? res.value.raised.toHuman() : null;
+  };
 
-  const getBalance = async address => {
+  const getBalance = async (address) => {
     const { data: balance } = await api.query.system.account(address);
-    return balance
-  }
-  
+    return balance;
+  };
+
   const contribute = () => {
     const handleTxResponse = makeDefaultTxResHandler(api, setStatus);
-    const tx = api.tx.crowdloan.contribute(2000, KusamaToAtomicUnits(1, api), null);
+    const tx = api.tx.crowdloan.contribute(
+      2000,
+      KusamaToAtomicUnits(1, api),
+      null,
+    );
     const unsub = tx.signAndSend(fromAccount, handleTxResponse);
     setUnsub(() => unsub);
-  }
-
+  };
 
   const publishReferral = () => {
     const handleTxResponse = makeDefaultTxResHandler(api, setStatus);
-    const tx = api.tx.system.remarkWithEvent(createReferrerRemark({ PARA_ID, api, referrer }))
+    const tx = api.tx.system.remarkWithEvent(
+      createReferrerRemark({ PARA_ID, api, referrer }),
+    );
     const unsub = tx.signAndSend(fromAccount, handleTxResponse);
     setUnsub(() => unsub);
-  }
+  };
 
-
-  const onChangeContributeAmount = e => {
+  const onChangeContributeAmount = (e) => {
     if (e.target.value) {
-      setContributeAmount(new BN(e.target.value))
+      setContributeAmount(new BN(e.target.value));
     } else {
-      setContributeAmount(new BN(-1))
+      setContributeAmount(new BN(-1));
     }
-  }
+  };
 
-  const onChangeReferrer = e => {
+  const onChangeReferrer = (e) => {
     if (e.target.value) {
       setReferrer(e.target.value);
     } else {
       setReferrer(null);
     }
-  }
+  };
 
-  const contributeButtonIsDisabled = !contributeAmount || contributeAmount.lte(new BN(0));
+  const contributeButtonIsDisabled =
+    !contributeAmount || contributeAmount.lte(new BN(0));
   const contributeFormIsDisabled = status && status.isProcessing();
 
   const referralButtonIsDisabled = !referrer;
@@ -147,48 +179,48 @@ function Main () {
         <AccountSelector setAccountAddress={setAccountAddress} />
       </Sticky>
       <Container>
-        <Grid stackable columns='equal'>
-        <Grid.Row stretched>
-            <Input  
-              label='Amount'
-              type='number'
-              state='contributeAmount'
+        <Grid stackable columns="equal">
+          <Grid.Row stretched>
+            <Input
+              label="Amount"
+              type="number"
+              state="contributeAmount"
               disabled={contributeFormIsDisabled}
               onChange={onChangeContributeAmount}
             />
           </Grid.Row>
           <Grid.Row stretched>
-            <Button 
-              disabled={contributeButtonIsDisabled}
-              onClick={contribute} 
-            >Contribute</Button>
+            <Button disabled={contributeButtonIsDisabled} onClick={contribute}>
+              Contribute
+            </Button>
           </Grid.Row>
           <Grid.Row stretched>
-            <Input  
-              label='Referrer'
-              type='string'
-              state='referrer'
+            <Input
+              label="Referrer"
+              type="string"
+              state="referrer"
               disabled={referralInputIsDisabled}
               onChange={onChangeReferrer}
             />
           </Grid.Row>
           <Grid.Row stretched>
-            <Button 
+            <Button
               disabled={referralButtonIsDisabled}
-              onClick={publishReferral} 
-            >Set</Button>
+              onClick={publishReferral}>
+              Set
+            </Button>
           </Grid.Row>
         </Grid>
         <Grid.Row stretched>
           <TxStatusDisplay txStatus={status} />
-          </Grid.Row>
+        </Grid.Row>
       </Container>
       <DeveloperConsole />
     </div>
   );
 }
 
-export default function App () {
+export default function App() {
   return (
     <SubstrateContextProvider>
       <Router>

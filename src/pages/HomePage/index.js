@@ -1,9 +1,12 @@
 import React from 'react';
+import Navbar from 'components/Layouts/Navbar';
 
 const HomePage = () => {
   return (
     <div className="home-page">
-      Home Page
+      <Navbar />
+      <div className="home-content">
+      </div>
     </div>
   );
 };

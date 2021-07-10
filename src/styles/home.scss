@@ -1,0 +1,28 @@
+// home page style
+.home-page {
+  padding: 0 100px;
+  background-color: $gray-color;
+  min-height: 100vh;
+  .navbar-content {
+    padding: 20px 0;
+    display: flex;
+    justify-content: space-between;
+    .navbar-menu {
+      display: flex;
+      align-items: center;
+      .menu-item {
+        padding: 14px 40px;
+        font-size: 18px;
+        letter-spacing: 0.02em;
+        color: $purple-color;
+      }
+      .menu-item.btn {
+        margin-left: 35px;
+        color: white;
+        background: linear-gradient(95.4deg, #ff991e 8.46%, #f4921b 71.41%);
+        border-radius: 9px;
+        cursor: pointer;
+      }
+    }
+  }
+}
