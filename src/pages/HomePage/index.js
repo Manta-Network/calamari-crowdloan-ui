@@ -1,7 +1,12 @@
 import React from 'react';
 import Navbar from 'components/Layouts/Navbar';
 import { Grid } from 'semantic-ui-react';
-import { Details, Contribute, Crowdloan } from 'components/HomeComponents';
+import {
+  Details,
+  Contribute,
+  Crowdloan,
+  ContributeDetails
+} from 'components/HomeComponents';
 
 const HomePage = () => {
   return (
@@ -22,6 +27,7 @@ const HomePage = () => {
           </Grid.Row>
         </Grid>
       </div>
+      <ContributeDetails />
     </div>
   );
 };

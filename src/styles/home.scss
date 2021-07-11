@@ -92,4 +92,13 @@
       }
     }
   }
+  .contributions-details {
+    .title {
+      font-family: Ubuntu Mono;
+      font-weight: bold;
+      font-size: 40px;
+      letter-spacing: 0.02em;
+      color: $purple-color-2;
+    }
+  }
 }
