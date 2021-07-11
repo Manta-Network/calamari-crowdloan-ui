@@ -9,7 +9,7 @@ const Contribute = () => {
       <div className="flex items-center">
         <div className="w-full form-input amount relative h-18">
           <Input className="w-full h-full outline-none" defaultValue="13" />
-          <span className="uppercase text-3xl mt-2 right-0 mr-2 max-btn font-semibold absolute px-5 py-3 rounded-md">
+          <span className="uppercase cursor-pointer text-3xl mt-2 right-0 mr-2 max-btn font-semibold absolute px-5 py-3 rounded-md">
             max
           </span>
         </div>
@@ -20,7 +20,7 @@ const Contribute = () => {
         <div className="w-full form-input relative h-18">
           <Input
             className="w-full h-full outline-none"
-            defaultValue="Mantra2021"
+            defaultValue="Manta2021"
           />
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import Logo from 'assets/images/calamari-logo.png';
+import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   return (
@@ -8,8 +9,12 @@ const Navbar = () => {
         <img src={Logo} alt="logo" />
       </div>
       <div className="navbar-menu">
-        <div className="menu-item">How it Works</div>
-        <div className="menu-item">My Referral Code</div>
+        <NavLink to="#">
+          <div className="menu-item">How it Works</div>
+        </NavLink>
+        <NavLink to="#">
+          <div className="menu-item">My Referral Code</div>
+        </NavLink>
         <div className="menu-item btn">Connect Wallet</div>
       </div>
     </div>
