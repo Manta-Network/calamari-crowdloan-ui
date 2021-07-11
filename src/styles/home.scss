@@ -25,6 +25,7 @@
 // home page style
 .home-page {
   padding: 0 140px;
+  padding-bottom: 30px;
   background-color: $gray-color;
   min-height: 100vh;
 
@@ -88,6 +89,9 @@
       &.crowdloan {
         .title {
           color: $purple-color-2;
+        }
+        .graph-line canvas{
+          padding-top: 20px;
         }
       }
     }

@@ -10,7 +10,7 @@ const data = {
       borderColor: 'rgba(234, 42, 141, 1)',
       backgroundColor: 'rgba(234, 42, 141, 1)',
       yAxisID: 'y',
-      borderWidth: 1,
+      borderWidth: 1
     },
     {
       label: 'KMA',
@@ -18,7 +18,7 @@ const data = {
       borderColor: 'rgba(233, 109, 43, 1)',
       backgroundColor: 'rgba(233, 109, 43, 1)',
       yAxisID: 'y1',
-      borderWidth: 1,
+      borderWidth: 1
     },
   ],
 };
@@ -65,7 +65,9 @@ const Crowdloan = () => {
           </span>
         </div>
       </div>
-      <div className="py-4 pt-6">
+      <div className="py-4 relative graph-line pt-6">
+        <span className="absolute left-0">KSM</span>
+        <span className="absolute right-0">KMA</span>
         <Line data={data} options={options} />
       </div>
     </div>

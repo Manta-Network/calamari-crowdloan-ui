@@ -6,7 +6,7 @@ import TableRowItem from 'components/Table/TableRowItem';
 
 const Contributions = () => {
   return (
-    <div className="contributions-details p-10 mb-20 bg-white rounded-xl">
+    <div className="contributions-details p-10 my-4 bg-white rounded-xl">
       <h1 className="title">Contributions in Details</h1>
       <div className="overflow-x-auto">
         <div className="mb-4 min-w-table">
@@ -21,8 +21,6 @@ const Contributions = () => {
           <TableRowData />
           <TableRowData />
           <TableRowData />
-          <TableRowData />
-          <TableRowData />
         </div>
       </div>
     </div>
@@ -31,9 +29,9 @@ const Contributions = () => {
 
 const TableRowData = () => {
   return (
-    <TableRow className="bg-thirdry rounded-lg px-2 my-3">
+    <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-3">
       <TableRowItem width="5%">
-        <div className="w-8 h-8 btn-primary leading-8 text-center rounded-md">
+        <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
           1
         </div>
       </TableRowItem>
