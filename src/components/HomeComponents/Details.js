@@ -4,22 +4,21 @@ import ArrowUp from 'assets/icons/arrow-up.svg';
 <img src={ArrowDown} alt="arrow-down" />;
 const Details = () => {
   return (
-    <div className="content-item bg-white calamari-text details">
+    <div className="content-item h-full bg-white calamari-text details">
       <h1 className="title">Your Details</h1>
       <div className="flex">
         <div className="w-1/2">
-          <p className="mb-0 calamari-text pb-5">Total Contributions</p>
+          <p className="mb-0 pb-5">Total Contributions</p>
           <span className="purple-text text-2xl font-semibold">200 KSM</span>
         </div>
         <div className="w-1/2">
-          <p className="mb-0 calamari-text pb-5">Total Rewards</p>
+          <p className="mb-0 pb-5">Total Rewards</p>
           <span className="purple-text text-2xl font-semibold">
             450,000 KMA
           </span>
         </div>
       </div>
-      <div className="h-48 py-4">Graph coming soon!</div>
-      <div className="flex justify-between">
+      <div className="flex justify-between pt-6">
         <p className="mb-1">Contribution History</p>
         <span className="opacity-50">1 of 50</span>
       </div>

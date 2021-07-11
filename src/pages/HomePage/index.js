@@ -9,14 +9,14 @@ const HomePage = () => {
       <Navbar />
       <div className="home-content">
         <Grid columns="three">
-          <Grid.Row>
-            <Grid.Column>
+          <Grid.Row className="flex-wrap flex">
+            <Grid.Column className="flex-wrap flex">
               <Contribute />
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column className="flex-wrap flex">
               <Details />
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column className="flex-wrap flex">
               <Crowdloan />
             </Grid.Column>
           </Grid.Row>

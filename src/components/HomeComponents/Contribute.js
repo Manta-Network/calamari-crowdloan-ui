@@ -3,7 +3,7 @@ import { Input } from 'semantic-ui-react';
 
 const Contribute = () => {
   return (
-    <div className="content-item contribute">
+    <div className="content-item contribute flex-1">
       <h1 className="title">Contribute</h1>
       <p className="mb-1">Enter Your Contribution Amount</p>
       <div className="flex items-center">
