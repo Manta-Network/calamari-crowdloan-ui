@@ -30,7 +30,7 @@ const Contribute = () => {
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-lg justify-between px-6 pt-4 pb-2">
               <span>Base</span>
-              <span>150,000 KMA</span>
+              <span className="font-semibold">150,000 KMA</span>
             </div>
             <div className="flex text-lg justify-between px-6 py-2 bg-gray">
               <div>
@@ -39,11 +39,11 @@ const Contribute = () => {
                   Limited Time
                 </span>
               </div>
-              <span>15,000 KMA</span>
+              <span className="font-semibold">15,000 KMA</span>
             </div>
             <div className="flex text-lg justify-between px-6 pt-2 pb-4">
               <span>Referral</span>
-              <span>7,500 KMA</span>
+              <span className="font-semibold">7,500 KMA</span>
             </div>
           </div>
           <div className="flex text-3xl p-6 result justify-between text-white">
@@ -52,7 +52,7 @@ const Contribute = () => {
           </div>
         </div>
       </div>
-      <div className="py-6 rounded-lg text-4xl cursor-pointer text-center mt-8 bg-oriange">
+      <div className="py-6 rounded-lg text-4xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
         Claim Your KMA
       </div>
     </div>

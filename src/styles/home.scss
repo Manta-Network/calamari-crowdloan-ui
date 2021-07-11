@@ -76,6 +76,14 @@
         .title {
           color: $purple-color-2;
         }
+        .history {
+          .arrow-down,
+          .arrow-up {
+            bottom: 0;
+            border: 2px solid $purple-color-2;
+            right: -15px;
+          }
+        }
       }
       &.crowdloan {
         .title {

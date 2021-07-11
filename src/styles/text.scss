@@ -3,12 +3,18 @@
 .calamari-text {
   color: $purple-color-2;
 }
+.purple-text{
+  color: $purple-color-3;
+}
 .bg-gray {
   background-color: $gray-color-2;
 }
 .bg-red {
   background-color: $red-color-2;
 }
-.bg-oriange{
+.bg-oriange {
   background: $oriange-bg;
+}
+.border-2{
+  border: 2px solid $purple-color-2
 }
