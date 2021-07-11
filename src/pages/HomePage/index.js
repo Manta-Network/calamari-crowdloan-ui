@@ -5,7 +5,7 @@ import {
   Details,
   Contribute,
   Crowdloan,
-  ContributeDetails
+  ContributeActivity
 } from 'components/HomeComponents';
 
 const HomePage = () => {
@@ -27,7 +27,7 @@ const HomePage = () => {
           </Grid.Row>
         </Grid>
       </div>
-      <ContributeDetails />
+      <ContributeActivity />
     </div>
   );
 };

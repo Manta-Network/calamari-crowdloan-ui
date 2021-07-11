@@ -1,6 +1,6 @@
 import Details from './Details';
 import Contribute from './Contribute';
 import Crowdloan from './Crowdloan';
-import ContributeDetails from './ContributeDetails';
+import ContributeActivity from './ContributeActivity';
 
-export { Details, Contribute, Crowdloan, ContributeDetails };
+export { Details, Contribute, Crowdloan, ContributeActivity };

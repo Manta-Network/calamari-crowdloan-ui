@@ -4,10 +4,10 @@ import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
 import TableRow from 'components/Table/TableRow';
 import TableRowItem from 'components/Table/TableRowItem';
 
-const Contributions = () => {
+const ContributeActivity = () => {
   return (
     <div className="contributions-details p-10 my-4 bg-white rounded-xl">
-      <h1 className="title">Contributions in Details</h1>
+      <h1 className="title">Global Contribution Activity</h1>
       <div className="overflow-x-auto">
         <div className="mb-4 min-w-table">
           <TableHeaderWrapper className="px-2">
@@ -56,4 +56,4 @@ const TableRowData = () => {
   );
 };
 
-export default Contributions;
+export default ContributeActivity;
