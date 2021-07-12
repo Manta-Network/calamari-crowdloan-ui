@@ -10,18 +10,18 @@ import {
 
 const HomePage = () => {
   return (
-    <div className="home-page">
+    <div className="home-page px-6 sm:px-16 xl:px-40">
       <Navbar />
-      <div className="home-content">
+      <div className="home-content py-6">
         <Grid columns="three">
-          <Grid.Row className="flex-wrap flex">
-            <Grid.Column className="flex-wrap flex">
+          <Grid.Row className="flex-wrap flex-col flex">
+            <Grid.Column className="flex-wrap item flex">
               <Contribute />
             </Grid.Column>
-            <Grid.Column className="flex-wrap flex">
+            <Grid.Column className="flex-wrap item flex">
               <Details />
             </Grid.Column>
-            <Grid.Column className="flex-wrap flex">
+            <Grid.Column className="flex-wrap item flex">
               <Crowdloan />
             </Grid.Column>
           </Grid.Row>

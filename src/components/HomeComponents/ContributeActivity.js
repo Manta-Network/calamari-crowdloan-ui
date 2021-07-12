@@ -1,4 +1,5 @@
 import React from 'react';
+import { Pagination } from 'semantic-ui-react';
 import TableColumnHeader from 'components/Table/TableColumnHeader';
 import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
 import TableRow from 'components/Table/TableRow';
@@ -6,8 +7,10 @@ import TableRowItem from 'components/Table/TableRowItem';
 
 const ContributeActivity = () => {
   return (
-    <div className="contributions-details p-10 my-4 bg-white rounded-xl">
-      <h1 className="title">Global Contribution Activity</h1>
+    <div className="contributions-details p-6 md:p-10 my-4 mt-20 lg:mt-4 bg-white rounded-xl">
+      <h1 className="text-2xl title md:text-4xl">
+        Global Contribution Activity
+      </h1>
       <div className="overflow-x-auto">
         <div className="mb-4 min-w-table">
           <TableHeaderWrapper className="px-2">
@@ -22,6 +25,17 @@ const ContributeActivity = () => {
           <TableRowData />
           <TableRowData />
         </div>
+      </div>
+      <div className="flex justify-end pt-2">
+        <Pagination
+          boundaryRange={0}
+          defaultActivePage={1}
+          ellipsisItem={null}
+          firstItem={null}
+          lastItem={null}
+          siblingRange={1}
+          totalPages={10}
+        />
       </div>
     </div>
   );
