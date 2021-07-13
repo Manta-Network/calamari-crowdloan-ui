@@ -7,16 +7,18 @@ import classNames from 'classnames';
 const Details = () => {
   const [currentPage, setcurrentPage] = useState(1);
   return (
-    <div className="content-item h-full bg-white calamari-text details">
-      <h1 className="title">Your Details</h1>
+    <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
+      <h1 className="title text-3xl md:text-4xl">Your Details</h1>
       <div className="flex">
-        <div className="w-1/2">
+        <div className="w-3/5">
           <p className="mb-0 pb-5">Total Contributions</p>
-          <span className="purple-text text-3xl font-semibold">200 KSM</span>
+          <span className="purple-text text-lg xl:text-2xl font-semibold">
+            200 KSM
+          </span>
         </div>
-        <div className="w-1/2">
+        <div className="w-2/5">
           <p className="mb-0 pb-5">Total Rewards</p>
-          <span className="purple-text text-3xl font-semibold">
+          <span className="purple-text text-lg xl:text-2xl font-semibold">
             450,000 KMA
           </span>
         </div>
@@ -29,6 +31,7 @@ const Details = () => {
         <div className="artibute border-2 py-2 z-10 history relative rounded-lg calamari-text bg-white">
           {FakeData.contributions[currentPage].map((val, index) => (
             <div
+              key={index}
               className={classNames(
                 'flex text-lg justify-between pl-6 pr-10 py-2',
                 { 'bg-gray': index % 2 },
