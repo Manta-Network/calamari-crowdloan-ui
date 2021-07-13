@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createRef } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import {
   Menu,
   Button,
   Dropdown,
-  Container,
   Icon,
-  Image,
   Label
 } from 'semantic-ui-react';
+import Decimal from 'decimal.js'
 
 import { useSubstrate } from './substrate-lib';
+import { KusamaFromAtomicUnits } from './utils/KusamaToAtomicUnits'
 
 function Main (props) {
   const { keyring } = useSubstrate();
-  const { setAccountAddress } = props;
-  const [accountSelected, setAccountSelected] = useState('');
-
+  const { setAccountAddress, setAccountBalance, accountBalance } = props;
+  const [accountSelected, setAccountSelected] = useState();
+  const { api } = useSubstrate()
   // Get the list of accounts we possess the private key for
   const keyringOptions = keyring.getPairs().map(account => ({
     key: account.address,
@@ -35,24 +35,34 @@ function Main (props) {
     setAccountSelected(initialAddress);
   }, [setAccountAddress, initialAddress]);
 
+  // When account address changes, update subscriptions
+  useEffect(() => {
+    let unsubscribe;
+    // If the user has selected an address, create a new subscription
+    accountSelected &&
+    api.query.system.account(accountSelected, balance => {
+        const rawBalance = new Decimal(balance.data.free.toString())
+        setAccountBalance(KusamaFromAtomicUnits(rawBalance, api).toString());
+      })
+        .then(unsub => {
+          unsubscribe = unsub;
+        })
+        .catch(console.error);
+
+    return () => unsubscribe && unsubscribe();
+  }, [api, accountSelected]);
+  
+
   const onChange = address => {
     // Update state with new account address
     setAccountAddress(address);
     setAccountSelected(address);
   };
 
+  const contextRef = createRef();
+
   return (
-    <Menu
-      attached='top'
-      tabular
-      style={{
-        backgroundColor: '#fff',
-        borderColor: '#fff',
-        paddingTop: '1em',
-        paddingBottom: '1em'
-      }}
-    >
-      <Container>
+    <div ref={contextRef}>
         <Menu.Menu position='right' style={{ alignItems: 'center' }}>
           { !accountSelected
             ? <span>
@@ -86,36 +96,14 @@ function Main (props) {
             }}
             value={accountSelected}
           />
-          <BalanceAnnotation accountSelected={accountSelected} />
+          <BalanceAnnotation accountSelected={accountSelected} accountBalance={accountBalance}/>
         </Menu.Menu>
-      </Container>
-    </Menu>
+    </ div >
   );
 }
 
 function BalanceAnnotation (props) {
-  const { accountSelected } = props;
-  const { api } = useSubstrate();
-  const [accountBalance, setAccountBalance] = useState(0);
-
-  // When account address changes, update subscriptions
-  useEffect(() => {
-    let unsubscribe;
-
-    
-    // If the user has selected an address, create a new subscription
-    accountSelected &&
-    api.query.system.account(accountSelected, balance => {
-        console.log(balance.data.free.toHuman(), accountSelected)
-        setAccountBalance(balance.data.free.toHuman());
-      })
-        .then(unsub => {
-          unsubscribe = unsub;
-        })
-        .catch(console.error);
-
-    return () => unsubscribe && unsubscribe();
-  }, [api, accountSelected]);
+  const { accountSelected, accountBalance } = props;
 
   return accountSelected
     ? <Label pointing='left'>

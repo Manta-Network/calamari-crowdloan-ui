@@ -1,8 +1,9 @@
 import React from 'react';
 import Logo from 'assets/images/calamari-logo.png';
 import { NavLink } from 'react-router-dom';
+import AccountSelector from '../../AccountSelector'
 
-const Navbar = () => {
+function Navbar ({ setAccountAddress, setAccountBalance, accountBalance }) {
   return (
     <div className="navbar-content">
       <div className="logo-content">
@@ -15,7 +16,8 @@ const Navbar = () => {
         <NavLink to="#">
           <div className="menu-item">My Referral Code</div>
         </NavLink>
-        <div className="menu-item btn">Connect Wallet</div>
+      <AccountSelector setAccountAddress={setAccountAddress}  setAccountBalance={setAccountBalance} accountBalance={accountBalance}/>
+        {/* <div className="menu-item btn">Connect Wallet</div> */}
       </div>
     </div>
   );
