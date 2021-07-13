@@ -97,9 +97,29 @@ const graphData = {
   ],
 };
 
+const accountData = [
+  {
+    userName: 'User 1',
+    address: '12T1tgaYZzEkFpnPvyqttmPRJxbGbR4uDx49cvZR5SRF8QDu',
+  },
+  {
+    userName: 'User 2',
+    address: 'YZzEkFpnPvyqttmPRJxbGbR4uDx49cvZR5SRF8QDu212121a',
+  },
+  {
+    userName: 'User 3',
+    address: '21sskhjakkasnknlmaqttmPRJxbGbR4uDx49cvZR5SRF8QDu',
+  },
+  {
+    userName: 'User 4',
+    address: '1tgaYZzEkFpnPvyqttmPRJxbGbR4uDx49cvZR5SRF8QDu121',
+  },
+];
+
 const FakeData = {
   graphData,
   contributions,
+  accountData,
 };
 
 export default FakeData;

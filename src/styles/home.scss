@@ -22,6 +22,22 @@
   }
 }
 
+.address-modal {
+  .header {
+    padding-bottom: 10px !important;
+  }
+  .account {
+    &.active, &:hover {
+      background: $oriange-bg-2;
+      .content,
+      .account-name,
+      .account-address {
+        color: white !important;
+      }
+    }
+  }
+}
+
 // home page style
 .home-page {
   padding-bottom: 30px;
