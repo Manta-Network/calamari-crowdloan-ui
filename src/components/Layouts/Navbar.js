@@ -73,8 +73,10 @@ const Navbar = () => {
                 className={classNames(
                   'border cursor-pointer px-8 mb-4 account rounded-md',
                   {
-                    active: selectedAddress.address === val.address,
-                  },
+                    active:
+                      selectedAddress &&
+                      selectedAddress.address === val.address
+                  }
                 )}
                 key={index}>
                 <div className="flex calamari-text items-center content">
