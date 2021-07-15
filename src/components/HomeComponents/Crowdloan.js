@@ -95,9 +95,32 @@ const Crowdloan = () => {
               <TableColumnHeader label="Amount(KSM)" width="25%" />
               <TableColumnHeader label="Reward(KMA)" width="30%" />
             </TableHeaderWrapper>
-            <TableRowData />
-            <TableRowData />
-            <TableRowData />
+            {FakeData.leaderBoardData.map((val) => (
+              <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-2">
+                <TableRowItem width="15%">
+                  <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
+                    {val.rank}
+                  </div>
+                </TableRowItem>
+                <TableRowItem width="30%">
+                  <div
+                    style={{ textOverflow: 'ellipsis' }}
+                    className="overflow-hidden">
+                    {val.address}
+                  </div>
+                </TableRowItem>
+                <TableRowItem width="25%">
+                  <span className="text-thirdry font-semibold">
+                    {val.amount}
+                  </span>
+                </TableRowItem>
+                <TableRowItem width="30%">
+                  <span className="manta-prime-blue font-semibold">
+                    {val.reward}
+                  </span>
+                </TableRowItem>
+              </TableRow>
+            ))}
           </div>
         </div>
         <div className="text-right pt-3 cursor-pointer oriange-text">
@@ -105,27 +128,6 @@ const Crowdloan = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const TableRowData = () => {
-  return (
-    <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-2">
-      <TableRowItem width="15%">
-        <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
-          1
-        </div>
-      </TableRowItem>
-      <TableRowItem width="30%">
-        <span className="text-blue-thirdry">16DmDS1H...</span>
-      </TableRowItem>
-      <TableRowItem width="25%">
-        <span className="text-thirdry font-semibold">17,000</span>
-      </TableRowItem>
-      <TableRowItem width="30%">
-        <span className="manta-prime-blue font-semibold">17,500,000</span>
-      </TableRowItem>
-    </TableRow>
   );
 };
 
