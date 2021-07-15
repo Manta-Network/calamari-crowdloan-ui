@@ -14,7 +14,7 @@ import Decimal from 'decimal.js';
 import { KusamaFromAtomicUnits } from '../../utils/KusamaToAtomicUnits';
 import Persistence from '../../utils/Persistence'
 import axios from 'axios';
-import { times } from 'lodash';
+import axiosRetry from 'axios-retry';
 
 function HomePage() {
   const [accountAddress, setAccountAddress] = useState();
@@ -24,11 +24,15 @@ function HomePage() {
   const [fromAccount, setFromAccount] = useState(null);
   const [totalFundsRaisedKSM, setTotalFundsRaisedKSM] = useState(0);
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
+  const [dayBlocks, setDayBlocks] = useState()
+  const [contributionsByDay, setContributionsByDay] = useState()
+
+  console.log(contributionsByDay, '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
 
   useEffect(() => {
 
-    const CROWDLOAN_START_DATE = new Date(2021, 6, 12)
+    const CROWDLOAN_START_DATE = new Date(2021, 6, 0)
     console.log(CROWDLOAN_START_DATE)
 
     const getCurrentDatetime = () => {
@@ -42,19 +46,40 @@ function HomePage() {
     }
 
     const msIntoCrowdloan = getCurrentDatetime() - CROWDLOAN_START_DATE
-    const fullDaysIntoCrowdloan = Math.floor(msIntoCrowdloan / (1000 * 60 * 60 * 24));
-    console.log(fullDaysIntoCrowdloan.toString())
+    const daysIntoCrowdloan = Math.ceil(msIntoCrowdloan / (1000 * 60 * 60 * 24));
+    // console.log(fullDaysIntoCrowdloan.toString())
 
 
     const midnightTimestamps = []
-    for (let i = 0; i < fullDaysIntoCrowdloan; i++) {
-      midnightTimestamps.push(addDays(CROWDLOAN_START_DATE, i + 1))
+    for (let i = 0; i < daysIntoCrowdloan; i++) {
+      midnightTimestamps.push(addDays(CROWDLOAN_START_DATE, i))
     }
 
     midnightTimestamps.forEach(timestamp => console.log(timestamp.toString()))
 
-    const binarySearch = async () => {
-      if (!api) return
+    const binarySearch = async (firstBlockNumber, lastBlockNumber, targetTimestamp, api) => {
+      let midpointBlockNumber;
+      while (lastBlockNumber > firstBlockNumber) {
+        midpointBlockNumber = Math.ceil((firstBlockNumber + lastBlockNumber) / 2)
+        let midpointBlockHash = await api.rpc.chain.getBlockHash(midpointBlockNumber);
+        let midpointBlock = await api.rpc.chain.getBlock(midpointBlockHash);
+        let midpointBlockTimestampRaw = await api.query.timestamp.now.at(midpointBlock.block.header.parentHash)
+        let midpointBlockTimestamp = new Date(Number.parseInt(midpointBlockTimestampRaw.toString()))
+        if (midpointBlockTimestamp < targetTimestamp) {
+          firstBlockNumber = midpointBlockNumber + 1
+        } else if (midpointBlockTimestamp > targetTimestamp) {
+          lastBlockNumber = midpointBlockNumber - 1
+        } else {
+          break
+        }
+      }
+      return midpointBlockNumber
+    }
+
+    const binarySearchAllDays = async () => {
+      if (!api) {
+        return []
+      }
       await api.isReady
       let midnightBlockNumbers = []
       let lastBlock = await api.rpc.chain.getBlock();
@@ -65,27 +90,16 @@ function HomePage() {
           firstBlockNumber = midnightBlockNumbers[midnightBlockNumbers.length - 1]
         }
         let targetTimestamp = midnightTimestamps[i]
-        let midpointBlockNumber;
-        while (lastBlockNumber > firstBlockNumber) {
-          midpointBlockNumber = Math.ceil((firstBlockNumber + lastBlockNumber) / 2)
-          let midpointBlockHash = await api.rpc.chain.getBlockHash(midpointBlockNumber);
-          let midpointBlock = await api.rpc.chain.getBlock(midpointBlockHash);
-          let midpointBlockTimestamp = await api.query.timestamp.now.at(midpointBlock.block.header.parentHash)
-          midpointBlockTimestamp = new Date(Number.parseInt(midpointBlockTimestamp.toString()))
-          if (midpointBlockTimestamp < targetTimestamp) {
-            firstBlockNumber = midpointBlockNumber + 1
-          } else if (midpointBlockTimestamp > targetTimestamp) {
-            lastBlockNumber = midpointBlockNumber - 1
-          } else {
-            break
-          }
-        }
-        midnightBlockNumbers.push(midpointBlockNumber)
-        console.log(midnightBlockNumbers, ':333')
+        let dayFirstBlock = await binarySearch(firstBlockNumber, lastBlockNumber, targetTimestamp, api)
+        midnightBlockNumbers.push(dayFirstBlock)
+        console.log('midnightBlockNumbers', midnightBlockNumbers)
       }
+      // console.log(midnightBlockNumbers, ':333')
+      console.log(midnightBlockNumbers, 'midnightr block numbers')
+      return midnightBlockNumbers
     }
-    binarySearch()
-
+    binarySearchAllDays().then(dayBlocks => setDayBlocks(dayBlocks))
+    console.log('okay')
 
 
   }, [api])
@@ -98,23 +112,60 @@ function HomePage() {
 
 
 
+  useEffect(() => {
+    axios.defaults.baseURL = 'https://kusama.api.subscan.io/api/scan/parachain/';
+    axios.defaults.headers.post['Content-Type'] = 'application/json';
+    axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
 
 
 
+    const getContributionsByDay = async () => {
+      if (!dayBlocks || !api) {
+        return
+      }
+      console.log('dayblocks', dayBlocks)
+      // const dayBlocks = [7800000, 8100000, 8400000]
+      const contributionsByDay = [0]
+      let selectedDayIndex = 1
+      let selectedDayEndBlockNumber = dayBlocks[selectedDayIndex]
+      let contributionsProcessed = 0;
+      let pageNumber = 0
+      let totalContributions;
 
+      do {
+        axiosRetry(axios, { retries: 5, retryDelay: _ => 1500, retryCondition: error => error.response.status === 429 });
+        let res = await axios.post('contributes', { order: 'block_num asc', fund_id: '2004-6', row: 100, page: pageNumber })
+        totalContributions = res.data.data.count
+        if (!res.data.data.contributes) {
+          break;
+        }
+        res.data.data.contributes.forEach(contribution => {
+          // 'old' contributions seem to get erased?
+          // if (contribution.who === 'F5bRcHfgzGfuVbz9tHbd8L2LtvKUhWfP5DMQU8bTNgK8vE7') {
+          //   console.log('!!!!!!!!!!!!!!', contribution)
+          //   console.log(contribution)
+          // }
+          let amount = KusamaFromAtomicUnits(new Decimal(contribution.contributed), api)
+          while (contribution.block_num >= selectedDayEndBlockNumber) {
+            selectedDayIndex++
+            selectedDayEndBlockNumber = dayBlocks[selectedDayIndex]
+            contributionsByDay.push(0)
+          } 
+          contributionsByDay[contributionsByDay.length - 1] += amount.toNumber()
+          contributionsProcessed++
+        })
+        pageNumber++
+      } while (totalContributions > contributionsProcessed)
 
+      while (contributionsByDay.length < dayBlocks.length - 1) {
+        contributionsByDay.push(0)
+      }
 
+      return contributionsByDay
+    };
+    getContributionsByDay().then(contributionsByDay => contributionsByDay && setContributionsByDay(contributionsByDay));
 
-
-
-
-
-
-
-
-
-
-
+  }, [dayBlocks, api, contributionsByDay])
 
   const accountPair =
     accountAddress &&
@@ -228,7 +279,7 @@ function HomePage() {
               <Details userContributions={userContributions} />
             </Grid.Column>
             <Grid.Column className="flex-wrap item flex">
-              <Crowdloan totalFundsRaisedKSM={totalFundsRaisedKSM?.toString()} />
+              <Crowdloan totalFundsRaisedKSM={totalFundsRaisedKSM?.toString()} contributionsByDay={contributionsByDay} />
             </Grid.Column>
           </Grid.Row>
         </Grid>

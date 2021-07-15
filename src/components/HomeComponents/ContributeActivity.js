@@ -23,7 +23,7 @@ const ContributeActivity = () => {
 
   useEffect(() => {
     const getContributions = () => {
-      axios.post('contributes', { row: PAGE_SIZE, page: pageNumber, order: 'block_num desc' }).then(res => {
+      axios.post('contributes', { row: PAGE_SIZE, page: pageNumber - 1, order: 'block_num desc' }).then(res => {
         setContributions(res.data.data.contributes);
         setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
       });
