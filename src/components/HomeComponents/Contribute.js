@@ -5,19 +5,19 @@ const Contribute = () => {
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">Contribute</h1>
-      <p className="mb-1 text-sm xl:text-base">Enter Your Contribution Amount</p>
+      <p className="mb-2 text-sm xl:text-base">Enter Your Contribution Amount</p>
       <div className="flex items-center">
-        <div className="form-input w-4/5 amount relative h-18">
+        <div className="form-input w-4/5 amount relative h-20">
           <Input className="h-full w-full outline-none" defaultValue="13" />
-          <span className="uppercase cursor-pointer text-xl xl:text-3xl mt-2 right-0 mr-2 max-btn font-semibold absolute px-5 py-3 rounded-md">
+          <span className="uppercase cursor-pointer text-xl xl:text-3xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
             max
           </span>
         </div>
         <div className="text-2xl xl:text-4xl w-1/5 font-semibold pl-4">KSM</div>
       </div>
       <div className="pt-8">
-        <p className="mb-1 text-sm xl:text-base">Enter Your Referral Code (Optional)</p>
-        <div className="w-full form-input relative h-18">
+        <p className="mb-2 text-sm xl:text-base">Enter Your Referral Code (Optional)</p>
+        <div className="w-full form-input relative h-20">
           <Input
             className="w-full h-full outline-none"
             defaultValue="Manta2021"
@@ -25,7 +25,7 @@ const Contribute = () => {
         </div>
       </div>
       <div className="pt-8">
-        <p className="mb-1">Your Rewards</p>
+        <p className="mb-2">Your Rewards</p>
         <div className="reward">
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-4 pb-2">
