@@ -4066,6 +4066,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^0.21.1":
+  version: 0.21.1
+  resolution: "axios@npm:0.21.1"
+  dependencies:
+    follow-redirects: ^1.10.0
+  checksum: 864fb7b5d077d236737f10adca53bf451a93f35a15271f56fba8da07265a02d26b7d881b935a6697dc6adb0549ea3e56d2eecb403edaa3bb78f6479901c10f69
+  languageName: node
+  linkType: hard
+
 "axobject-query@npm:^2.2.0":
   version: 2.2.0
   resolution: "axobject-query@npm:2.2.0"
@@ -5426,6 +5435,7 @@ __metadata:
     "@polkadot/ui-settings": ^0.82.1
     "@polkadot/util": ^6.10.1
     "@polkadot/util-crypto": ^6.10.1
+    axios: ^0.21.1
     babel-preset-env: ^1.7.0
     chart.js: ^3.4.1
     classnames: ^2.3.1
@@ -5453,6 +5463,7 @@ __metadata:
     semantic-ui-css: ^2.4.1
     semantic-ui-react: ^2.0.3
     semistandard: ^16.0.0
+    store: ^2.0.12
   languageName: unknown
   linkType: soft
 
@@ -8464,7 +8475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.10.0":
   version: 1.14.1
   resolution: "follow-redirects@npm:1.14.1"
   peerDependenciesMeta:

@@ -8,5 +8,5 @@ export function KusamaToAtomicUnits (amount, api) {
 
 export function KusamaFromAtomicUnits (amount, api) {
   const decimals = api.registry.chainDecimals;
-  return amount / new Decimal(10).pow(new Decimal(decimals.toString()));
+  return new Decimal(amount / new Decimal(10).pow(new Decimal(decimals.toString())));
 }

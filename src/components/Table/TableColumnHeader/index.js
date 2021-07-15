@@ -7,9 +7,9 @@ const TableColumnHeader = ({ label, className, width = 'auto', children }) => {
       style={{ width }}
       className={classNames(
         'box-border text-base inline-block p-2 text-gray font-semibold',
-        className,
+        className
       )}>
-      {label ? label : children}
+      {label || children}
     </div>
   );
 };

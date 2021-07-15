@@ -29,12 +29,12 @@ export function makeDefaultTxResHandler (
   setStatus
 ) {
   const onSuccess = block => {
-    console.log('success')
+    console.log('success');
     setStatus(TxStatus.finalized(block));
   };
   const onFailure = (block, error) => {
-    console.log('failure')
-    console.log(error)
+    console.log('failure');
+    console.log(error);
     setStatus(TxStatus.failed(block, error));
   };
   const onUpdate = message => {

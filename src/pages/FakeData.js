@@ -75,23 +75,14 @@ const contributions = {
 };
 
 const graphData = {
-  labels: ['1 Oct', '2 Oct', '3 Oct', '4 Oct', '5 Oct', '6 Oct', '7 Oct'],
+  labels: ['1 Oct', '2 Oct', '3 Oct', '4 Oct', '5 Oct', '6 Oct', '7 Oct', '8 Oct', '9 Oct', '10 Oct', '11 Oct', '12 Oct', '13 Oct', '`14 Oct', '15 Oct', '16 Oct'],
   datasets: [
     {
       label: 'KSM',
-      data: [0, 7, 10, 5, 8, 3, 2],
-      borderColor: 'rgba(234, 42, 141, 1)',
-      backgroundColor: 'rgba(234, 42, 141, 1)',
-      color: 'green',
-      yAxisID: 'y',
-      borderWidth: 1,
-    },
-    {
-      label: 'KMA',
-      data: [8, 12, 3, 3, 2, 3, 6],
+      data: [0, 100, 500, 700, 900, 1200, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000],
       borderColor: 'rgba(233, 109, 43, 1)',
       backgroundColor: 'rgba(233, 109, 43, 1)',
-      yAxisID: 'y1',
+      yAxisID: 'y',
       borderWidth: 1,
     },
   ],

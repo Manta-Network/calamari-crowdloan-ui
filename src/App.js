@@ -220,7 +220,7 @@ import { DeveloperConsole } from './substrate-lib/components';
 //   );
 // }
 
-export default function App() {
+export default function App () {
   return (
     <SubstrateContextProvider>
       <Router>
