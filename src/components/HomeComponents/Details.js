@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ArrowDown from 'assets/icons/arrow-down.svg';
 import ArrowUp from 'assets/icons/arrow-up.svg';
-import FakeData from 'pages/FakeData';
 import classNames from 'classnames';
+import Kusama from 'types/Kusama';
+import Decimal from 'decimal.js';
 
 const Details = ({ userContributions }) => {
   const PAGE_SIZE = 5;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(Math.ceil(userContributions.length / 5, 1), 1);
-  const currentPageUserContributions = userContributions.slice((currentPage + 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const currentPageUserContributions = userContributions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const userTotalContributions = userContributions.reduce(
+    (acc, cur) => acc.add(cur.amountKSM), new Kusama(Kusama.KSM, new Decimal(0)));
+  const dateFormatOptions = { month: 'short', day: 'numeric' };
 
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
@@ -17,13 +21,13 @@ const Details = ({ userContributions }) => {
         <div className="w-3/5">
           <p className="mb-0 pb-5">Total Contributions</p>
           <span className="purple-text text-lg xl:text-2xl font-semibold">
-            {userContributions.reduce((acc, cur) => acc + cur.amountKSM, 0)} KSM
+            {userTotalContributions.toString()}
           </span>
         </div>
         <div className="w-2/5">
           <p className="mb-0 pb-5">Total Rewards</p>
           <span className="purple-text text-lg xl:text-2xl font-semibold">
-            {userContributions.reduce((acc, cur) => acc + cur.rewardKMA, 0)} KMA
+            ??? KMA
           </span>
         </div>
       </div>
@@ -40,14 +44,14 @@ const Details = ({ userContributions }) => {
                 'flex text-lg justify-between pl-6 pr-10 py-2',
                 { 'bg-gray': index % 2 }
               )}>
-              <span>{val.date}</span>
-              <span className="font-semibold">{contribution.amountKSM} KSM</span>
+              <span>{contribution.date.toLocaleDateString('en-US', dateFormatOptions)}</span>
+              <span className="font-semibold">{contribution.amountKSM.toString()}</span>
             </div>
           ))}
           <img
             src={ArrowUp}
             onClick={() =>
-              currenyPage > 1 && setCurrentPage(currentPage - 1)
+              currentPage > 1 && setCurrentPage(currentPage - 1)
             }
             alt="arrow-up"
             className="h-8 w-8 arrow-down absolute z-20 cursor-pointer top-0 p-2 mt-12 bg-white rounded-full"
@@ -55,7 +59,7 @@ const Details = ({ userContributions }) => {
           <img
             src={ArrowDown}
             onClick={() =>
-              currenyPage < totalPages && setCurrentPage(currentPage + 1)
+              currentPage < totalPages && setCurrentPage(currentPage + 1)
             }
             alt="arrow-down"
             className="h-8 w-8 arrow-down absolute cursor-pointer z-20 p-2 mb-12 bg-white rounded-full"

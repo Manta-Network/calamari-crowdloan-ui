@@ -1,5 +1,5 @@
 class Contribution {
-  constructor (amountKSM, date, rewardKSM) {
+  constructor (amountKSM, date, rewardKMA = null) {
     this.amountKSM = amountKSM;
     this.date = date;
     this.rewardKMA = rewardKMA;
@@ -13,3 +13,5 @@ class Contribution {
     return { amountKSM: this.amountKSM, date: this.date, rewardKSM: this.rewardKSM };
   }
 }
+
+export default Contribution;

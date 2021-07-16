@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
-import { KusamaToAtomicUnits, KusamaFromAtomicUnits } from '../../utils/KusamaToAtomicUnits';
 import Decimal from 'decimal.js';
 import { PARA_ID } from '../../constants/ChainConstants';
 import { makeDefaultTxResHandler } from '../../utils/MakeTxResHandler';
+import Kusama from '../../types/Kusama';
 
 function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userContributions }) {
   const [status, setStatus] = useState(null);
@@ -14,44 +14,37 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
   // 2084
   const { api } = useSubstrate();
 
-  const getContributeAmountKSM = () => {
+  const getContributeAmounKSM = () => {
     try {
-      return new Decimal(contributeAmountInput);
+      return new Kusama(Kusama.KSM, new Decimal(contributeAmountInput));
     } catch (error) {
-      return null;
+      return new Kusama(Kusama.KSM, new Decimal(0));
     }
   };
-  const contributeAmountKSM = getContributeAmountKSM();
-
-  const getContributeAmountAtomicUnits = () => {
-    try {
-      return KusamaToAtomicUnits(new Decimal(contributeAmountInput), api);
-    } catch (error) {
-      return null;
-    }
-  };
-  const contributeAmountAtomicUnits = getContributeAmountAtomicUnits();
+  const contributeAmountKSM = getContributeAmounKSM();
+  const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
 
   const getEarlyBonus = () => {
     if (!totalFundsRaisedKSM || !contributeAmountKSM) {
       return null;
     }
-    const KSMEligibleForBonus = new Decimal(1000);
-    const KSMEligibleForBonusRemaining = Decimal.max(0, KSMEligibleForBonus.minus(totalFundsRaisedKSM));
-    const userKSMIneligibleForBonus = Decimal.max(0, contributeAmountKSM.minus(KSMEligibleForBonusRemaining));
+    const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000));
+    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalFundsRaisedKSM).max(new Kusama(Kusama.KSM, new Decimal(0)));
+    const userKSMIneligibleForBonus = contributeAmountKSM.minus(KSMEligibleForBonusRemaining).max(new Kusama(Kusama.KSM, new Decimal(0)));
     const userKSMEligibleForBonus = contributeAmountKSM.minus(userKSMIneligibleForBonus);
-    return userKSMEligibleForBonus.mul(new Decimal(500));
+    return userKSMEligibleForBonus.value.mul(new Decimal(500));
   };
   const earlyBonus = getEarlyBonus();
 
   const getReferalBonus = () => {
     if (!contributeAmountKSM) return null;
-    return referralCode ? contributeAmountKSM.mul(new Decimal(500)) : new Decimal(0);
+    return referralCode ? contributeAmountKSM.value.mul(new Decimal(500)) : new Decimal(0);
   };
   const referralBonus = getReferalBonus();
 
   const getBaseReward = () => {
-    return contributeAmountKSM ? contributeAmountKSM.mul(new Decimal(10000)) : null;
+    if (!contributeAmountKSM) return null;
+    return contributeAmountKSM ? contributeAmountKSM.value.mul(new Decimal(10000)) : new Decimal(0);
   };
   const baseReward = getBaseReward();
 
@@ -93,7 +86,7 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
   };
 
   const onClickMax = () => {
-    accountBalance && setContributeAmountInput(accountBalance.toString());
+    accountBalance && setContributeAmountInput(accountBalance.toString(false));
   };
 
   const onChangeContributeAmountInput = e => {

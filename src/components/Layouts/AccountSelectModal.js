@@ -2,18 +2,19 @@ import React from 'react';
 import FakeData from 'pages/FakeData';
 import classNames from 'classnames';
 import { Modal } from 'semantic-ui-react';
+import { useSubstrate } from '../../substrate-lib';
 
-function AddressSelectModal ({openModal, setOpenModal, acccountAddress, setAccountAddress }) {
-    const { keyring } = useSubstrate();  
-    // Get the list of accounts we possess the private key for
-    const keyringOptions = keyring.getPairs().map(account => ({
-      key: account.address,
-      value: account.address,
-      text: account.meta.name.toUpperCase(),
-      icon: 'user'
-    }));
-    
-    return (
+function AddressSelectModal ({ openModal, setOpenModal, acccountAddress, setAccountAddress }) {
+  const { keyring } = useSubstrate();
+  // Get the list of accounts we possess the private key for
+  const keyringOptions = keyring.getPairs().map(account => ({
+    key: account.address,
+    value: account.address,
+    text: account.meta.name.toUpperCase(),
+    icon: 'user'
+  }));
+
+  return (
         <Modal
             size="small"
             className="address-modal"
@@ -29,19 +30,19 @@ function AddressSelectModal ({openModal, setOpenModal, acccountAddress, setAccou
             </Modal.Header>
             <Modal.Content>
             <div className="px-24">
-                {FakeData.accountData.map((val, index) => (
+                {keyringOptions?.map((option, index) => (
                 <div
                     onClick={() => {
-                    setAccountAddress(val);
-                    setOpenModal(false);
+                      setAccountAddress(option.value);
+                      setOpenModal(false);
                     }}
                     className={classNames(
-                    'border cursor-pointer px-8 mb-4 account rounded-md',
-                    {
+                      'border cursor-pointer px-8 mb-4 account rounded-md',
+                      {
                         active:
                         acccountAddress &&
-                        acccountAddress === val.address
-                    }
+                        acccountAddress === option.value
+                      }
                     )}
                     key={index}>
                     <div className="flex calamari-text items-center content">
@@ -60,10 +61,10 @@ function AddressSelectModal ({openModal, setOpenModal, acccountAddress, setAccou
                     </svg>
                     <div className="px-4 py-1">
                         <p className="mb-1 account-name font-semibold calamari-text">
-                        {val.userName}
+                        {option.text}
                         </p>
                         <span className="purple-text account-address">
-                        {val.address}
+                        {option.value}
                         </span>
                     </div>
                     </div>
@@ -72,7 +73,7 @@ function AddressSelectModal ({openModal, setOpenModal, acccountAddress, setAccou
             </div>
             </Modal.Content>
         </Modal>
-    )
+  );
 }
 
 export default AddressSelectModal;

@@ -6,7 +6,7 @@ import TableRow from 'components/Table/TableRow';
 import TableRowItem from 'components/Table/TableRowItem';
 import axios from 'axios';
 import Decimal from 'decimal.js';
-import { KusamaFromAtomicUnits } from 'utils/KusamaToAtomicUnits';
+import Kusama from '../../types/Kusama';
 import { useSubstrate } from 'substrate-lib';
 
 const ContributeActivity = () => {
@@ -15,15 +15,11 @@ const ContributeActivity = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [contributions, setContributions] = useState(null);
 
-  axios.defaults.baseURL = 'https://kusama.api.subscan.io/api/scan/parachain/';
-  axios.defaults.headers.post['Content-Type'] = 'application/json';
-  axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
-
   const PAGE_SIZE = 10;
 
   useEffect(() => {
     const getContributions = () => {
-      axios.post('contributes', { row: PAGE_SIZE, page: pageNumber - 1, order: 'block_num desc' }).then(res => {
+      axios.post('parachain/contributes', { row: PAGE_SIZE, page: pageNumber - 1, order: 'block_num desc' }).then(res => {
         setContributions(res.data.data.contributes);
         setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
       });
@@ -69,8 +65,7 @@ const ContributeActivity = () => {
 };
 
 const TableRowData = ({ contribution }) => {
-  const contributionAtomicUnits = new Decimal(contribution.contributing);
-  const contributionKSM = KusamaFromAtomicUnits(contributionAtomicUnits, api);
+  const contributionKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
   return (
     <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-3">
       {/* <TableRowItem width="5%">
@@ -84,10 +79,10 @@ const TableRowData = ({ contribution }) => {
         </span>
       </TableRowItem>
       <TableRowItem width="15%">
-        <span className="text-thirdry font-semibold">{contributionKSM.toString()} KSM</span>
+        <span className="text-thirdry font-semibold">{contributionKSM.toString()}</span>
       </TableRowItem>
       <TableRowItem width="15%">
-        <span className="manta-prime-blue font-semibold">{contributionKSM.mul(10000).toString()} KMA</span>
+        <span className="manta-prime-blue font-semibold">{contributionKSM.value.mul(10000).toString()} KMA</span>
       </TableRowItem>
       {/* <TableRowItem width="20%">
         <span className="text-thirdry font-semibold">2</span>

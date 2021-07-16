@@ -20,7 +20,6 @@ function Navbar ({ setAccountAddress, accountBalance, accountPair }) {
         </NavLink>
         <AccountSelectButton
           setAccountAddress={setAccountAddress}
-          accountBalance={accountBalance}
           accountPair={accountPair}
         />
       </div>
