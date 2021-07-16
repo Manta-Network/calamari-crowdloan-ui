@@ -63,7 +63,7 @@ const Navbar = () => {
           </div>
         </Modal.Header>
         <Modal.Content>
-          <div className="px-24">
+          <div className="px-4 lg:px-24">
             {FakeData.accountData.map((val, index) => (
               <div
                 onClick={() => {
@@ -71,7 +71,7 @@ const Navbar = () => {
                   setOpenModal(false);
                 }}
                 className={classNames(
-                  'border cursor-pointer px-8 mb-4 account rounded-md',
+                  'border cursor-pointer px-8 mb-4 break-all account rounded-md',
                   {
                     active:
                       selectedAddress &&
@@ -79,7 +79,8 @@ const Navbar = () => {
                   }
                 )}
                 key={index}>
-                <div className="flex calamari-text items-center content">
+                <div className="flex calamari-text justify-center items-center content">
+                  <div className='w-8 h-8'>
                   <svg
                     fill="none"
                     stroke="currentColor"
@@ -93,7 +94,8 @@ const Navbar = () => {
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
-                  <div className="px-4 py-1">
+                  </div>
+                  <div className="px-8 py-1">
                     <p className="mb-1 account-name font-semibold calamari-text">
                       {val.userName}
                     </p>

@@ -116,10 +116,32 @@ const accountData = [
   },
 ];
 
+const leaderBoardData = [
+  {
+    rank: 1,
+    address: '12T1tgaYZzEkFpnPvyqttmPRJxbGbR4uDx49cvZR5SRF8QDu',
+    amount: '17.000',
+    reward: '17.500000',
+  },
+  {
+    rank: 2,
+    address: '12T1tgaYZzEkFpnPvyqttmPRJxbGbR4uDx49cvZR5SRF8QDu',
+    amount: '6.000',
+    reward: '18.500000',
+  },
+  {
+    rank: 3,
+    address: '12T1tgaYZzEkFpnPvyqttmPRJxbGbR4uDx49cvZR5SRF8QDu',
+    amount: '10.000',
+    reward: '17.500000',
+  },
+];
+
 const FakeData = {
   graphData,
   contributions,
   accountData,
+  leaderBoardData,
 };
 
 export default FakeData;

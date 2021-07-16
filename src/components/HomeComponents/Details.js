@@ -58,7 +58,7 @@ const Details = () => {
           />
         </div>
       </div>
-      <div className="flex justify-between pt-6">
+      <div className="flex justify-between pt-10">
         <p className="mb-1">Referral History</p>
         <span className="opacity-50">1 of 50</span>
       </div>
