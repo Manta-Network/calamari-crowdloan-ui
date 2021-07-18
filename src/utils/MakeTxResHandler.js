@@ -24,21 +24,21 @@ export function makeTxResHandler (
   };
 }
 
-export function makeDefaultTxResHandler (
-  api,
-  setStatus
-) {
-  const onSuccess = block => {
-    console.log('success');
-    setStatus(TxStatus.finalized(block));
-  };
-  const onFailure = (block, error) => {
-    console.log('failure');
-    console.log(error);
-    setStatus(TxStatus.failed(block, error));
-  };
-  const onUpdate = message => {
-    setStatus(TxStatus.processing(message));
-  };
-  return makeTxResHandler(api, onSuccess, onFailure, onUpdate);
-}
+// export function makeDefaultTxResHandler (
+//   api,
+//   setStatus
+// ) {
+//   const onSuccess = block => {
+//     console.log('success');
+//     setStatus(TxStatus.finalized(block));
+//   };
+//   const onFailure = (block, error) => {
+//     console.log('failure');
+//     console.log(error);
+//     setStatus(TxStatus.failed(block, error));
+//   };
+//   const onUpdate = message => {
+//     setStatus(TxStatus.processing(message));
+//   };
+//   return makeTxResHandler(api, onSuccess, onFailure, onUpdate);
+// }

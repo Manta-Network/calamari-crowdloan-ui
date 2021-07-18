@@ -27,7 +27,7 @@ const Details = ({ userContributions }) => {
         <div className="w-2/5">
           <p className="mb-0 pb-5">Total Rewards</p>
           <span className="purple-text text-lg xl:text-2xl font-semibold">
-            ??? KMA
+            {userTotalContributions.value.mul(10500).toString()} KMA
           </span>
         </div>
       </div>
@@ -66,7 +66,7 @@ const Details = ({ userContributions }) => {
           />
         </div>
       </div>
-      <div className="flex justify-between pt-6">
+      <div className="flex justify-between pt-10">
         <p className="mb-1">Referral History</p>
         <span className="opacity-50">{currentPage} of {totalPages}</span>
       </div>

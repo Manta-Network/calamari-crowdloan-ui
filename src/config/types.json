@@ -1,8 +1,3 @@
 {
-    "CalamariCrowdloanReferrerRemark": {
-    "magic": "Bytes",
-    "paraId": "ParaId",
-    "referrer": "AccountId",
-    "referrerHash": "Bytes"
-  }
+  "Memo": "AccountId"
 }

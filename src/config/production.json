@@ -1,3 +1,5 @@
 {
-  "PROVIDER_SOCKET": "wss://kusama-rpc.polkadot.io/ws"
+  "PROVIDER_SOCKET": "wss://kusama-rpc.polkadot.io/ws",
+  "START_DATE": null,
+  "PARA_ID": 2084
 }

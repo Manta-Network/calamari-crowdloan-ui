@@ -3,15 +3,26 @@ import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
 import Decimal from 'decimal.js';
 import { PARA_ID } from '../../constants/ChainConstants';
-import { makeDefaultTxResHandler } from '../../utils/MakeTxResHandler';
+import { makeTxResHandler } from '../../utils/MakeTxResHandler';
 import Kusama from '../../types/Kusama';
+import config from '../../config'
+import TxStatusDisplay from '../../TxStatusDisplay';
+import TxStatus from '../../utils/TxStatus';
+import { decodeAddress } from '@polkadot/util-crypto'
+import formatPayloadForSubstrate from 'utils/FormatPayloadForSubstrate';
+import BN from 'bn.js'
+import { hexToU8a, isHex, stringToU8a } from '@polkadot/util';
 
-function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userContributions }) {
-  const [status, setStatus] = useState(null);
+
+
+function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, userContributions }) {
+  const [referralStatus, setReferralStatus] = useState(null);
+  const [contributionStatus, setContributionStatus] = useState(null)
   const [, setUnsub] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
-  const [referralCode, setReferralCode] = useState();
-  // 2084
+  const [referralCodeInput, setReferralCodeInput] = useState();
+  const [referralCode, setReferralCode] = useState()
+
   const { api } = useSubstrate();
 
   const getContributeAmounKSM = () => {
@@ -23,6 +34,9 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
   };
   const contributeAmountKSM = getContributeAmounKSM();
   const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
+
+  // console.log(referralCode && hexToU8a('0x' + Buffer.from(referralCode).toString('hex'))
+
 
   const getEarlyBonus = () => {
     if (!totalFundsRaisedKSM || !contributeAmountKSM) {
@@ -38,7 +52,7 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
 
   const getReferalBonus = () => {
     if (!contributeAmountKSM) return null;
-    return referralCode ? contributeAmountKSM.value.mul(new Decimal(500)) : new Decimal(0);
+    return referralCodeInput ? contributeAmountKSM.value.mul(new Decimal(500)) : new Decimal(0);
   };
   const referralBonus = getReferalBonus();
 
@@ -55,38 +69,62 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
   }
 
   const contribute = () => {
-    const handleTxResponse = makeDefaultTxResHandler(api, setStatus);
-    const tx = api.tx.crowdloan.contribute(
-      PARA_ID,
-      contributeAmountAtomicUnits,
+    const handleTxResponse = makeTxResHandler(
+      api, onContributeSuccess, onContributeFailure, onContributeUpdate);
+    console.log('suffer', formatPayloadForSubstrate([
+      2055,
+      contributeAmountAtomicUnits.value.toString(),
       null
+    ]))
+    const tx = api.tx.crowdloan.contribute(
+      ...formatPayloadForSubstrate([
+        2055,
+        new BN(contributeAmountAtomicUnits.value.toString()),
+        null
+      ])
     );
-    const unsub = tx.signAndSend(fromAccount, handleTxResponse);
-    setUnsub(() => unsub);
+    // console.log('fromAccount', fromAccount)
+    tx.signAndSend(fromAccount, handleTxResponse);
   };
 
-  const createReferrerRemark = ({ paraId, api, referrer }) => {
-    const refAcc = api.createType('AccountId', referrer);
-    const remark = api.createType('CalamariCrowdloanReferrerRemark', {
-      magic: 'CA',
-      paraId,
-      referrer: refAcc,
-      referrerHash: refAcc.hash.toHex()
-    });
-    return api.createType('Bytes', remark.toHex());
-  };
+  const onContributeSuccess = block => {
+    setContributionStatus(TxStatus.finalized(block));
+    publishReferral()
+  }
+  const onContributeFailure = (block, error) => {
+    setContributionStatus(TxStatus.failed(block, error));
+  }
+  const onContributeUpdate = message => {
+    console.log(message)
+
+    setContributionStatus(TxStatus.processing(message));
+  }
+
+  const onReferralSuccess = block => {
+    setContributionStatus(TxStatus.finalized(block));
+  }
+  const onReferralFailure = (block, error) => {
+    setContributionStatus(TxStatus.failed(block, error));
+  }
+  const onReferralUpdate = message => {
+    console.log(message)
+    setContributionStatus(TxStatus.processing(message));
+  }
 
   const publishReferral = () => {
-    const handleTxResponse = makeDefaultTxResHandler(api, setStatus);
-    const tx = api.tx.system.remarkWithEvent(
-      createReferrerRemark({ PARA_ID, api, referralCode })
+    const memo = api.createType('Memo', referralCode);
+    const handleTxResponse = makeTxResHandler(
+      api, onReferralSuccess, onReferralFailure, onReferralUpdate);
+    const tx = api.tx.crowdloan.addMemo(
+      2055, memo.toHex()
     );
-    const unsub = tx.signAndSend(fromAccount, handleTxResponse);
-    setUnsub(() => unsub);
+    console.log(tx)
+    tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onClickMax = () => {
-    accountBalance && setContributeAmountInput(accountBalance.toString(false));
+    console.log(accountBalanceKSM?.toString(), 'accountbalance')
+    accountBalanceKSM && setContributeAmountInput(accountBalanceKSM.toString(false));
   };
 
   const onChangeContributeAmountInput = e => {
@@ -97,44 +135,50 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
     setContributeAmountInput(input);
   };
 
+  const onChangeReferralCodeInput = e => {
+    setReferralCodeInput(e.target.value)
+    try {
+      const referralCode = decodeAddress(e.target.value)
+      setReferralCode(referralCode)
+    } catch (error) {
+      setReferralCode(null)
+    }
+  }
+
   const onClickClaimButton = () => {
-    console.log(1);
     publishReferral();
-    console.log(2);
-    contribute();
-    console.log(3);
   };
 
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">Contribute</h1>
-      <p className="mb-1 text-sm xl:text-base">Enter Your Contribution Amount</p>
+      <p className="mb-2 text-sm xl:text-base">Enter Your Contribution Amount</p>
       <div className="flex items-center">
-        <div className="form-input w-4/5 amount relative h-18">
+        <div className="form-input w-4/5 amount relative h-20">
           <Input
             className="h-full w-full outline-none"
             value={contributeAmountInput && contributeAmountInput.toString()}
             type='numher'
             onChange={onChangeContributeAmountInput}
           />
-          <span onClick={onClickMax} className="uppercase cursor-pointer text-xl xl:text-2xl mt-2 right-0 mr-2 max-btn font-semibold absolute px-5 py-3 rounded-md">
+          <span onClick={onClickMax} className="uppercase cursor-pointer text-xl xl:text-2xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
             max
           </span>
         </div>
         <div className="text-2xl xl:text-2xl w-1/5 font-semibold pl-4">KSM</div>
       </div>
       <div className="pt-8">
-        <p className="mb-1 text-sm xl:text-base">Enter Your Referral Code (Optional)</p>
-        <div className="w-full form-input relative h-18">
+        <p className="mb-2 text-sm xl:text-base">Enter Your Referral Code (Optional)</p>
+        <div className="w-full form-input relative h-20">
           <Input
-            value={referralCode}
-            onChange={e => setReferralCode(e.target.value)}
+            value={referralCodeInput}
+            onChange={onChangeReferralCodeInput}
             className="w-full h-full outline-none"
           />
         </div>
       </div>
       <div className="pt-8">
-        <p className="mb-1">Your Rewards</p>
+        <p className="mb-2">Your Rewards</p>
         <div className="reward">
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-4 pb-2">
@@ -166,6 +210,8 @@ function Contribute ({ fromAccount, accountBalance, totalFundsRaisedKSM, userCon
         className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
         Claim Your KMA
       </div>
+      <TxStatusDisplay txStatus={contributionStatus} />
+      <TxStatusDisplay txStatus={referralStatus} />
     </div>
   );
 }

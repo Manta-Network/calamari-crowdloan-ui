@@ -5,7 +5,7 @@ import Logo from 'assets/images/calamari-logo.svg';
 import { NavLink } from 'react-router-dom';
 import AccountSelectButton from './AccountSelectButton';
 
-function Navbar ({ setAccountAddress, accountBalance, accountPair }) {
+function Navbar ({ setAccountAddress, accountBalanceKSM, accountPair }) {
   return (
     <div className="navbar-content">
       <div className="logo-content">

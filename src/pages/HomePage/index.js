@@ -9,22 +9,22 @@ import {
 import { useSubstrate } from '../../substrate-lib';
 import { Dimmer, Loader, Grid, Message } from 'semantic-ui-react';
 import getFromAccount from '../../utils/GetFromAccount';
-import { PARA_ID } from '../../constants/ChainConstants';
 import Decimal from 'decimal.js';
 import Kusama from 'types/Kusama';
 import Contribution from 'types/Contribution';
 import Persistence from '../../utils/Persistence';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import config from 'config';
 
-function HomePage () {
-  axios.defaults.baseURL = 'https://kusama.api.subscan.io/api/scan/';
+function HomePage() {
+  axios.defaults.baseURL = config.SUBSCAN_URL;
   axios.defaults.headers.post['Content-Type'] = 'application/json';
   axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
   axiosRetry(axios, { retries: 5, retryDelay: _ => 1000, retryCondition: error => error.response.status === 429 });
 
   const [accountAddress, setAccountAddress] = useState();
-  const [accountBalance, setAccountBalance] = useState();
+  const [accountBalanceKSM, setAccountBalanceKSM] = useState();
   const [userContributions, setUserContributions] = useState([]);
   const [userReferrals, setUserReferrals] = useState([]);
   const [userRewards, setUserRewards] = useState(0);
@@ -33,8 +33,6 @@ function HomePage () {
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
   const [dayBlocks, setDayBlocks] = useState();
   const [contributionsByDay, setContributionsByDay] = useState();
-
-  console.log('dayBlocks', dayBlocks);
 
   const accountPair =
     accountAddress &&
@@ -50,9 +48,7 @@ function HomePage () {
         return;
       }
       await api.isReady;
-      const testDummyAddress = 'ELcshfq2N8F8v2XnvSeGfJMMeHNxfHk4KW9g8J6Z1DRYSec';
-      const res = await axios.post('extrinsics', { call: 'contribute', module: 'crowdloan', address: testDummyAddress, row: 100, page: 0 });
-
+      const res = await axios.post('extrinsics', { call: 'contribute', address: accountAddress, module: 'crowdloan', row: 100, page: 0 });
       const contributions = await Promise.all(res.data.data.extrinsics
         .filter(ex => ex.success)
         .map(ex => ({ timestamp: ex.block_timestamp, blockNumber: ex.block_num, extrinsicIndex: parseInt(ex.extrinsic_index.split('-')[1]) }))
@@ -70,33 +66,9 @@ function HomePage () {
     getUserContributions();
   }, [accountAddress, api]);
 
-  // // Get people I referred
-  // useEffect(() => {
-  //   const getUserRefferals = async () => {
-  //     if (!accountAddress || !api) {
-  //       return
-  //     }
-  //     await api.isReady
-  //     const testDummyAddress = '"HhM97zfBvM1H7Mee3TDatCsGRNzdoaEodJdjty4bh32NcZb"'
-  //     const res = await axios.post('extrinsics', { call: 'remark', address: 'GHd2okZveTsCBnjnJ73dMD788i1bY7PCFp6fEbd8XNYhrJV', row: 100, page: 0 })
-  //     console.log(res)
-  //     const blockNumbers = res.data.data.extrinsics.filter(extrinsic => extrinsic.success).map(extrinsic => extrinsic.block_num) // extrinsic_index
-  //     blockNumbers.forEach(blockNumber => {
-  //       const blockHash = api.rpc.chain.getBlockHash()
-
-  //     })
-  //   }
-  //   getUserRefferals()
-
-  //       // use api to look up the extrinsic
-
-  //       // set state AND save locally
-
-  // }, [accountAddress, api])
-
-  // const getCurrentDatetime = () => {
-  //   return new Date()
-  // }
+  const getCurrentDatetime = () => {
+    return new Date()
+  }
 
   useMemo(() => {
     const binarySearch = async (firstBlockNumber, lastBlockNumber, targetTimestamp, api) => {
@@ -128,15 +100,24 @@ function HomePage () {
       const lastBlock = await api.rpc.chain.getBlock();
       const lastBlockNumber = lastBlock.block.header.number.toNumber();
       const firstBlockNumber = 0;
-      const CROWDLOAN_START_DATE = new Date(2021, 6, 0);
+      const CROWDLOAN_START_DATE = new Date(config.CROWDLOAN_START_TIMESTAMP);
       const crowdloanStartBlock = await binarySearch(firstBlockNumber, lastBlockNumber, CROWDLOAN_START_DATE, api); // todo: hardcode for production
       const msIntoCrowdloan = new Date() - CROWDLOAN_START_DATE;
       const daysIntoCrowdloan = Math.ceil(msIntoCrowdloan / (1000 * 60 * 60 * 24));
+      console.log(daysIntoCrowdloan)
       setDayBlocks([...Array(daysIntoCrowdloan).keys()]
         .map(daysIntoCrowdloan => crowdloanStartBlock + APPROX_BLOCKS_PER_DAY * daysIntoCrowdloan));
     };
     getDayBlocks();
   }, [api]);
+
+
+
+
+
+
+
+
 
   useMemo(() => {
     const getContributionsByDay = async () => {
@@ -152,13 +133,13 @@ function HomePage () {
       let totalContributions;
 
       do {
-        // todo: add our fund id to env variable
-        const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: '2004-6', row: 100, page: pageNumber, from_history: true });
+        const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageNumber, from_history: true });
         totalContributions = res.data.data.count;
         if (!res.data.data.contributes) {
           break;
         }
         res.data.data.contributes.forEach(contribution => {
+          console.log(contribution)
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           while (contribution.block_num >= selectedDayEndBlockNumber) {
             selectedDayIndex++;
@@ -170,7 +151,6 @@ function HomePage () {
           contributionsProcessed++;
         });
         pageNumber++;
-        console.log(pageNumber);
       } while (totalContributions > contributionsProcessed);
 
       while (contributionsByDay.length < dayBlocks.length - 1) {
@@ -181,8 +161,18 @@ function HomePage () {
     getContributionsByDay();
   }, [dayBlocks, api]);
 
+
+
+
+
+
+
+
+
+
+
   useEffect(() => {
-    async function loadFromAccount (accountPair) {
+    async function loadFromAccount(accountPair) {
       if (!api || !api.isConnected || !accountPair) {
         return;
       }
@@ -200,7 +190,7 @@ function HomePage () {
     accountAddress &&
       api.query.system.account(accountAddress, balance => {
         const rawBalance = new Decimal(balance.data.free.toString());
-        setAccountBalance(new Kusama(Kusama.KSM, rawBalance));
+        setAccountBalanceKSM(new Kusama(Kusama.ATOMIC_UNITS, rawBalance).toKSM());
       })
         .then(unsub => {
           unsubscribe = unsub;
@@ -216,7 +206,7 @@ function HomePage () {
         return;
       }
       await api.isReady;
-      const funds = await api.query.crowdloan.funds(PARA_ID);
+      const funds = await api.query.crowdloan.funds(config.PARA_ID);
       const totalFundsRaisedAtomicUnits = funds.isSome ? new Decimal(funds.value.raised.toString()) : new Decimal(0);
       setTotalFundsRaisedKSM(new Kusama(Kusama.ATOMIC_UNITS, totalFundsRaisedAtomicUnits).toKSM());
     };
@@ -250,7 +240,7 @@ function HomePage () {
       <Navbar
         accountPair={accountPair}
         setAccountAddress={setAccountAddress}
-        accountBalance={accountBalance}
+        accountBalanceKSM={accountBalanceKSM}
       />
       <div className="home-content py-6">
         <Grid columns="three">
@@ -258,7 +248,7 @@ function HomePage () {
             <Grid.Column className="flex-wrap item flex">
               <Contribute
                 fromAccount={fromAccount}
-                accountBalance={accountBalance}
+                accountBalanceKSM={accountBalanceKSM}
                 totalFundsRaisedKSM={totalFundsRaisedKSM}
                 setUserContributions={setUserContributions}
               />

@@ -1,4 +1,4 @@
-import utils from '../../substrate-lib/utils';
+import utils from '../substrate-lib/utils';
 
 function isNumType (type) {
   return utils.paramConversion.num.some(el => type.indexOf(el) >= 0);

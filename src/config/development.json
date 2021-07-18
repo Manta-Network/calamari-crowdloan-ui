@@ -1,3 +1,7 @@
 {
-  "PROVIDER_SOCKET": "wss://kusama-rpc.polkadot.io"
+  "PROVIDER_SOCKET": "wss://rococo.elara.patract.io",
+  "CROWDLOAN_START_TIMESTAMP": 1626307200000,
+  "PARA_ID": 2055,
+  "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
+  "FUND_ID": "2055-10"
 }

@@ -92,7 +92,7 @@ const loadAccounts = (state, dispatch) => {
       await web3Enable(config.APP_NAME);
       let allAccounts = await web3Accounts();
       allAccounts = allAccounts.map(({ address, meta }) =>
-        ({ address, meta: { ...meta, name: `${meta.name} (${meta.source})` } }));
+        ({ address, meta: { ...meta, name: meta.name } }));
       keyring.loadAll({ isDevelopment: config.DEVELOPMENT_KEYRING }, allAccounts);
       dispatch({ type: 'SET_KEYRING', payload: keyring });
     } catch (e) {
