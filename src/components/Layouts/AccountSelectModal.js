@@ -1,5 +1,4 @@
 import React from 'react';
-import FakeData from 'pages/FakeData';
 import classNames from 'classnames';
 import { Modal } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';

@@ -8,11 +8,9 @@ import TableRowItem from 'components/Table/TableRowItem';
 import axios from 'axios';
 import Decimal from 'decimal.js';
 import Kusama from '../../types/Kusama';
-import { useSubstrate } from 'substrate-lib';
-import config from '../../config'
+import config from '../../config';
 
 const ContributeActivity = () => {
-  const { api } = useSubstrate();
   const [totalPages, setTotalPages] = useState(1);
   const [pageNumber, setPageNumber] = useState(1);
   const [contributions, setContributions] = useState(null);

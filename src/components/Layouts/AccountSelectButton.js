@@ -1,10 +1,4 @@
-import React, { useState, useEffect, createRef } from 'react';
-
-import {
-  Icon,
-  Label
-} from 'semantic-ui-react';
-
+import React, { useState } from 'react';
 import { useSubstrate } from '../../substrate-lib';
 import AccountSelectModal from './AccountSelectModal';
 
@@ -52,56 +46,18 @@ function Main ({ accountPair, setAccountAddress }) {
   );
 }
 
-function BalanceAnnotation (props) {
-  const { accountSelected, accountBalance } = props;
+// function BalanceAnnotation (props) {
+//   const { accountSelected, accountBalance } = props;
 
-  return accountSelected
-    ? <Label pointing='left'>
-        <Icon name='money' color='green' />
-        {accountBalance}
-      </Label>
-    : null;
-}
+//   return accountSelected
+//     ? <Label pointing='left'>
+//         <Icon name='money' color='green' />
+//         {accountBalance}
+//       </Label>
+//     : null;
+// }
 
 export default function AccountSelector (props) {
   const { api, keyring } = useSubstrate();
   return keyring.getPairs && api.query ? <Main {...props} /> : null;
 }
-
-// <div ref={contextRef}>
-//     <Menu.Menu position='right' style={{ alignItems: 'center' }}>
-//       { !accountSelected
-//         ? <span>
-//           Add your account with the{' '}
-//           <a
-//             target='_blank'
-//             rel='noopener noreferrer'
-//             href='https://github.com/polkadot-js/extension'
-//           >
-//             Polkadot JS Extension
-//           </a>
-//         </span>
-//         : null }
-//       <CopyToClipboard text={accountSelected}>
-//         <Button
-//           basic
-//           circular
-//           size='large'
-//           icon='user'
-//           color={accountSelected ? 'green' : 'red'}
-//         />
-//       </CopyToClipboard>
-//       <Dropdown
-//         search
-//         selection
-//         clearable
-//         placeholder='Select an account'
-//         options={keyringOptions}
-//         onChange={(_, dropdown) => {
-//           onChange(dropdown.value);
-//         }}
-//         value={accountSelected}
-//       />
-//       <BalanceAnnotation accountSelected={accountSelected} accountBalance={accountBalance}/>
-//     </Menu.Menu>
-// </ div >

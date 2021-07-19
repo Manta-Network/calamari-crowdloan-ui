@@ -1,27 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
 import Decimal from 'decimal.js';
-import { PARA_ID } from '../../constants/ChainConstants';
 import { makeTxResHandler } from '../../utils/MakeTxResHandler';
 import Kusama from '../../types/Kusama';
-import config from '../../config'
 import TxStatusDisplay from '../../TxStatusDisplay';
 import TxStatus from '../../utils/TxStatus';
-import { decodeAddress } from '@polkadot/util-crypto'
+import { decodeAddress } from '@polkadot/util-crypto';
 import formatPayloadForSubstrate from 'utils/FormatPayloadForSubstrate';
-import BN from 'bn.js'
-import { hexToU8a, isHex, stringToU8a } from '@polkadot/util';
-
-
+import BN from 'bn.js';
 
 function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, userContributions }) {
   const [referralStatus, setReferralStatus] = useState(null);
-  const [contributionStatus, setContributionStatus] = useState(null)
-  const [, setUnsub] = useState(null);
+  const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState();
-  const [referralCode, setReferralCode] = useState()
+  const [referralCode, setReferralCode] = useState();
 
   const { api } = useSubstrate();
 
@@ -34,9 +28,6 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   };
   const contributeAmountKSM = getContributeAmounKSM();
   const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
-
-  // console.log(referralCode && hexToU8a('0x' + Buffer.from(referralCode).toString('hex'))
-
 
   const getEarlyBonus = () => {
     if (!totalFundsRaisedKSM || !contributeAmountKSM) {
@@ -71,11 +62,6 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   const contribute = () => {
     const handleTxResponse = makeTxResHandler(
       api, onContributeSuccess, onContributeFailure, onContributeUpdate);
-    console.log('suffer', formatPayloadForSubstrate([
-      2055,
-      contributeAmountAtomicUnits.value.toString(),
-      null
-    ]))
     const tx = api.tx.crowdloan.contribute(
       ...formatPayloadForSubstrate([
         2055,
@@ -83,33 +69,29 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
         null
       ])
     );
-    // console.log('fromAccount', fromAccount)
     tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onContributeSuccess = block => {
     setContributionStatus(TxStatus.finalized(block));
-    publishReferral()
-  }
+    referralCode && publishReferral();
+  };
   const onContributeFailure = (block, error) => {
     setContributionStatus(TxStatus.failed(block, error));
-  }
+  };
   const onContributeUpdate = message => {
-    console.log(message)
-
     setContributionStatus(TxStatus.processing(message));
-  }
+  };
 
   const onReferralSuccess = block => {
-    setContributionStatus(TxStatus.finalized(block));
-  }
+    setReferralStatus(TxStatus.finalized(block));
+  };
   const onReferralFailure = (block, error) => {
-    setContributionStatus(TxStatus.failed(block, error));
-  }
+    setReferralStatus(TxStatus.failed(block, error));
+  };
   const onReferralUpdate = message => {
-    console.log(message)
-    setContributionStatus(TxStatus.processing(message));
-  }
+    setReferralStatus(TxStatus.processing(message));
+  };
 
   const publishReferral = () => {
     const memo = api.createType('Memo', referralCode);
@@ -118,12 +100,10 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
     const tx = api.tx.crowdloan.addMemo(
       2055, memo.toHex()
     );
-    console.log(tx)
     tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onClickMax = () => {
-    console.log(accountBalanceKSM?.toString(), 'accountbalance')
     accountBalanceKSM && setContributeAmountInput(accountBalanceKSM.toString(false));
   };
 
@@ -136,17 +116,17 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   };
 
   const onChangeReferralCodeInput = e => {
-    setReferralCodeInput(e.target.value)
+    setReferralCodeInput(e.target.value);
     try {
-      const referralCode = decodeAddress(e.target.value)
-      setReferralCode(referralCode)
+      const referralCode = decodeAddress(e.target.value);
+      setReferralCode(referralCode);
     } catch (error) {
-      setReferralCode(null)
+      setReferralCode(null);
     }
-  }
+  };
 
   const onClickClaimButton = () => {
-    publishReferral();
+    contribute();
   };
 
   return (

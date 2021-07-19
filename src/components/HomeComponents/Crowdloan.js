@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import Kusama from 'types/Kusama';
 import Decimal from 'decimal.js';
-import FakeData from 'pages/FakeData';
 import { Placeholder } from 'semantic-ui-react';
 import TableColumnHeader from 'components/Table/TableColumnHeader';
 import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
@@ -34,11 +33,10 @@ const options = {
   elements: { point: { radius: 1, hoverRadius: 2 } }
 };
 
-function Crowdloan({ totalFundsRaisedKSM, contributionsByDay }) {
-  const [showPlaceholder, setShowPlaceholder] = useState(true);
+function Crowdloan ({ totalFundsRaisedKSM, allContributions }) {
   const dateFormatOptions = { month: 'short', day: 'numeric' };
-
-  console.log(contributionsByDay, '!')
+  const [showPlaceholder, setShowPlaceholder] = useState(true);
+  const [contributionsByDay, setContributionsByDay] = useState([]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -46,6 +44,47 @@ function Crowdloan({ totalFundsRaisedKSM, contributionsByDay }) {
     }, 2000);
   }, []);
 
+  useEffect(() => {
+    console.log(allContributions, 'allContributions');
+    const getContributionsByDay = () => {
+      const CROWDLOAN_START_DATE = new Date(config.CROWDLOAN_START_TIMESTAMP);
+      const MS_PER_DAY = 1000 * 60 * 60 * 24;
+      const msIntoCrowdloan = new Date() - CROWDLOAN_START_DATE;
+      const daysIntoCrowdloan = Math.ceil(msIntoCrowdloan / MS_PER_DAY);
+      const crowdloanDays = [...Array(daysIntoCrowdloan).keys()].map((i) => CROWDLOAN_START_DATE.getTime() + (i * MS_PER_DAY));
+      const contributionsByDay = crowdloanDays.map(day => ({ day: day, totalContributions: new Kusama(Kusama.KSM, new Decimal(0)) }));
+      let dayIdx = 0;
+      let currentDate = contributionsByDay[dayIdx].date;
+      allContributions.forEach(contribution => {
+        while (contribution.date > currentDate) {
+          dayIdx++;
+          currentDate = contributionsByDay[dayIdx].date;
+        }
+        contributionsByDay[dayIdx].totalContributions = contributionsByDay[dayIdx].totalContributions.add(contribution.amountKSM);
+      });
+      // Add day before crowdloan so that the graph starts at 0
+      const dayBeforeCrowdloan = CROWDLOAN_START_DATE.getTime() - MS_PER_DAY;
+      const contributionsZerothDay = { day: dayBeforeCrowdloan, totalContributions: new Kusama(Kusama.KSM, new Decimal(0)) };
+      console.log('suffer', [contributionsZerothDay, ...contributionsByDay]);
+      setContributionsByDay([contributionsZerothDay, ...contributionsByDay]);
+    };
+    getContributionsByDay();
+  }, [allContributions]);
+
+  const getTopThreeContributors = () => {
+    const contributionsByAddress = {};
+    allContributions.forEach(contribution => {
+      const addressCurrentContribution = contributionsByAddress[contribution.address] || new Kusama(Kusama.KSM, new Decimal(0));
+      contributionsByAddress[contribution.address] = addressCurrentContribution.add(contribution.amountKSM);
+    });
+    return Object.entries(contributionsByAddress)
+      .map(([address, amountKSM]) => ({ address: address, amountKSM: amountKSM }))
+      .sort((first, second) => first.amountKSM.value.gt(second.amountKSM.value))
+      .slice(0, 3);
+  };
+  const topThreeContributors = getTopThreeContributors();
+
+  // todo: include referrals
   const getTotalRewards = () => {
     let earlyBonus = totalFundsRaisedKSM.value.mul(500);
     if (totalFundsRaisedKSM.value.gt(1000)) {
@@ -55,20 +94,21 @@ function Crowdloan({ totalFundsRaisedKSM, contributionsByDay }) {
   };
   const totalRewards = getTotalRewards();
 
+  const data = contributionsByDay.map((_, i) => contributionsByDay.slice(0, i + 1)
+    .reduce((acc, cur) => acc.add(cur.totalContributions), new Kusama(Kusama.KSM, new Decimal(0))))
+    .map(kusama => kusama.value.toNumber());
+
+  const graphLabels = contributionsByDay.map(singleDayContributions => {
+    const day = new Date(singleDayContributions.day);
+    return day.toLocaleDateString('en-US', dateFormatOptions);
+  });
+
   const graphData = {
-    labels: contributionsByDay?.map(
-      (_, i) => {
-        let date = new Date(config.CROWDLOAN_START_TIMESTAMP)
-        date.setDate(date.getDate() + i + 1)
-        return date.toLocaleDateString('en-US', dateFormatOptions)
-      }),
+    labels: graphLabels,
     datasets: [
       {
         label: 'KSM',
-        data: contributionsByDay?.map(
-          (_, i) => contributionsByDay.slice(0, i + 1)
-            .reduce((acc, cur) => acc.add(cur), new Kusama(Kusama.KSM, new Decimal(0))))
-          .map(kusama => kusama.value.toNumber()),
+        data: data,
         borderColor: 'rgba(233, 109, 43, 1)',
         backgroundColor: 'rgba(233, 109, 43, 1)',
         yAxisID: 'y',
@@ -76,8 +116,6 @@ function Crowdloan({ totalFundsRaisedKSM, contributionsByDay }) {
       }
     ]
   };
-
-  console.log(graphData.labels)
 
   return (
     <div className="content-item h-full mt-16 lg:mt-0 calamari-text crowdloan">
@@ -127,14 +165,13 @@ function Crowdloan({ totalFundsRaisedKSM, contributionsByDay }) {
             <TableHeaderWrapper className="px-2">
               <TableColumnHeader label="Rank" width="15%" />
               <TableColumnHeader label="Address" width="30%" />
-              <TableColumnHeader label="KSM" width="25%" />
-              <TableColumnHeader label="Reward(KMA)" width="30%" />
+              <TableColumnHeader label="Contributed" width="25%" />
             </TableHeaderWrapper>
-            {FakeData.leaderBoardData.map((val) => (
+            {topThreeContributors.map((val, i) => (
               <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-2">
                 <TableRowItem width="15%">
                   <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
-                    {val.rank}
+                    {i + 1}
                   </div>
                 </TableRowItem>
                 <TableRowItem width="30%">
@@ -146,12 +183,7 @@ function Crowdloan({ totalFundsRaisedKSM, contributionsByDay }) {
                 </TableRowItem>
                 <TableRowItem width="25%">
                   <span className="text-thirdry font-semibold">
-                    {val.amount}
-                  </span>
-                </TableRowItem>
-                <TableRowItem width="30%">
-                  <span className="manta-prime-blue font-semibold">
-                    {val.reward}
+                    {val.amountKSM.toString()}
                   </span>
                 </TableRowItem>
               </TableRow>

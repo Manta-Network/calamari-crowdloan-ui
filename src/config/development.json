@@ -1,7 +1,7 @@
 {
   "PROVIDER_SOCKET": "wss://rococo.elara.patract.io",
-  "CROWDLOAN_START_TIMESTAMP": 1626307200000,
+  "CROWDLOAN_START_TIMESTAMP": 1626580800000,
   "PARA_ID": 2055,
   "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
-  "FUND_ID": "2055-10"
+  "FUND_ID": "2055-11"
 }
