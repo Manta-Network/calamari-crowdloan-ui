@@ -2,18 +2,17 @@
 .navbar-content {
   padding: 20px 0;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   .navbar-menu {
     display: flex;
     align-items: center;
     .menu-item {
-      padding: 14px 40px;
-      font-size: 18px;
       letter-spacing: 0.02em;
       color: $purple-color;
     }
     .menu-item.btn {
-      margin-left: 35px;
+      margin-left: 20px;
       color: white;
       background: $oriange-bg;
       border-radius: 9px;
@@ -158,10 +157,9 @@
 @media screen and (max-width: 640px) {
   .navbar-content {
     .navbar-menu .menu-item.btn {
-      font-size: 15px;
-      width: 150px;
+      width: 120px;
+      margin-left: 10px;
       text-align: center;
-      padding: 10px;
     }
   }
 }

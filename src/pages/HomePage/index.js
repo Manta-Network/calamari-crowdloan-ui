@@ -10,7 +10,7 @@ import {
 
 const HomePage = () => {
   return (
-    <div className="home-page px-6 sm:px-16 xl:px-40">
+    <div className="home-page px-2 md:px-6 sm:px-16 xl:px-40">
       <Navbar />
       <div className="home-content py-6">
         <Grid columns="three">
