@@ -7,7 +7,7 @@ import {
   Sticky,
   Message,
   Button,
-  Input
+  Input,
 } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
@@ -22,6 +22,8 @@ import KusamaToAtomicUnits from './utils/KusamaToAtomicUnits';
 import { BN } from '@polkadot/util';
 import TxStatusDisplay from './TxStatusDisplay';
 import { decodeAddress } from '@polkadot/util-crypto';
+import { useTranslation } from 'react-i18next';
+import { getLanguage } from 'utils/LocalStorageValue';
 
 const Main = () => {
   const [accountAddress, setAccountAddress] = useState();
@@ -41,7 +43,7 @@ const Main = () => {
   console.log(
     'decodeAddress',
     decodeAddress('5FBp8JTjQM3Hv3uqTQz5grhPCqJKZ1KF9Ckq8sZCHFtTNg7f'),
-    decodeAddress('FhRncoc2i4DfhjHE7o8ap4PMRaZMg8RbabaXXq9m46x7d9e')
+    decodeAddress('FhRncoc2i4DfhjHE7o8ap4PMRaZMg8RbabaXXq9m46x7d9e'),
   );
 
   useEffect(() => {
@@ -218,9 +220,16 @@ const Main = () => {
       <DeveloperConsole />
     </div>
   );
-}
+};
 
-export default function App() {
+const App = () => {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    i18n.changeLanguage(getLanguage());
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <SubstrateContextProvider>
       <Router>
@@ -231,4 +240,5 @@ export default function App() {
       </Router>
     </SubstrateContextProvider>
   );
-}
+};
+export default App;

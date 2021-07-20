@@ -1,15 +1,32 @@
 /* eslint-disable multiline-ternary */
 /* eslint-disable react/style-prop-object */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Logo from 'assets/images/calamari-logo.svg';
 import { NavLink } from 'react-router-dom';
 import FakeData from 'pages/FakeData';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 import { Modal } from 'semantic-ui-react';
+import ReactFlagsSelect from 'react-flags-select';
+import { setLanguage, getLanguage } from 'utils/LocalStorageValue';
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const [openModal, setOpenModal] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selected, setSelected] = useState('US');
+
+  const onChangeLanguage = (code) => {
+    setSelected(code);
+    const langCode = code === 'US' ? 'en' : 'cn';
+    i18n.changeLanguage(langCode);
+    setLanguage(langCode);
+  };
+
+  useEffect(() => {
+    setSelected(getLanguage() === 'en' ? 'US' : 'CN');
+  }, []);
+
   return (
     <div className="navbar-content">
       <div className="logo-content">
@@ -18,15 +35,27 @@ const Navbar = () => {
       <div className="navbar-menu">
         <div className="hidden lg:flex">
           <NavLink to="#">
-            <div className="menu-item">How it Works</div>
+            <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
+              {t('How it works')}
+            </div>
           </NavLink>
           <NavLink to="#">
-            <div className="menu-item">My Referral Code</div>
+            <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
+              {t('My Referral code')}
+            </div>
           </NavLink>
+        </div>
+        <div className="hidden lg:block">
+          <ReactFlagsSelect
+            selected={selected}
+            countries={['US', 'CN']}
+            customLabels={{ US: 'EN', CN: 'CN' }}
+            onSelect={(code) => onChangeLanguage(code)}
+          />
         </div>
         <div
           onClick={() => setOpenModal(true)}
-          className="menu-item text-base btn">
+          className="menu-item text-base lg:text-xl py-3 lg:py-4 px-2 lg:px-8 xl:px-12 btn">
           {selectedAddress ? (
             <div className="flex px-3 items-center">
               <svg
@@ -45,7 +74,7 @@ const Navbar = () => {
               <span className="pl-4">{selectedAddress.userName}</span>
             </div>
           ) : (
-            'Connect Wallet'
+            t('Connect wallet')
           )}
         </div>
       </div>
@@ -75,25 +104,25 @@ const Navbar = () => {
                   {
                     active:
                       selectedAddress &&
-                      selectedAddress.address === val.address
-                  }
+                      selectedAddress.address === val.address,
+                  },
                 )}
                 key={index}>
                 <div className="flex calamari-text justify-center items-center content">
-                  <div className='w-8 h-8'>
-                  <svg
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    shapeRendering="geometricPrecision"
-                    viewBox="0 0 24 24"
-                    height="24"
-                    width="24">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
+                  <div className="w-8 h-8">
+                    <svg
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      shapeRendering="geometricPrecision"
+                      viewBox="0 0 24 24"
+                      height="24"
+                      width="24">
+                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                   </div>
                   <div className="px-8 py-1">
                     <p className="mb-1 account-name font-semibold calamari-text">
