@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useSubstrate } from '../../substrate-lib';
 import AccountSelectModal from './AccountSelectModal';
+import { useTranslation } from 'react-i18next';
+
 
 function Main ({ accountPair, setAccountAddress }) {
   const [openModal, setOpenModal] = useState(false);
+  const { t } = useTranslation();
   return (
     <>
     <div
@@ -29,7 +32,7 @@ function Main ({ accountPair, setAccountAddress }) {
         </div>
           )
         : (
-            'Connect Wallet'
+          t('Connect wallet')
           )}
     </div>
     {

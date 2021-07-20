@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import Kusama from 'types/Kusama';
 import Decimal from 'decimal.js';
+import { useTranslation } from 'react-i18next';
 import { Placeholder } from 'semantic-ui-react';
 import TableColumnHeader from 'components/Table/TableColumnHeader';
 import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
@@ -35,6 +36,7 @@ const options = {
 
 function Crowdloan ({ totalFundsRaisedKSM, allContributions }) {
   const dateFormatOptions = { month: 'short', day: 'numeric' };
+  const { t } = useTranslation();
   const [showPlaceholder, setShowPlaceholder] = useState(true);
   const [contributionsByDay, setContributionsByDay] = useState([]);
 
@@ -120,20 +122,58 @@ function Crowdloan ({ totalFundsRaisedKSM, allContributions }) {
   return (
     <div className="content-item h-full mt-16 lg:mt-0 calamari-text crowdloan">
       <div className="bg-white item p-8 xl:p-10 xl:pb-4">
-        <h1 className="title text-3xl md:text-4xl">The Crowdloan</h1>
-      <div className="py-4 relative graph-line pt-1">
-      <div className="pt- flex justify-between">
-        <p className="mb-0 calamari-text pb-5">Total Contributions</p>
-        <span className="purple-text text-lg xl:text-2xl font-semibold">
-          {totalFundsRaisedKSM.toString()}
-        </span>
+        <h1 className="title text-3xl md:text-4xl">{t('The Crowdloan')}</h1>
+        {showPlaceholder ? (
+          <div className="py-2">
+            <Placeholder fluid>
+              <Placeholder.Line />
+              <Placeholder.Line />
+            </Placeholder>
+          </div>
+        ) : (
+          <div className="flex">
+            <div className="w-3/5">
+              <p className="mb-0 pb-5 total-title">
+                {t('Total contributions')}
+              </p>
+              <span className="purple-text total-value text-lg font-semibold">
+              {totalFundsRaisedKSM.toString()}
+              </span>
+            </div>
+            <div className="w-2/5">
+              <p className="mb-0 pb-5 total-title">{t('Total rewards')}</p>
+              <span className="purple-text total-value text-lg font-semibold">
+              {totalRewards.toNumber().toLocaleString(undefined, { maximumFractionDigits: 0, minimumFractionDigits: 0 })} KMA
+              </span>
+            </div>
+          </div>
+        )}
+        {showPlaceholder ? (
+          <div className="py-8">
+            <Placeholder fluid>
+              <Placeholder.Paragraph>
+                <Placeholder.Line />
+                <Placeholder.Line />
+                <Placeholder.Line />
+                <Placeholder.Line />
+              </Placeholder.Paragraph>
+              <Placeholder.Paragraph>
+                <Placeholder.Line />
+                <Placeholder.Line />
+                <Placeholder.Line />
+                <Placeholder.Line />
+              </Placeholder.Paragraph>
+            </Placeholder>
+          </div>
+        ) : (
+          <div className="py-4 relative graph-line pt-4">
+            <span className="absolute right-0">KSM</span>
+            <Line data={graphData} options={options} />
+          </div>
+        )}
       </div>
-      <div className="pt-3 flex justify-between">
-        <p className="mb-0 calamari-text pb-5">Total Rewards</p>
-        <span className="purple-text text-lg xl:text-2xl font-semibold">
-          {totalRewards.toNumber().toLocaleString(undefined, { maximumFractionDigits: 0, minimumFractionDigits: 0 })} KMA
-        </span>
-      </div>
+      <div className="item p-8 mt-6 xl:px-10 xl:py-6 bg-white">
+        <h1 className="title text-3xl md:text-4xl">Leaderboard</h1>
         {showPlaceholder ? (
           <div className="py-8">
             <Placeholder fluid>
@@ -151,15 +191,6 @@ function Crowdloan ({ totalFundsRaisedKSM, allContributions }) {
             </Placeholder>
           </div>
         ) : (
-          <div className="py-4 relative graph-line pt-4">
-            <span className="absolute right-0">KSM</span>
-            <Line data={graphData} options={options} />
-          </div>
-        )}
-      </div>
-      </div>
-      <div className="item p-8 mt-6 xl:px-10 xl:py-6 bg-white">
-        <h1 className="title text-3xl md:text-4xl">Leaderboard</h1>
         <div className="overflow-x-auto border-2 rounded-lg">
           <div className="min-w-table-md ">
             <TableHeaderWrapper className="px-2">
@@ -190,6 +221,7 @@ function Crowdloan ({ totalFundsRaisedKSM, allContributions }) {
             ))}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

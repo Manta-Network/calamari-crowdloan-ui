@@ -1,3 +1,4 @@
+/* eslint-disable multiline-ternary */
 import React, { useState } from 'react';
 import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
@@ -9,6 +10,9 @@ import TxStatus from '../../utils/TxStatus';
 import { decodeAddress } from '@polkadot/util-crypto';
 import formatPayloadForSubstrate from 'utils/FormatPayloadForSubstrate';
 import BN from 'bn.js';
+import { Input, Loader } from 'semantic-ui-react';
+import { useTranslation } from 'react-i18next';
+
 
 function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, userContributions }) {
   const [referralStatus, setReferralStatus] = useState(null);
@@ -18,6 +22,15 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   const [referralCode, setReferralCode] = useState();
 
   const { api } = useSubstrate();
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+
+  const onClaimHandler = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+  };
 
   const getContributeAmounKSM = () => {
     try {
@@ -129,10 +142,19 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
     contribute();
   };
 
+  // const onClaimHandler = () => {
+  //   setLoading(true);
+  //   setTimeout(() => {
+  //     setLoading(false);
+  //   }, 3000);
+  // };
+
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
-      <h1 className="title text-3xl md:text-4xl">Contribute</h1>
-      <p className="mb-2 text-sm xl:text-base">Enter Your Contribution Amount</p>
+      <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
+      <p className="mb-2 text-sm xl:text-base">
+        {t('Enter your contribution amount')}
+      </p>
       <div className="flex items-center">
         <div className="form-input w-4/5 amount relative h-20">
           <Input
@@ -142,13 +164,15 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
             onChange={onChangeContributeAmountInput}
           />
           <span onClick={onClickMax} className="uppercase cursor-pointer text-xl xl:text-2xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
-            max
+          {t('Max')}
           </span>
         </div>
         <div className="text-2xl xl:text-2xl w-1/5 font-semibold pl-4">KSM</div>
       </div>
       <div className="pt-8">
-        <p className="mb-2 text-sm xl:text-base">Enter Your Referral Code (Optional)</p>
+        <p className="mb-2 text-sm xl:text-base">
+          {t('Enter your referral code (optional)')}
+        </p>
         <div className="w-full form-input relative h-20">
           <Input
             value={referralCodeInput}
@@ -158,29 +182,29 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
         </div>
       </div>
       <div className="pt-8">
-        <p className="mb-2">Your Rewards</p>
+        <p className="mb-2">{t('Your Rewards')}</p>
         <div className="reward">
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-4 pb-2">
-              <span>Base</span>
+              <span>{t('Base')}</span>
               <span className="font-semibold">{baseReward && baseReward.toString()} KMA</span>
             </div>
             <div className="flex text-base xl:text-lg items-center justify-between px-3 xl:px-6 py-2 bg-gray">
               <div className="flex items-center">
-                <span>Bonus</span>
+                <span>{t('Bonus')}</span>
                 <span className="text-xs block text-white rounded-sm ml-2 bg-red py-1 px-2">
-                  Limited Time
+                  {t('Limited Time')}
                 </span>
               </div>
               <span className="font-semibold">{earlyBonus && earlyBonus.toString()} KMA</span>
             </div>
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-2 pb-4">
-              <span>Referral</span>
+              <span>{t('Referral')}</span>
               <span className="font-semibold">{referralBonus && referralBonus.toString()} KMA</span>
             </div>
           </div>
           <div className="flex text-2xl xl:text-2xl p-6 result justify-between text-white">
-            <span>Rewards:</span>
+          <span>{t('Rewards')}:</span>
             <span>{totalReward && totalReward.toString()} KMA</span>
           </div>
         </div>
@@ -188,7 +212,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
       <div
         onClick={onClickClaimButton}
         className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-        Claim Your KMA
+        {t('Claim your KMA')}
       </div>
       <TxStatusDisplay txStatus={contributionStatus} />
       <TxStatusDisplay txStatus={referralStatus} />
@@ -197,3 +221,16 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
 }
 
 export default Contribute;
+
+      // {loading ? (
+      //   <div className="py-6 px-4 mt-8 items-center flex">
+      //     <Loader active inline />
+      //     <span className="text-white pl-4">Processing...</span>
+      //   </div>
+      // ) : (
+      //   <div
+      //     onClick={onClaimHandler}
+      //     className="py-6 rounded-lg text-3xl xl:text-4xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
+          
+      //   </div>
+      // )}

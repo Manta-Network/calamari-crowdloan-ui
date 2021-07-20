@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import ArrowDown from 'assets/icons/arrow-down.svg';
 import ArrowUp from 'assets/icons/arrow-up.svg';
+/* eslint-disable multiline-ternary */
+import React, { useState, useEffect } from 'react';
+import ArrowDown from 'assets/icons/arrow-down.svg';
+import ArrowUp from 'assets/icons/arrow-up.svg';
+import { Placeholder } from 'semantic-ui-react';
+import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import Kusama from 'types/Kusama';
 import Decimal from 'decimal.js';
@@ -12,6 +18,25 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
   const [userTotalRewardsKMA, setUserTotalRewardKMA] = useState(Decimal(0));
   const [userReferrals, setUserReferrals] = useState([]);
   const [userTotalContributionsKSM, setUserTotalContributionsKSM] = useState(new Kusama(Kusama.KSM, new Decimal(0)));
+
+  const PAGE_SIZE = 5;
+  const [currentPageNumberUserContributions, setCurrentPageNumberUserContributions] = useState(1);
+  const totalPagesUserContributions = Math.max(Math.ceil(userContributions.length / 5, 1), 1);
+  const currentPageUserContributions = userContributions.slice((currentPageNumberUserContributions - 1) * PAGE_SIZE, currentPageNumberUserContributions * PAGE_SIZE);
+
+  const [currentPageNumberUserReferrals, setCurrentPageNumberUserReferrals] = useState(1);
+  const totalPagesUserReferrals = Math.max(Math.ceil(userReferrals.length / 5, 1), 1);
+  const currentPageUserReferrals = userReferrals.slice((currentPageNumberUserReferrals - 1) * PAGE_SIZE, currentPageNumberUserReferrals * PAGE_SIZE);
+
+  const dateFormatOptions = { month: 'short', day: 'numeric' };
+
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowPlaceholder(false);
+    }, 2000);
+  }, []);
 
   useEffect(() => {
     const getUserReferrals = () => {
@@ -42,7 +67,6 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
 
   useEffect(() => {
     const getUserBonusRewardsKMA = () => {
-      console.log('getting bonues rewards');
       const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000)); // todo: is this number correct??
       let runningTotalKSM = new Kusama(Kusama.KSM, new Decimal(0));
       let userBonusRewardKMA = new Decimal(0);
@@ -84,36 +108,26 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
     getUserTotalContributionsKSM();
   }, [userContributions]);
 
-  const PAGE_SIZE = 5;
-  const [currentPageNumberUserContributions, setCurrentPageNumberUserContributions] = useState(1);
-  const totalPagesUserContributions = Math.max(Math.ceil(userContributions.length / 5, 1), 1);
-  const currentPageUserContributions = userContributions.slice((currentPageNumberUserContributions - 1) * PAGE_SIZE, currentPageNumberUserContributions * PAGE_SIZE);
-
-  const [currentPageNumberUserReferrals, setCurrentPageNumberUserReferrals] = useState(1);
-  const totalPagesUserReferrals = Math.max(Math.ceil(userReferrals.length / 5, 1), 1);
-  const currentPageUserReferrals = userReferrals.slice((currentPageNumberUserReferrals - 1) * PAGE_SIZE, currentPageNumberUserReferrals * PAGE_SIZE);
-
-  const dateFormatOptions = { month: 'short', day: 'numeric' };
 
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
-      <h1 className="title text-3xl md:text-4xl">Your Details</h1>
+      <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
       <div className="flex">
         <div className="w-3/5">
-          <p className="mb-0 pb-5">Total Contributions</p>
+          <p className="mb-0 pb-5">{t('Total contributions ')}</p>
           <span className="purple-text text-lg xl:text-2xl font-semibold">
             {userTotalContributionsKSM.toString()}
           </span>
         </div>
         <div className="w-2/5">
-          <p className="mb-0 pb-5">Total Rewards</p>
+          <p className="mb-0 pb-5">{t('Total rewards ')}</p>
           <span className="purple-text text-lg xl:text-2xl font-semibold">
             {userTotalRewardsKMA.toString()} KMA
           </span>
         </div>
       </div>
       <div className="flex justify-between pt-6">
-        <p className="mb-1">Contribution History</p>
+        <p className="mb-1">{t('Contribution history')}</p>
         <span className="opacity-50">{currentPageNumberUserContributions} of {totalPagesUserContributions}</span>
       </div>
       <div>
@@ -148,13 +162,14 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
         </div>
       </div>
       <div className="flex justify-between pt-10">
-        <p className="mb-1">Referral History</p>
+        <p className="mb-1">{t('Referral history')}</p>
         <span className="opacity-50">{currentPageNumberUserReferrals} of {totalPagesUserReferrals}</span>
       </div>
       <div>
         <div className="artibute border-2 z-10 history relative rounded-lg calamari-text bg-white">
           <div className='pt-2'>
             {currentPageUserReferrals.map((referral, index) => (
+
               <div
                 key={index}
                 className={classNames(

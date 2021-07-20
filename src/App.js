@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import HomePage from 'pages/HomePage';
 import { SubstrateContextProvider } from './substrate-lib';
 import { DeveloperConsole } from './substrate-lib/components';
+import { useTranslation } from 'react-i18next';
+import { getLanguage } from 'utils/LocalStorageValue';
 
-export default function App () {
+
+const App = () => {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    i18n.changeLanguage(getLanguage());
+    // eslint-disable-next-line
+  }, []);
   return (
     <SubstrateContextProvider>
       <Router>
@@ -16,4 +25,5 @@ export default function App () {
       <DeveloperConsole />
     </SubstrateContextProvider>
   );
-}
+};
+export default App;
