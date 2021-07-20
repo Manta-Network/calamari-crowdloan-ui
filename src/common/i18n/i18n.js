@@ -6,11 +6,11 @@ import detector from 'i18next-browser-languagedetector';
 
 const resources = {
   en: {
-    translation: translationEN,
+    translation: translationEN
   },
   cn: {
-    translation: translationCN,
-  },
+    translation: translationCN
+  }
 };
 
 i18n
@@ -21,8 +21,8 @@ i18n
     lng: 'en',
     keySeparator: false,
     interpolation: {
-      escapeValue: false,
-    },
+      escapeValue: false
+    }
   });
 
 export default i18n;

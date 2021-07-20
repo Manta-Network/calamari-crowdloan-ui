@@ -7,7 +7,6 @@ import { DeveloperConsole } from './substrate-lib/components';
 import { useTranslation } from 'react-i18next';
 import { getLanguage } from 'utils/LocalStorageValue';
 
-
 const App = () => {
   const { i18n } = useTranslation();
 

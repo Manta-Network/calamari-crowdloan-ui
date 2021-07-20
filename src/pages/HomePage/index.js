@@ -21,16 +21,17 @@ function HomePage () {
   axios.defaults.baseURL = config.SUBSCAN_URL;
   axios.defaults.headers.post['Content-Type'] = 'application/json';
   axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
+  axios.defaults.headers.post['X-API-Key'] = config.API_KEY;
   axiosRetry(axios, { retries: 5, retryDelay: _ => 1000, retryCondition: error => error.response.status === 429 });
 
   const [fromAccount, setFromAccount] = useState(null);
-  const [accountAddress, setAccountAddress] = useState();
-  const [accountBalanceKSM, setAccountBalanceKSM] = useState();
-  const [userContributions, setUserContributions] = useState([]);
+  const [accountAddress, setAccountAddress] = useState(null);
+  const [accountBalanceKSM, setAccountBalanceKSM] = useState(null);
+  const [userContributions, setUserContributions] = useState(null);
 
-  const [totalFundsRaisedKSM, setTotalFundsRaisedKSM] = useState(new Kusama(Kusama.KSM, new Decimal(0)));
+  const [totalFundsRaisedKSM, setTotalFundsRaisedKSM] = useState(null);
   const [allReferrals, setAllReferrals] = useState({});
-  const [allContributions, setAllContributions] = useState([]);
+  const [allContributions, setAllContributions] = useState(null);
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
 
   const accountPair =
@@ -55,7 +56,6 @@ function HomePage () {
           const blockHash = await api.rpc.chain.getBlockHash(ex.blockNumber);
           const signedBlock = await api.rpc.chain.getBlock(blockHash);
           const paraID = signedBlock.block.extrinsics[ex.extrinsicIndex].method.args[0].toNumber();
-          console.log(ex.timestamp, config.CROWDLOAN_START_TIMESTAMP, 'timestamps');
           if (paraID && ex.timestamp > config.CROWDLOAN_START_TIMESTAMP) {
             const amountKSM = new Kusama(
               Kusama.ATOMIC_UNITS,
@@ -77,15 +77,12 @@ function HomePage () {
         return;
       }
       await api.isReady;
-
       let totalPages;
       let pageIdx = 0;
       const allContributions = [];
-
       do {
         const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageIdx, from_history: true });
         totalPages = Math.floor(res.data.data.count / 100);
-
         res.data.data.contributes
           ?.filter(contribution => contribution.fund_id === config.FUND_ID)
           .forEach(contribution => {
@@ -198,6 +195,7 @@ function HomePage () {
     <div className="home-page px-6 sm:px-16 xl:px-40">
       <Navbar
         accountPair={accountPair}
+        accountAddress={accountAddress}
         setAccountAddress={setAccountAddress}
         accountBalanceKSM={accountBalanceKSM}
       />

@@ -10,9 +10,8 @@ import TxStatus from '../../utils/TxStatus';
 import { decodeAddress } from '@polkadot/util-crypto';
 import formatPayloadForSubstrate from 'utils/FormatPayloadForSubstrate';
 import BN from 'bn.js';
-import { Input, Loader } from 'semantic-ui-react';
 import { useTranslation } from 'react-i18next';
-
+import Calamari from 'types/Calamari';
 
 function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, userContributions }) {
   const [referralStatus, setReferralStatus] = useState(null);
@@ -36,7 +35,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
     try {
       return new Kusama(Kusama.KSM, new Decimal(contributeAmountInput));
     } catch (error) {
-      return new Kusama(Kusama.KSM, new Decimal(0));
+      return Kusama.zero();
     }
   };
   const contributeAmountKSM = getContributeAmounKSM();
@@ -47,22 +46,22 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
       return null;
     }
     const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000));
-    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalFundsRaisedKSM).max(new Kusama(Kusama.KSM, new Decimal(0)));
-    const userKSMIneligibleForBonus = contributeAmountKSM.minus(KSMEligibleForBonusRemaining).max(new Kusama(Kusama.KSM, new Decimal(0)));
+    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalFundsRaisedKSM).max(Kusama.zero());
+    const userKSMIneligibleForBonus = contributeAmountKSM.minus(KSMEligibleForBonusRemaining).max(Kusama.zero());
     const userKSMEligibleForBonus = contributeAmountKSM.minus(userKSMIneligibleForBonus);
-    return userKSMEligibleForBonus.value.mul(new Decimal(500));
+    return userKSMEligibleForBonus.toKMABonusReward();
   };
   const earlyBonus = getEarlyBonus();
 
   const getReferalBonus = () => {
     if (!contributeAmountKSM) return null;
-    return referralCodeInput ? contributeAmountKSM.value.mul(new Decimal(500)) : new Decimal(0);
+    return referralCodeInput ? contributeAmountKSM.toKMAReferralReward() : Calamari.zero();
   };
   const referralBonus = getReferalBonus();
 
   const getBaseReward = () => {
     if (!contributeAmountKSM) return null;
-    return contributeAmountKSM ? contributeAmountKSM.value.mul(new Decimal(10000)) : new Decimal(0);
+    return contributeAmountKSM ? contributeAmountKSM.toKMABaseReward() : Calamari.zero();
   };
   const baseReward = getBaseReward();
 
@@ -222,15 +221,15 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
 
 export default Contribute;
 
-      // {loading ? (
-      //   <div className="py-6 px-4 mt-8 items-center flex">
-      //     <Loader active inline />
-      //     <span className="text-white pl-4">Processing...</span>
-      //   </div>
-      // ) : (
-      //   <div
-      //     onClick={onClaimHandler}
-      //     className="py-6 rounded-lg text-3xl xl:text-4xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-          
-      //   </div>
-      // )}
+// {loading ? (
+//   <div className="py-6 px-4 mt-8 items-center flex">
+//     <Loader active inline />
+//     <span className="text-white pl-4">Processing...</span>
+//   </div>
+// ) : (
+//   <div
+//     onClick={onClaimHandler}
+//     className="py-6 rounded-lg text-3xl xl:text-4xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
+
+//   </div>
+// )}

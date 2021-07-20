@@ -7,8 +7,9 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import ReactFlagsSelect from 'react-flags-select';
 import { setLanguage, getLanguage } from 'utils/LocalStorageValue';
+import AccountSelectButton from './AccountSelectButton'
 
-function Navbar ({ setAccountAddress, accountBalanceKSM, accountPair }) {
+function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, accountPair }) {
   const { t, i18n } = useTranslation();
   const [selected, setSelected] = useState('US');
 
@@ -23,30 +24,23 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountPair }) {
     setSelected(getLanguage() === 'en' ? 'US' : 'CN');
   }, []);
 
+  const onClickMyReferralCode = () => {
+    accountAddress && navigator.clipboard.writeText(accountAddress)
+  }
+
   return (
     <div className="navbar-content">
       <div className="logo-content">
         <img src={Logo} alt="logo" />
       </div>
       <div className="navbar-menu">
-        <NavLink to="#">
-          <div className="menu-item">How it Works</div>
-        </NavLink>
-        <NavLink to="#">
-          <div className="menu-item">My Referral Code</div>
-        </NavLink>
-        <AccountSelectButton
-          setAccountAddress={setAccountAddress}
-          accountPair={accountPair}
-        />
-      </div>
         <div className="hidden lg:flex">
           <NavLink to="#">
             <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
               {t('How it works')}
             </div>
           </NavLink>
-          <NavLink to="#">
+          <NavLink to="#" onClick={onClickMyReferralCode}>
             <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
               {t('My Referral code')}
             </div>
@@ -64,6 +58,7 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountPair }) {
           setAccountAddress={setAccountAddress}
           accountPair={accountPair}
         />
+        </div>
     </div>
   );
 }

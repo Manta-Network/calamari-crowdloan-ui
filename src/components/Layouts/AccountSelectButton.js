@@ -1,23 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, createRef } from 'react';
+
+import {
+  Icon,
+  Label
+} from 'semantic-ui-react';
+import { useTranslation } from 'react-i18next';
 import { useSubstrate } from '../../substrate-lib';
 import AccountSelectModal from './AccountSelectModal';
-import { useTranslation } from 'react-i18next';
 
 
 function Main ({ accountPair, setAccountAddress }) {
+  const { t, i18n } = useTranslation();
   const [openModal, setOpenModal] = useState(false);
-  const { t } = useTranslation();
   return (
     <>
     <div
       onClick={() => setOpenModal(true)}
-      className="menu-item text-base btn">
+      className="menu-item text-base btn lg:text-xl py-3 lg:py-4 px-2 lg:px-8 xl:px-12 btn">
       {accountPair
         ? (
         <div className="flex px-3 items-center">
           <svg
             fill="none"
-            stroke="currentColor"
+            stroke="none"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="1.5"
@@ -32,7 +37,7 @@ function Main ({ accountPair, setAccountAddress }) {
         </div>
           )
         : (
-          t('Connect wallet')
+            t('Connect Wallet')
           )}
     </div>
     {
@@ -49,18 +54,56 @@ function Main ({ accountPair, setAccountAddress }) {
   );
 }
 
-// function BalanceAnnotation (props) {
-//   const { accountSelected, accountBalance } = props;
+function BalanceAnnotation (props) {
+  const { accountSelected, accountBalance } = props;
 
-//   return accountSelected
-//     ? <Label pointing='left'>
-//         <Icon name='money' color='green' />
-//         {accountBalance}
-//       </Label>
-//     : null;
-// }
+  return accountSelected
+    ? <Label pointing='left'>
+        <Icon name='money' color='green' />
+        {accountBalance}
+      </Label>
+    : null;
+}
 
 export default function AccountSelector (props) {
   const { api, keyring } = useSubstrate();
   return keyring.getPairs && api.query ? <Main {...props} /> : null;
 }
+
+// <div ref={contextRef}>
+//     <Menu.Menu position='right' style={{ alignItems: 'center' }}>
+//       { !accountSelected
+//         ? <span>
+//           Add your account with the{' '}
+//           <a
+//             target='_blank'
+//             rel='noopener noreferrer'
+//             href='https://github.com/polkadot-js/extension'
+//           >
+//             Polkadot JS Extension
+//           </a>
+//         </span>
+//         : null }
+//       <CopyToClipboard text={accountSelected}>
+//         <Button
+//           basic
+//           circular
+//           size='large'
+//           icon='user'
+//           color={accountSelected ? 'green' : 'red'}
+//         />
+//       </CopyToClipboard>
+//       <Dropdown
+//         search
+//         selection
+//         clearable
+//         placeholder='Select an account'
+//         options={keyringOptions}
+//         onChange={(_, dropdown) => {
+//           onChange(dropdown.value);
+//         }}
+//         value={accountSelected}
+//       />
+//       <BalanceAnnotation accountSelected={accountSelected} accountBalance={accountBalance}/>
+//     </Menu.Menu>
+// </ div >
