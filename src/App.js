@@ -18,7 +18,8 @@ const App = () => {
     <SubstrateContextProvider>
       <Router>
         <Switch>
-          <Route path="/" component={HomePage} exact />
+          <Route path="/:referralCode" component={HomePage} />
+          <Route path="/" component={HomePage} />
         </Switch>
       </Router>
       <DeveloperConsole />

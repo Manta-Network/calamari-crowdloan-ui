@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Logo from 'assets/images/calamari-logo.svg';
 import { NavLink } from 'react-router-dom';
-import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import ReactFlagsSelect from 'react-flags-select';
 import { setLanguage, getLanguage } from 'utils/LocalStorageValue';
-import AccountSelectButton from './AccountSelectButton'
+import AccountSelectButton from './AccountSelectButton';
+import ReferralCode from 'types/ReferralCode';
 
 function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, accountPair }) {
   const { t, i18n } = useTranslation();
@@ -25,8 +25,8 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
   }, []);
 
   const onClickMyReferralCode = () => {
-    accountAddress && navigator.clipboard.writeText(accountAddress)
-  }
+    accountAddress && navigator.clipboard.writeText(ReferralCode.fromAddress(accountAddress).toString());
+  };
 
   return (
     <div className="navbar-content">
@@ -58,7 +58,7 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
           setAccountAddress={setAccountAddress}
           accountPair={accountPair}
         />
-        </div>
+      </div>
     </div>
   );
 }

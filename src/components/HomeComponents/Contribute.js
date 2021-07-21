@@ -1,5 +1,5 @@
 /* eslint-disable multiline-ternary */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
 import Decimal from 'decimal.js';
@@ -7,29 +7,33 @@ import { makeTxResHandler } from '../../utils/MakeTxResHandler';
 import Kusama from '../../types/Kusama';
 import TxStatusDisplay from '../../TxStatusDisplay';
 import TxStatus from '../../utils/TxStatus';
-import { decodeAddress } from '@polkadot/util-crypto';
 import formatPayloadForSubstrate from 'utils/FormatPayloadForSubstrate';
 import BN from 'bn.js';
 import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
+import config from 'config';
+import ReferralCode from 'types/ReferralCode';
 
-function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, userContributions }) {
+const ConnectWalletPrompt = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
+      <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
+      <p className="mb-2 text-sm xl:text-base">
+        {t('Connect wallet to continue')}
+      </p>
+    </div>
+  );
+};
+
+function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, urlReferralCode }) {
   const [referralStatus, setReferralStatus] = useState(null);
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState();
   const [referralCode, setReferralCode] = useState();
-
   const { api } = useSubstrate();
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-
-  const onClaimHandler = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-  };
 
   const getContributeAmounKSM = () => {
     try {
@@ -42,11 +46,11 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
 
   const getEarlyBonus = () => {
-    if (!totalFundsRaisedKSM || !contributeAmountKSM) {
+    if (!totalContributionsKSM || !contributeAmountKSM) {
       return null;
     }
     const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000));
-    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalFundsRaisedKSM).max(Kusama.zero());
+    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalContributionsKSM).max(Kusama.zero());
     const userKSMIneligibleForBonus = contributeAmountKSM.minus(KSMEligibleForBonusRemaining).max(Kusama.zero());
     const userKSMEligibleForBonus = contributeAmountKSM.minus(userKSMIneligibleForBonus);
     return userKSMEligibleForBonus.toKMABonusReward();
@@ -55,7 +59,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
 
   const getReferalBonus = () => {
     if (!contributeAmountKSM) return null;
-    return referralCodeInput ? contributeAmountKSM.toKMAReferralReward() : Calamari.zero();
+    return referralCode ? contributeAmountKSM.toKMAReferralReward() : Calamari.zero();
   };
   const referralBonus = getReferalBonus();
 
@@ -76,7 +80,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
       api, onContributeSuccess, onContributeFailure, onContributeUpdate);
     const tx = api.tx.crowdloan.contribute(
       ...formatPayloadForSubstrate([
-        2055,
+        config.PARA_ID,
         new BN(contributeAmountAtomicUnits.value.toString()),
         null
       ])
@@ -106,17 +110,18 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   };
 
   const publishReferral = () => {
-    const memo = api.createType('Memo', referralCode);
+    const memo = api.createType('Memo', referralCode.bytes);
     const handleTxResponse = makeTxResHandler(
       api, onReferralSuccess, onReferralFailure, onReferralUpdate);
     const tx = api.tx.crowdloan.addMemo(
-      2055, memo.toHex()
+      config.PARA_ID, memo.toHex()
     );
     tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onClickMax = () => {
-    accountBalanceKSM && setContributeAmountInput(accountBalanceKSM.toString(false));
+    const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1))
+    accountBalanceKSM && setContributeAmountInput(accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero()).toString(false));
   };
 
   const onChangeContributeAmountInput = e => {
@@ -130,7 +135,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
   const onChangeReferralCodeInput = e => {
     setReferralCodeInput(e.target.value);
     try {
-      const referralCode = decodeAddress(e.target.value);
+      const referralCode = ReferralCode.fromHexStr(e.target.value);
       setReferralCode(referralCode);
     } catch (error) {
       setReferralCode(null);
@@ -141,12 +146,22 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
     contribute();
   };
 
-  // const onClaimHandler = () => {
-  //   setLoading(true);
-  //   setTimeout(() => {
-  //     setLoading(false);
-  //   }, 3000);
-  // };
+  useEffect(() => {
+    const setReferralCodeFromURL = () => {
+      if (urlReferralCode && !referralCodeInput) {
+        try {
+          const referralCode = ReferralCode.fromHexStr(urlReferralCode);
+          setReferralCode(referralCode);
+          setReferralCodeInput(urlReferralCode);
+        } catch (error) {}
+      }
+    };
+    setReferralCodeFromURL();
+  }, [referralCodeInput, urlReferralCode]);
+
+  if (!fromAccount) {
+    return <ConnectWalletPrompt />;
+  }
 
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
@@ -163,7 +178,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
             onChange={onChangeContributeAmountInput}
           />
           <span onClick={onClickMax} className="uppercase cursor-pointer text-xl xl:text-2xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
-          {t('Max')}
+            {t('Max')}
           </span>
         </div>
         <div className="text-2xl xl:text-2xl w-1/5 font-semibold pl-4">KSM</div>
@@ -203,7 +218,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
             </div>
           </div>
           <div className="flex text-2xl xl:text-2xl p-6 result justify-between text-white">
-          <span>{t('Rewards')}:</span>
+            <span>{t('Rewards')}:</span>
             <span>{totalReward && totalReward.toString()} KMA</span>
           </div>
         </div>
@@ -213,23 +228,10 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalFundsRaisedKSM, user
         className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
         {t('Claim your KMA')}
       </div>
-      <TxStatusDisplay txStatus={contributionStatus} />
-      <TxStatusDisplay txStatus={referralStatus} />
+      <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
+      <TxStatusDisplay txStatus={referralStatus} transactionType={'Referral'} />
     </div>
   );
 }
 
 export default Contribute;
-
-// {loading ? (
-//   <div className="py-6 px-4 mt-8 items-center flex">
-//     <Loader active inline />
-//     <span className="text-white pl-4">Processing...</span>
-//   </div>
-// ) : (
-//   <div
-//     onClick={onClaimHandler}
-//     className="py-6 rounded-lg text-3xl xl:text-4xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-
-//   </div>
-// )}

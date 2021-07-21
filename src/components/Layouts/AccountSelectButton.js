@@ -1,16 +1,10 @@
-import React, { useState, useEffect, createRef } from 'react';
-
-import {
-  Icon,
-  Label
-} from 'semantic-ui-react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSubstrate } from '../../substrate-lib';
 import AccountSelectModal from './AccountSelectModal';
 
-
 function Main ({ accountPair, setAccountAddress }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [openModal, setOpenModal] = useState(false);
   return (
     <>
@@ -22,7 +16,7 @@ function Main ({ accountPair, setAccountAddress }) {
         <div className="flex px-3 items-center">
           <svg
             fill="none"
-            stroke="none"
+            stroke="currentColor"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="1.5"
@@ -54,16 +48,16 @@ function Main ({ accountPair, setAccountAddress }) {
   );
 }
 
-function BalanceAnnotation (props) {
-  const { accountSelected, accountBalance } = props;
+// function BalanceAnnotation (props) {
+//   const { accountSelected, accountBalance } = props;
 
-  return accountSelected
-    ? <Label pointing='left'>
-        <Icon name='money' color='green' />
-        {accountBalance}
-      </Label>
-    : null;
-}
+//   return accountSelected
+//     ? <Label pointing='left'>
+//         <Icon name='money' color='green' />
+//         {accountBalance}
+//       </Label>
+//     : null;
+// }
 
 export default function AccountSelector (props) {
   const { api, keyring } = useSubstrate();

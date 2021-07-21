@@ -1,10 +1,11 @@
 /* eslint-disable multiline-ternary */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ArrowDown from 'assets/icons/arrow-down.svg';
 import ArrowUp from 'assets/icons/arrow-up.svg';
 import { Placeholder } from 'semantic-ui-react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+
 const ReferralHistoryPlaceholder = () => {
   return (
   <div className="py-12">
@@ -23,26 +24,22 @@ const ReferralHistoryPlaceholder = () => {
       </Placeholder.Paragraph>
     </Placeholder>
   </div>
-  )
-}
-
+  );
+};
 
 const ReferralHistory = ({ userReferrals }) => {
-    if (!userReferrals) {
-      return <ReferralHistoryPlaceholder />
-    }
+  const [currentPageNumberUserReferrals, setCurrentPageNumberUserReferrals] = useState(1);
 
-    const [currentPageNumberUserReferrals, setCurrentPageNumberUserReferrals] = useState(1);
-    
-    const PAGE_SIZE = 5;
-    const totalPagesUserReferrals = Math.max(Math.ceil(userReferrals.length / 5, 1), 1);
-    const currentPageUserReferrals = userReferrals.slice((currentPageNumberUserReferrals - 1) * PAGE_SIZE, currentPageNumberUserReferrals * PAGE_SIZE);
-    const dateFormatOptions = { month: 'short', day: 'numeric' };
-    const { t } = useTranslation();
+  const PAGE_SIZE = 5;
+  const totalPagesUserReferrals = Math.max(Math.ceil(userReferrals?.length / 5, 1), 1);
+  const currentPageUserReferrals = userReferrals?.slice((currentPageNumberUserReferrals - 1) * PAGE_SIZE, currentPageNumberUserReferrals * PAGE_SIZE);
+  const dateFormatOptions = { month: 'short', day: 'numeric' };
+  const { t } = useTranslation();
 
-
-
-    return (
+  if (!userReferrals) {
+    return <ReferralHistoryPlaceholder />;
+  }
+  return (
         <>
         <div className="flex justify-between pt-10">
         <p className="mb-1">{t('Referral history')}</p>
@@ -84,7 +81,7 @@ const ReferralHistory = ({ userReferrals }) => {
         </div>
       </div>
       </>
-    )
-}
+  );
+};
 
 export default ReferralHistory;

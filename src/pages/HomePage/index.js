@@ -15,7 +15,9 @@ import Contribution from 'types/Contribution';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import config from 'config';
-import { encodeAddress } from '@polkadot/util-crypto';
+import { isHex, hexAddPrefix } from '@polkadot/util';
+import ReferralCode from 'types/ReferralCode';
+import { useParams } from 'react-router-dom';
 
 function HomePage () {
   axios.defaults.baseURL = config.SUBSCAN_URL;
@@ -24,13 +26,15 @@ function HomePage () {
   axios.defaults.headers.post['X-API-Key'] = config.API_KEY;
   axiosRetry(axios, { retries: 5, retryDelay: _ => 1000, retryCondition: error => error.response.status === 429 });
 
+  const { referralCode } = useParams();
+
   const [fromAccount, setFromAccount] = useState(null);
   const [accountAddress, setAccountAddress] = useState(null);
   const [accountBalanceKSM, setAccountBalanceKSM] = useState(null);
   const [userContributions, setUserContributions] = useState(null);
 
-  const [totalFundsRaisedKSM, setTotalFundsRaisedKSM] = useState(null);
-  const [allReferrals, setAllReferrals] = useState({});
+  const [totalContributionsKSM, setTotalContributionsKSM] = useState(null);
+  const [allReferrals, setAllReferrals] = useState(null);
   const [allContributions, setAllContributions] = useState(null);
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
 
@@ -72,7 +76,7 @@ function HomePage () {
   }, [accountAddress, api]);
 
   useMemo(() => {
-    const getAllContributions = async () => {
+    const getAllContributionsAndReferrals = async () => {
       if (!api) {
         return;
       }
@@ -80,51 +84,28 @@ function HomePage () {
       let totalPages;
       let pageIdx = 0;
       const allContributions = [];
+      const allAddresses = [];
+      const allReferrals = {};
+
       do {
         const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageIdx, from_history: true });
         totalPages = Math.floor(res.data.data.count / 100);
-        res.data.data.contributes
-          ?.filter(contribution => contribution.fund_id === config.FUND_ID)
-          .forEach(contribution => {
-            const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
-            const currentContribution = new Contribution(amountKSM, new Date(contribution.block_timestamp), contribution.who);
-            allContributions.push(currentContribution);
-          });
+        res.data.data.contributes?.forEach(contribution => {
+          const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
+          const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
+          const currentContribution = new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who);
+          allContributions.push(currentContribution);
+          allAddresses.push(contribution.who);
+          if (referralCode) {
+            allReferrals[contribution.who] = referralCode.toAddress();
+          }
+        });
         pageIdx++;
       } while (pageIdx < totalPages);
       setAllContributions(allContributions);
+      setAllReferrals(allReferrals);
     };
-    getAllContributions();
-  }, [api]);
-
-  useMemo(() => {
-    const getAllReferrals = async () => {
-      if (!api) {
-        return;
-      }
-      await api.isReady;
-      // todo: loop over every page
-      const res = await axios.post('extrinsics', { call: 'add_memo', module: 'crowdloan', row: 100, page: 0 });
-      const extrinsics = res.data.data.extrinsics || [];
-      const referrals = {};
-      // todo: check that referrals are for OUR crowdloan
-      await Promise.all(extrinsics
-        .filter(ex => ex.success)
-        .map(ex => ({ timestamp: ex.block_timestamp * 1000, blockNumber: ex.block_num, extrinsicIndex: parseInt(ex.extrinsic_index.split('-')[1]) }))
-        .map(async ex => {
-          const blockHash = await api.rpc.chain.getBlockHash(ex.blockNumber);
-          const signedBlock = await api.rpc.chain.getBlock(blockHash);
-          const paraID = signedBlock.block.extrinsics[ex.extrinsicIndex].method.args[0].toNumber();
-          const memoBytes = signedBlock.block.extrinsics[ex.extrinsicIndex].method.args[1];
-          const referredAddress = signedBlock.block.extrinsics[ex.extrinsicIndex].signer.toString();
-          if (memoBytes.length === 32 && paraID === config.PARA_ID && ex.timestamp > config.CROWDLOAN_START_TIMESTAMP) {
-            const referrerAddress = encodeAddress(memoBytes, 42);
-            referrals[referredAddress] = referrerAddress;
-          }
-        }));
-      setAllReferrals(referrals);
-    };
-    getAllReferrals();
+    getAllContributionsAndReferrals();
   }, [api]);
 
   useEffect(() => {
@@ -157,16 +138,11 @@ function HomePage () {
   }, [api, accountAddress]);
 
   useEffect(() => {
-    const getTotalFundsRaisedKSM = async () => {
-      if (!api) {
-        return;
-      }
-      await api.isReady;
-      const funds = await api.query.crowdloan.funds(config.PARA_ID);
-      const totalFundsRaisedAtomicUnits = funds.isSome ? new Decimal(funds.value.raised.toString()) : new Decimal(0);
-      setTotalFundsRaisedKSM(new Kusama(Kusama.ATOMIC_UNITS, totalFundsRaisedAtomicUnits).toKSM());
+    const getTotalContributionsKSM = async () => {
+      const res = await axios.post('parachain/funds', { fund_id: config.fundID, row: 1, page: 0 });
+      setTotalContributionsKSM(new Kusama(Kusama.ATOMIC_UNITS, new Decimal(res.data.data.funds[0].raised)).toKSM());
     };
-    getTotalFundsRaisedKSM();
+    getTotalContributionsKSM();
   }, [api]);
 
   const loader = text =>
@@ -188,7 +164,7 @@ function HomePage () {
   else if (apiState !== 'READY') return loader('Connecting to Substrate');
 
   if (keyringState !== 'READY') {
-    return loader('Loading accounts (please review any extension\'s authorization)');
+    return loader('Loading accounts (please review polkadot.js authorization)');
   }
 
   return (
@@ -204,9 +180,10 @@ function HomePage () {
           <Grid.Row className="flex-wrap flex-col flex">
             <Grid.Column className="flex-wrap item flex">
               <Contribute
+                urlReferralCode={referralCode}
                 fromAccount={fromAccount}
                 accountBalanceKSM={accountBalanceKSM}
-                totalFundsRaisedKSM={totalFundsRaisedKSM}
+                totalContributionsKSM={totalContributionsKSM}
                 setUserContributions={setUserContributions}
               />
             </Grid.Column>
@@ -220,7 +197,7 @@ function HomePage () {
             </Grid.Column>
             <Grid.Column className="flex-wrap item flex">
               <Crowdloan
-                totalFundsRaisedKSM={totalFundsRaisedKSM}
+                totalContributionsKSM={totalContributionsKSM}
                 allContributions={allContributions}
               />
             </Grid.Column>

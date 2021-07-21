@@ -5,13 +5,13 @@ class Contribution {
     this.address = address;
   }
 
-  static fromJson (json) {
-    return new Contribution(json.date, json.amountKSM, json.address);
-  }
+  // static fromJson (json) {
+  //   return new Contribution(json.date, json.amountKSM, json.address);
+  // }
 
-  toJson () {
-    return { amountKSM: this.amountKSM, date: this.date, rewardKSM: this.address };
-  }
+  // toJson () {
+  //   return { amountKSM: this.amountKSM, date: this.date, rewardKSM: this.address };
+  // }
 }
 
 export default Contribution;

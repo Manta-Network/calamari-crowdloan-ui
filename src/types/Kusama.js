@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import Calamari from './Calamari'
+import Calamari from './Calamari';
 
 const KUSAMA_CHAIN_DECIMALS = 12;
 
@@ -21,8 +21,8 @@ class Kusama {
       this.value = value;
     }
 
-    static zero() {
-      return new Kusama(Kusama.KSM, new Decimal(0))
+    static zero () {
+      return new Kusama(Kusama.KSM, new Decimal(0));
     }
 
     minus (kusama) {
@@ -71,25 +71,25 @@ class Kusama {
       return new Kusama(Kusama.KSM, atomicUnitsToKSM(this.value));
     }
 
-    toKMABaseReward() {
+    toKMABaseReward () {
       if (this.denomination !== Kusama.KSM) {
         throw Error('Cannot calculate reward from atomic units');
       }
-      return new Calamari(this.value.mul(10000))
+      return new Calamari(this.value.mul(10000));
     }
 
-    toKMABonusReward() {
+    toKMABonusReward () {
       if (this.denomination !== Kusama.KSM) {
         throw Error('Cannot calculate reward from atomic units');
       }
-      return new Calamari(this.value.mul(500))
+      return new Calamari(this.value.mul(500));
     }
 
-    toKMAReferralReward() {
+    toKMAReferralReward () {
       if (this.denomination !== Kusama.KSM) {
         throw Error('Cannot calculate reward from atomic units');
       }
-      return new Calamari(this.value.mul(500))
+      return new Calamari(this.value.mul(500));
     }
 
     toString (includeUnits = true) {

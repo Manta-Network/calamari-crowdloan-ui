@@ -1,5 +1,5 @@
 /* eslint-disable multiline-ternary */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ArrowDown from 'assets/icons/arrow-down.svg';
 import ArrowUp from 'assets/icons/arrow-up.svg';
 import { Placeholder } from 'semantic-ui-react';
@@ -24,26 +24,21 @@ const ContributionHistoryPlaceholder = () => {
       </Placeholder.Paragraph>
     </Placeholder>
   </div>
-  )
-}
+  );
+};
 
 const ContributionHistory = ({ userContributions }) => {
-    if (!userContributions) {
-      return <ContributionHistoryPlaceholder />
-    }
+  const { t } = useTranslation();
+  const PAGE_SIZE = 5;
+  const [currentPageNumberUserContributions, setCurrentPageNumberUserContributions] = useState(1);
+  const totalPagesUserContributions = userContributions && Math.max(Math.ceil(userContributions.length / 5, 1), 1);
+  const currentPageUserContributions = userContributions && userContributions.slice((currentPageNumberUserContributions - 1) * PAGE_SIZE, currentPageNumberUserContributions * PAGE_SIZE);
+  const dateFormatOptions = { month: 'short', day: 'numeric' };
 
-    const PAGE_SIZE = 5;
-    const [currentPageNumberUserContributions, setCurrentPageNumberUserContributions] = useState(1);
-    const totalPagesUserContributions = Math.max(Math.ceil(userContributions.length / 5, 1), 1);
-    const currentPageUserContributions = userContributions.slice((currentPageNumberUserContributions - 1) * PAGE_SIZE, currentPageNumberUserContributions * PAGE_SIZE);
-  
-    
-    const dateFormatOptions = { month: 'short', day: 'numeric' };
-
-    const { t } = useTranslation();
-  
-    
-    return (
+  if (!userContributions) {
+    return <ContributionHistoryPlaceholder />;
+  }
+  return (
         <>
         <div className="flex justify-between pt-6">
         <p className="mb-1">{t('Contribution history')}</p>
@@ -81,7 +76,7 @@ const ContributionHistory = ({ userContributions }) => {
         </div>
       </div>
       </>
-    )
-}
+  );
+};
 
-export default ContributionHistory
+export default ContributionHistory;
