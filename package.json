@@ -24,6 +24,8 @@
     "@polkadot/ui-settings": "^0.82.1",
     "@polkadot/util": "^6.10.1",
     "@polkadot/util-crypto": "^6.10.1",
+    "axios": "^0.21.1",
+    "axios-retry": "^3.1.9",
     "chart.js": "^3.4.1",
     "classnames": "^2.3.1",
     "i18next": "^20.3.3",
@@ -42,7 +44,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^2.0.3"
+    "semantic-ui-react": "^2.0.3",
+    "store": "^2.0.12"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",

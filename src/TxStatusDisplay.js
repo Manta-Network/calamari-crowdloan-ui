@@ -1,33 +1,32 @@
 import React from 'react';
+import config from 'config';
 
-export default function Main ({ txStatus, batchNumber = 1, totalBatches = 1 }) {
+export default function Main ({ txStatus, transactionType = 'Transacion' }) {
   if (!txStatus) {
     return <div/>;
   }
 
-  let batchMessage = '';
-  if (totalBatches > 1) {
-    batchMessage = `${batchNumber}/${totalBatches} `;
-  }
-
   let txStatusMesage;
   if (txStatus.isProcessing()) {
-    txStatusMesage = `Transaction ${batchMessage}processing`;
+    txStatusMesage = `🕒 ${transactionType} processing`;
   } else if (txStatus.isFinalized()) {
-    txStatusMesage = `😊 Transaction ${batchMessage}finalized`;
+    txStatusMesage = `✅ ${transactionType} finalized`;
   } else if (txStatus.isFailed()) {
-    txStatusMesage = `❌ Transaction ${batchMessage}failed`;
+    txStatusMesage = `❌ ${transactionType} failed`;
   }
-
-  const txSecondaryMessage = txStatus.message ? `: ${txStatus.message}` : '';
+  console.log(txStatus);
 
   return (
     <div style={{ textAlign: 'center', overflowWrap: 'break-word' }}>
+      {!txStatus.isProcessing()
+        ? <a href={config.BLOCK_EXPLORER_URL + txStatus.block}>
       <p>
-        {txStatusMesage}{txSecondaryMessage}
+        {txStatusMesage}
       </p>
-      {
-        txStatus.block && <p>Block hash: {txStatus.block}</p>
+      </a>
+        : <p>
+            {txStatusMesage}
+          </p>
       }
     </div>
   );
