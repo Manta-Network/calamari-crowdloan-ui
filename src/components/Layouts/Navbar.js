@@ -8,6 +8,7 @@ import ReactFlagsSelect from 'react-flags-select';
 import { setLanguage, getLanguage } from 'utils/LocalStorageValue';
 import AccountSelectButton from './AccountSelectButton';
 import ReferralCode from 'types/ReferralCode';
+import config from 'config';
 
 function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, accountPair }) {
   const { t, i18n } = useTranslation();
@@ -25,7 +26,7 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
   }, []);
 
   const onClickMyReferralCode = () => {
-    accountAddress && navigator.clipboard.writeText(ReferralCode.fromAddress(accountAddress).toString());
+    accountAddress && navigator.clipboard.writeText(config.APP_BASE_URL + ReferralCode.fromAddress(accountAddress).toString());
   };
 
   return (

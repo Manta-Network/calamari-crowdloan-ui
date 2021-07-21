@@ -120,7 +120,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
   };
 
   const onClickMax = () => {
-    const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1))
+    const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1));
     accountBalanceKSM && setContributeAmountInput(accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero()).toString(false));
   };
 
