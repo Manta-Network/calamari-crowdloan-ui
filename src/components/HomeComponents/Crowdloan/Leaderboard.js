@@ -43,9 +43,10 @@ export default function Leaderboard ({ allContributions }) {
       const addressCurrentContribution = contributionsByAddress[contribution.address] || Kusama.zero();
       contributionsByAddress[contribution.address] = addressCurrentContribution.add(contribution.amountKSM);
     });
+
     return Object.entries(contributionsByAddress)
       .map(([address, amountKSM]) => ({ address: address, amountKSM: amountKSM }))
-      .sort((first, second) => first.amountKSM.value.gt(second.amountKSM.value))
+      .sort((first, second) => second.amountKSM.value.minus(first.amountKSM.value))
       .slice(0, 3);
   };
   const topThreeContributors = getTopThreeContributors();

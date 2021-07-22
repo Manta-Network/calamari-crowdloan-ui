@@ -26,7 +26,7 @@ const ConnectWalletPrompt = () => {
   );
 };
 
-function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, urlReferralCode }) {
+function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, urlReferralCode }) {
   const [referralStatus, setReferralStatus] = useState(null);
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -75,22 +75,22 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
     totalReward = baseReward.add(referralBonus.add(earlyBonus));
   }
 
-  const contribute = () => {
-    const handleTxResponse = makeTxResHandler(
-      api, onContributeSuccess, onContributeFailure, onContributeUpdate);
-    const tx = api.tx.crowdloan.contribute(
+  const buildContributeTx = () => {
+    return api.tx.crowdloan.contribute(
       ...formatPayloadForSubstrate([
         config.PARA_ID,
         new BN(contributeAmountAtomicUnits.value.toString()),
         null
       ])
     );
-    tx.signAndSend(fromAccount, handleTxResponse);
   };
 
-  const onContributeSuccess = block => {
-    setContributionStatus(TxStatus.finalized(block));
-    referralCode && publishReferral();
+  const onContributeSuccess = (referralTx = null) => {
+    return block => {
+      setContributionStatus(TxStatus.finalized(block));
+      const handleTxRes = makeTxResHandler(onReferralSuccess, onReferralFailure, onReferralUpdate)
+      referralTx?.send(handleTxRes)
+    }
   };
   const onContributeFailure = (block, error) => {
     setContributionStatus(TxStatus.failed(block, error));
@@ -109,14 +109,13 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
     setReferralStatus(TxStatus.processing(message));
   };
 
-  const publishReferral = () => {
+  const buildReferralTx = () => {
     const memo = api.createType('Memo', referralCode.bytes);
-    const handleTxResponse = makeTxResHandler(
-      api, onReferralSuccess, onReferralFailure, onReferralUpdate);
-    const tx = api.tx.crowdloan.addMemo(
+    // const handleTxResponse = makeTxResHandler(
+    //   api, onReferralSuccess, onReferralFailure, onReferralUpdate);
+    return api.tx.crowdloan.addMemo(
       config.PARA_ID, memo.toHex()
     );
-    tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onClickMax = () => {
@@ -142,8 +141,17 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
     }
   };
 
-  const onClickClaimButton = () => {
-    contribute();
+  const onClickClaimButton = async () => {
+    try {
+      const contributeTx = buildContributeTx();
+      const referralTx = referralCode && buildReferralTx();
+      await contributeTx.signAsync(fromAccount);
+      referralTx && await referralTx.signAsync();
+      const txResHandler = makeTxResHandler(api, onContributeSuccess(referralTx), onContributeFailure, onContributeUpdate);
+      contributeTx.send(txResHandler)
+    } catch(error) {
+      console.error(error)
+    }
   };
 
   useEffect(() => {
@@ -153,7 +161,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
           const referralCode = ReferralCode.fromHexStr(urlReferralCode);
           setReferralCode(referralCode);
           setReferralCodeInput(urlReferralCode);
-        } catch (error) {}
+        } catch (error) { }
       }
     };
     setReferralCodeFromURL();
