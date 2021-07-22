@@ -26,5 +26,21 @@
   "Address": "地址",
   "Amount (KSM)": "KSM 贡献量",
   "Rewards (KMA)": "KMA 奖励",
-  "View all board": "查看完整榜单"
+  "View all board": "查看完整榜单",
+  "Select an account": "选择账户",
+  "Copied to clipboard": "复制到粘贴板",
+  "Contribution processing": "支持处理中",
+  "Contribution finalized": "支持确认",
+  "Contribution failed": "支持失败",
+  "Referral processing": "邀请处理中",
+  "Referral finalized": "邀请成功",
+  "Referral failed": "邀请失败",
+  "Contributed": "支持",
+  "Global Contribution Activity": "全球支持",
+  "Referrals": "邀请数量",
+  "Referral rewards": "邀请奖励",
+  "Connecting to Kusama": "连接到 Kusama 中",
+  "Install polkadot.js wallet to continue": "请安装 polkadot.js 以继续",
+  "Connect wallet to continue": "连接到钱包以继续",
+  "Create a polkadot.js acount to continue(edited)": "请先在Polkadot.js中创建账户"
 }
