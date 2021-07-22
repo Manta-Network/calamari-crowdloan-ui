@@ -7,3 +7,45 @@ body {
   font-family: "Ubuntu Mono", monospace;
   min-height: 100vh;
 }
+
+// navbar menu mobile
+.nav-menu-mobile {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 99;
+  width: 85%;
+  max-width: 350px;
+  height: 100%;
+  transform: translate3d(100%, 0, 0);
+  text-align: left;
+  background: #f8f8f8;
+  transition: transform 0.25s ease-in-out;
+  .close-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: color 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
+    position: absolute;
+    top: 6px;
+    background: #e2e8f0;
+    left: -48px;
+    z-index: 105;
+    font-size: 25px;
+  }
+}
+.navbar-mobile-overlay {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(75, 86, 102, 0.4);
+  z-index: 98;
+  background-color: rgba(75, 86, 102, 0.7);
+}
+
