@@ -19,15 +19,20 @@ const ConnectWalletPrompt = () => {
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <p className="mb-2 text-sm xl:text-base">
+      <p className="mb-2 text-md xl:text-base">
         {t('Connect wallet to continue')}
       </p>
     </div>
   );
 };
 
-function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, urlReferralCode }) {
-  const [referralStatus, setReferralStatus] = useState(null);
+function Contribute ({
+  fromAccount,
+  accountBalanceKSM,
+  urlReferralCode,
+  allContributors,
+  accountAddress
+}) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState();
@@ -46,14 +51,15 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
   const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
 
   const getEarlyBonus = () => {
-    if (!totalContributionsKSM || !contributeAmountKSM) {
-      return null;
+    if (!allContributors || !contributeAmountKSM) {
+      return Calamari.zero();
+    } else if (allContributors.length < config.EARLY_BONUS_TIER_1_CUTOFF || allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)) {
+      return contributeAmountKSM.toKMABonusRewardTier1();
+    } else if (allContributors.length < config.EARLY_BONUS_TIER_2_CUTOFF || allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)) {
+      return contributeAmountKSM.toKMABonusRewardTier2();
+    } else {
+      return Calamari.zero();
     }
-    const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000));
-    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalContributionsKSM).max(Kusama.zero());
-    const userKSMIneligibleForBonus = contributeAmountKSM.minus(KSMEligibleForBonusRemaining).max(Kusama.zero());
-    const userKSMEligibleForBonus = contributeAmountKSM.minus(userKSMIneligibleForBonus);
-    return userKSMEligibleForBonus.toKMABonusReward();
   };
   const earlyBonus = getEarlyBonus();
 
@@ -75,22 +81,18 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
     totalReward = baseReward.add(referralBonus.add(earlyBonus));
   }
 
-  const contribute = () => {
-    const handleTxResponse = makeTxResHandler(
-      api, onContributeSuccess, onContributeFailure, onContributeUpdate);
-    const tx = api.tx.crowdloan.contribute(
+  const buildContributeTx = () => {
+    return api.tx.crowdloan.contribute(
       ...formatPayloadForSubstrate([
         config.PARA_ID,
         new BN(contributeAmountAtomicUnits.value.toString()),
         null
       ])
     );
-    tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onContributeSuccess = block => {
     setContributionStatus(TxStatus.finalized(block));
-    referralCode && publishReferral();
   };
   const onContributeFailure = (block, error) => {
     setContributionStatus(TxStatus.failed(block, error));
@@ -99,24 +101,11 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
     setContributionStatus(TxStatus.processing(message));
   };
 
-  const onReferralSuccess = block => {
-    setReferralStatus(TxStatus.finalized(block));
-  };
-  const onReferralFailure = (block, error) => {
-    setReferralStatus(TxStatus.failed(block, error));
-  };
-  const onReferralUpdate = message => {
-    setReferralStatus(TxStatus.processing(message));
-  };
-
-  const publishReferral = () => {
+  const buildReferralTx = () => {
     const memo = api.createType('Memo', referralCode.bytes);
-    const handleTxResponse = makeTxResHandler(
-      api, onReferralSuccess, onReferralFailure, onReferralUpdate);
-    const tx = api.tx.crowdloan.addMemo(
+    return api.tx.crowdloan.addMemo(
       config.PARA_ID, memo.toHex()
     );
-    tx.signAndSend(fromAccount, handleTxResponse);
   };
 
   const onClickMax = () => {
@@ -142,8 +131,16 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
     }
   };
 
-  const onClickClaimButton = () => {
-    contribute();
+  const onClickClaimButton = async () => {
+    try {
+      const contributeTx = buildContributeTx();
+      const referralTx = referralCode && buildReferralTx();
+      const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx];
+      const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
+      api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -153,7 +150,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
           const referralCode = ReferralCode.fromHexStr(urlReferralCode);
           setReferralCode(referralCode);
           setReferralCodeInput(urlReferralCode);
-        } catch (error) {}
+        } catch (error) { }
       }
     };
     setReferralCodeFromURL();
@@ -201,7 +198,7 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-4 pb-2">
               <span>{t('Base')}</span>
-              <span className="font-semibold">{baseReward && baseReward.toString()} KMA</span>
+              <span className="font-semibold">{baseReward && baseReward.toString()}</span>
             </div>
             <div className="flex text-base xl:text-lg items-center justify-between px-3 xl:px-6 py-2 bg-gray">
               <div className="flex items-center">
@@ -210,26 +207,25 @@ function Contribute ({ fromAccount, accountBalanceKSM, totalContributionsKSM, ur
                   {t('Limited Time')}
                 </span>
               </div>
-              <span className="font-semibold">{earlyBonus && earlyBonus.toString()} KMA</span>
+              <span className="font-semibold">{earlyBonus && earlyBonus.toString()}</span>
             </div>
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-2 pb-4">
               <span>{t('Referral')}</span>
-              <span className="font-semibold">{referralBonus && referralBonus.toString()} KMA</span>
+              <span className="font-semibold">{referralBonus && referralBonus.toString()}</span>
             </div>
           </div>
           <div className="flex text-2xl xl:text-2xl p-6 result justify-between text-white">
             <span>{t('Rewards')}:</span>
-            <span>{totalReward && totalReward.toString()} KMA</span>
+            <span>{totalReward && totalReward.toString()}</span>
           </div>
         </div>
       </div>
       <div
         onClick={onClickClaimButton}
         className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-        {t('Claim your KMA')}
+        {t('Contribute')}
       </div>
       <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
-      <TxStatusDisplay txStatus={referralStatus} transactionType={'Referral'} />
     </div>
   );
 }

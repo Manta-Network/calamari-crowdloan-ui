@@ -18,6 +18,7 @@ import config from 'config';
 import { isHex, hexAddPrefix } from '@polkadot/util';
 import ReferralCode from 'types/ReferralCode';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function HomePage () {
   axios.defaults.baseURL = config.SUBSCAN_URL;
@@ -27,6 +28,7 @@ function HomePage () {
   axiosRetry(axios, { retries: 5, retryDelay: _ => 1000, retryCondition: error => error.response.status === 429 });
 
   const { referralCode } = useParams();
+  const { t } = useTranslation();
 
   const [fromAccount, setFromAccount] = useState(null);
   const [accountAddress, setAccountAddress] = useState(null);
@@ -36,6 +38,7 @@ function HomePage () {
   const [totalContributionsKSM, setTotalContributionsKSM] = useState(null);
   const [allReferrals, setAllReferrals] = useState(null);
   const [allContributions, setAllContributions] = useState(null);
+  const [allContributors, setAllContributors] = useState(null);
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
 
   const accountPair =
@@ -76,6 +79,12 @@ function HomePage () {
   }, [accountAddress, api]);
 
   useMemo(() => {
+    const getAllContributors = allContributions => {
+      return allContributions
+        .map(contribution => contribution.address)
+        .filter((address, i, self) => self.indexOf(address) === i);
+    };
+
     const getAllContributionsAndReferrals = async () => {
       if (!api) {
         return;
@@ -84,7 +93,6 @@ function HomePage () {
       let totalPages;
       let pageIdx = 0;
       const allContributions = [];
-      const allAddresses = [];
       const allReferrals = {};
 
       do {
@@ -93,15 +101,16 @@ function HomePage () {
         res.data.data.contributes?.forEach(contribution => {
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
-          const currentContribution = new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who);
+          const currentContribution = new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who, referralCode);
           allContributions.push(currentContribution);
-          allAddresses.push(contribution.who);
           if (referralCode) {
             allReferrals[contribution.who] = referralCode.toAddress();
           }
         });
         pageIdx++;
       } while (pageIdx < totalPages);
+      const allContributors = getAllContributors(allContributions);
+      setAllContributors(allContributors);
       setAllContributions(allContributions);
       setAllReferrals(allReferrals);
     };
@@ -139,7 +148,7 @@ function HomePage () {
 
   useEffect(() => {
     const getTotalContributionsKSM = async () => {
-      const res = await axios.post('parachain/funds', { fund_id: config.fundID, row: 1, page: 0 });
+      const res = await axios.post('parachain/funds', { fund_id: config.FUND_ID, row: 1, page: 0 });
       setTotalContributionsKSM(new Kusama(Kusama.ATOMIC_UNITS, new Decimal(res.data.data.funds[0].raised)).toKSM());
     };
     getTotalContributionsKSM();
@@ -161,7 +170,7 @@ function HomePage () {
     </Grid>;
 
   if (apiState === 'ERROR') return message(apiError);
-  else if (apiState !== 'READY') return loader('Connecting to Substrate');
+  else if (apiState !== 'READY') return loader(t('Connecting to Kusama'));
 
   if (keyringState !== 'READY') {
     return loader('Loading accounts (please review polkadot.js authorization)');
@@ -180,6 +189,8 @@ function HomePage () {
           <Grid.Row className="flex-wrap flex-col flex">
             <Grid.Column className="flex-wrap item flex">
               <Contribute
+                accountAddress={accountAddress}
+                allContributors={allContributors}
                 urlReferralCode={referralCode}
                 fromAccount={fromAccount}
                 accountBalanceKSM={accountBalanceKSM}
@@ -192,6 +203,7 @@ function HomePage () {
                 accountAddress={accountAddress}
                 userContributions={userContributions}
                 allContributions={allContributions}
+                allContributors={allContributors}
                 allReferrals={allReferrals}
               />
             </Grid.Column>
@@ -199,12 +211,14 @@ function HomePage () {
               <Crowdloan
                 totalContributionsKSM={totalContributionsKSM}
                 allContributions={allContributions}
+                allContributors={allContributors}
+                allReferrals={allReferrals}
               />
             </Grid.Column>
           </Grid.Row>
         </Grid>
       </div>
-      <ContributeActivity />
+      <ContributeActivity allContributions={allContributions} />
     </div>
   );
 }

@@ -41,9 +41,9 @@ function Navbar ({
         config.APP_BASE_URL +
           ReferralCode.fromAddress(accountAddress).toString()
       );
-      toast('Referral URL is copied to your clipboard', {
+      toast('Copied to clipboard', {
         position: 'top-right',
-        autoClose: 3000,
+        autoClose: 2000,
         hideProgressBar: true,
         draggable: true,
         progress: undefined
@@ -59,15 +59,15 @@ function Navbar ({
       <ToastContainer />
       <div className="navbar-menu">
         <div className="hidden lg:flex">
-          <NavLink to="#">
+          <a href="https://mantanetwork.medium.com/the-calamari-crowdloan-on-kusama-74a3cb2a2a4b">
             <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
               {t('How it works')}
             </div>
-          </NavLink>
+          </a>
           <div
             onClick={onClickMyReferralCode}
             className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 cursor-pointer lg:px-8 xl:px-12">
-            {t('My Referral code')}
+            {t('My Referral link')}
           </div>
         </div>
         <div className="hidden lg:block">
@@ -109,7 +109,7 @@ function Navbar ({
                 <div
                   onClick={onClickMyReferralCode}
                   className="menu-item text-base py-3 mb-2 cursor-pointer">
-                  {t('My Referral code')}
+                  {t('My Referral link')}
                 </div>
                 <ReactFlagsSelect
                   className="w-2/5 mb-4"

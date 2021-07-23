@@ -1,18 +1,21 @@
 import React from 'react';
 import config from 'config';
+import { useTranslation } from 'react-i18next';
 
 export default function Main ({ txStatus, transactionType = 'Transacion' }) {
+  const { t } = useTranslation();
+
   if (!txStatus) {
     return <div/>;
   }
 
   let txStatusMesage;
   if (txStatus.isProcessing()) {
-    txStatusMesage = `🕒 ${transactionType} processing`;
+    txStatusMesage = '🕒 ' + t(`${transactionType} processing`);
   } else if (txStatus.isFinalized()) {
-    txStatusMesage = `✅ ${transactionType} finalized`;
+    txStatusMesage = '✅ ' + t(`${transactionType} finalized`);
   } else if (txStatus.isFailed()) {
-    txStatusMesage = `❌ ${transactionType} failed`;
+    txStatusMesage = '❌ ' + t(`${transactionType} failed`);
   }
   console.log(txStatus);
 

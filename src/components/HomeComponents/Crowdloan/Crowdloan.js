@@ -1,25 +1,76 @@
 /* eslint-disable multiline-ternary */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Placeholder } from 'semantic-ui-react';
+import Calamari from 'types/Calamari';
 import Graph from './Graph';
 import Leaderboard from './Leaderboard';
+import config from 'config';
 
-function Crowdloan ({ totalContributionsKSM, allContributions }) {
+function Crowdloan({ totalContributionsKSM, allContributions, allContributors, allReferrals }) {
   const { t } = useTranslation();
 
-  // todo: include referrals
-  const getTotalRewards = () => {
-    if (!totalContributionsKSM) {
-      return;
-    }
-    let earlyBonus = totalContributionsKSM.value.mul(500);
-    if (totalContributionsKSM.value.gt(1000)) {
-      earlyBonus = 500000;
-    }
-    return totalContributionsKSM.value.mul(10000).add(earlyBonus);
-  };
-  const totalRewards = getTotalRewards();
+  const [totalBaseRewardsKMA, setTotalBaseRewardsKMA] = useState(Calamari.zero())
+  const [totalBonusRewardsKMA, setTotalBonusRewardsKMA] = useState(Calamari.zero())
+  const [totalReferralRewardsKMA, setTotalReferralRewardsKMA] = useState(Calamari.zero())
+  const [totalRewardsKMA, setTotalRewardsKMA] = useState(Calamari.zero())
+
+  useEffect(() => {
+    const getTotalBaseRewardsKMA = () => {
+      if (!totalContributionsKSM) {
+        return Calamari.zero();
+      }
+      return totalContributionsKSM.toKMABaseReward()
+    };
+    setTotalBaseRewardsKMA(getTotalBaseRewardsKMA())
+  }, [totalContributionsKSM])
+
+  useEffect(() => {
+    const getTotalBonusRewardsKMA = () => {
+      if (!allContributions) {
+        return Calamari.zero();
+      }
+      return allContributions.reduce((acc, contribution) => {
+        if (allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(contribution.address)) {
+          return acc.add(contribution.amountKSM.toKMABonusRewardTier1());
+        } else if (allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(contribution.address)) {
+          return acc.add(contribution.amountKSM.toKMABonusRewardTier2());
+        } else {
+          return acc;
+        }
+      }, Calamari.zero())
+    };
+    setTotalBonusRewardsKMA(getTotalBonusRewardsKMA())
+  }, [allContributions, allContributors])
+
+  useEffect(() => {
+    const getTotalReferralRewardsKMA = () => {
+      console.log(allReferrals, allContributions)
+      // console.log(allReferrals, allContributions[0], allReferrals[allContributions[0].address])
+      if (!allContributions || !allReferrals) {
+        return Calamari.zero();
+      }
+      return allContributions.reduce((acc, contribution) => {
+        if (allReferrals[contribution.address]) {
+          const giveReferralReward = contribution.amountKSM.toKMAGaveReferralReward()
+          const receiveReferralReward = contribution.amountKSM.toKMAWasReferredReward()
+          const referralReward = giveReferralReward.add(receiveReferralReward)
+          return acc.add(referralReward);
+        } else {
+          return acc;
+        }
+      }, Calamari.zero())
+    };
+    setTotalReferralRewardsKMA(getTotalReferralRewardsKMA())
+  }, [allContributions, allReferrals])
+
+
+  useEffect(() => {
+    const getTotalRewardsKMA = () => {
+      return totalBaseRewardsKMA.add(totalBonusRewardsKMA.add(totalReferralRewardsKMA));
+    };
+    setTotalRewardsKMA(getTotalRewardsKMA());
+  }, [totalBaseRewardsKMA, totalBonusRewardsKMA, totalReferralRewardsKMA]);
 
   return (
     <div className="content-item lg:flex flex-col h-full mt-16 lg:mt-0 calamari-text crowdloan">
@@ -39,18 +90,18 @@ function Crowdloan ({ totalContributionsKSM, allContributions }) {
                 {t('Total contributions')}
               </p>
               <span className="purple-text total-value text-lg font-semibold">
-              {totalContributionsKSM.toString()}
+                {totalContributionsKSM.toString()}
               </span>
             </div>
             <div className="w-2/5">
               <p className="mb-0 pb-5 total-title">{t('Total rewards')}</p>
               <span className="purple-text total-value text-lg font-semibold">
-              {totalRewards.toNumber().toLocaleString(undefined, { maximumFractionDigits: 0, minimumFractionDigits: 0 })} KMA
+                {totalRewardsKMA.toString()}
               </span>
             </div>
           </div>
         )}
-      <Graph allContributions={allContributions} />
+        <Graph allContributions={allContributions} />
       </div>
       <Leaderboard allContributions={allContributions} />
     </div>

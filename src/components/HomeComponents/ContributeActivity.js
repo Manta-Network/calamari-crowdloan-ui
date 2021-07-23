@@ -10,6 +10,7 @@ import Decimal from 'decimal.js';
 import Kusama from '../../types/Kusama';
 import config from '../../config';
 import { useTranslation } from 'react-i18next';
+import Calamari from 'types/Calamari';
 
 const ContributeActivityPlaceholder = () => {
   const { t } = useTranslation();
@@ -41,10 +42,12 @@ const ContributeActivityPlaceholder = () => {
   );
 };
 
-const ContributeActivity = () => {
+const ContributeActivity = ({ allContributions }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [pageNumber, setPageNumber] = useState(1);
   const [contributions, setContributions] = useState(null);
+  const [referralCounts, setReferralCounts] = useState(null);
+  const [referralRewards, setReferralRewards] = useState(null)
 
   const { t } = useTranslation();
   const PAGE_SIZE = 10;
@@ -63,6 +66,33 @@ const ContributeActivity = () => {
     getContributions();
   }, [pageNumber]);
 
+  useEffect(() => {
+    if (!allContributions || !contributions) {
+      return;
+    }
+    const getReferralCountsAndRewards = () => {
+      const referralsByContribution = contributions.map(currentPageContribution => {
+        return allContributions.filter(someContribution => {
+          return someContribution.referral?.toAddress() === currentPageContribution.who
+        })
+      })
+      const referralCounts = referralsByContribution.map(referredTransactions => {
+        return referredTransactions.map(transaction => transaction.address).filter((address, i, self) => self.indexOf(address) === i).length
+      })
+      
+      const referralRewards = referralsByContribution.map(referredTransactions => {
+        return referredTransactions.reduce((acc, transaction) => acc.add(transaction.amountKSM.toKMAGaveReferralReward()), Calamari.zero())
+      })
+      console.log('!', referralCounts, referralRewards)
+      return [referralCounts, referralRewards]
+    }
+    const [referralCounts, referralRewards] = getReferralCountsAndRewards()
+    setReferralCounts(referralCounts)
+    setReferralRewards(referralRewards)
+  }, [allContributions, contributions])
+
+
+
   if (!contributions) {
     return <ContributeActivityPlaceholder />;
   }
@@ -71,22 +101,30 @@ const ContributeActivity = () => {
       <h1 className="text-2xl title md:text-4xl">
         {t('Global Contribution Activity')}
       </h1>
-      <div className="overflow-x-auto">
-        <div className="mb-4 min-w-table">
-        </div>
-        <div className="mb-4 min-w-table">
-          <TableHeaderWrapper className="px-2">
-            {/* <TableColumnHeader label="Rank" width="5%" /> */}
-            <TableColumnHeader label="Kusama Account" width="30%" />
-            <TableColumnHeader label="Contributed" width="15%" />
-            <TableColumnHeader label="Contributed Reward" width="15%" />
-            {/* <TableColumnHeader label="Participants Referred" width="20%" />
-              <TableColumnHeader label="Referral Reward" width="15%" /> */}
-          </TableHeaderWrapper>
-          {
-            contributions?.map(contribution => <TableRowData contribution={contribution} key={contribution.extrinsic_index} />)
+      <div className="mb-4 min-w-table-sm">
+        <TableHeaderWrapper className="px-2">
+          <TableColumnHeader label={t('Address')} width="40%" />
+          <TableColumnHeader label={t('Contributed')} width="13%" />
+          <TableColumnHeader label={t('Rewards')} width="17%" />
+          {(referralCounts && referralRewards) &&
+            <>
+              <TableColumnHeader label={t("Referrals")} width="13%" />
+              <TableColumnHeader label={t("Referral rewards")} width="17%" />
+            </>
           }
-        </div>
+        </TableHeaderWrapper>
+        {
+          contributions?.map((contribution, i) => {
+            return (
+              <TableRowData
+                contribution={contribution}
+                key={contribution.extrinsic_index}
+                referralCount={referralCounts && referralCounts[i]}
+                referralReward={referralRewards && referralRewards[i]}
+              />
+            )
+          })
+        }
       </div>
       <div className="flex justify-center pt-2">
         <Pagination
@@ -102,32 +140,32 @@ const ContributeActivity = () => {
   );
 };
 
-const TableRowData = ({ contribution }) => {
+const TableRowData = ({ contribution, referralCount, referralReward }) => {
+  console.log('@', referralReward, referralCount)
   const contributionKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
   return (
-    <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-3">
-      {/* <TableRowItem width="5%">
-        <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
-          1
-        </div>
-      </TableRowItem> */}
-      <TableRowItem width="30%">
-        <span className="text-blue-thirdry">
+    <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
+      <TableRowItem width="40%">
+        <div className="text-blue-thirdry" className="overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
           {contribution.who}
-        </span>
+        </div>
       </TableRowItem>
-      <TableRowItem width="15%">
+      <TableRowItem width="13%">
         <span className="text-thirdry font-semibold">{contributionKSM.toString()}</span>
       </TableRowItem>
-      <TableRowItem width="15%">
+      <TableRowItem width="17%">
         <span className="manta-prime-blue font-semibold">{contributionKSM.value.mul(10000).toString()} KMA</span>
       </TableRowItem>
-      {/* <TableRowItem width="20%">
-        <span className="text-thirdry font-semibold">2</span>
-      </TableRowItem>
-      <TableRowItem width="15%">
-        <span className="text-thirdry font-semibold">3.0148</span>
-      </TableRowItem> */}
+      {(referralCount !== null && referralReward !== null) &&
+        <>
+          <TableRowItem width="13%">
+            <span className="text-thirdry font-semibold">{referralCount}</span>
+          </TableRowItem>
+          <TableRowItem width="17%">
+            <span className="text-thirdry font-semibold">{referralReward.toString()}</span>
+          </TableRowItem>
+        </>
+      }
     </TableRow>
   );
 };

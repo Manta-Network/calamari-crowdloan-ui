@@ -10,14 +10,20 @@ const ConnectWalletPrompt = () => {
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
     <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
-    <p className="mb-2 text-sm xl:text-base">
+    <p className="mb-2 text-md xl:text-base">
       {t('Connect wallet to continue')}
     </p>
     </div>
   );
 };
 
-const Details = ({ userContributions, allContributions, allReferrals, accountAddress }) => {
+const Details = ({
+  userContributions,
+  allContributions,
+  allReferrals,
+  accountAddress,
+  allContributors
+}) => {
   const [userReferrals, setUserReferrals] = useState([]);
   const { t } = useTranslation();
 
@@ -39,7 +45,7 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
           userReferrals.push(contribution);
         }
       });
-      setUserReferrals(userReferrals);
+      setUserReferrals(userReferrals.sort((a, b) => b.date - a.date));
     };
     getUserReferrals();
   }, [allContributions, allReferrals, accountAddress]);
@@ -54,7 +60,9 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
         userReferrals={userReferrals || []}
         userContributions={userContributions}
         allContributions={allContributions}
+        allReferrals={allReferrals}
         accountAddress={accountAddress}
+        allContributors={allContributors}
       />
       <ContributionHistory userContributions={userContributions} />
       <ReferralHistory userReferrals={userReferrals} />

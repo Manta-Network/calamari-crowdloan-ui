@@ -2,9 +2,11 @@ import React from 'react';
 import classNames from 'classnames';
 import { Modal } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
+import { useTranslation } from 'react-i18next';
 
 function AddressSelectModal ({ openModal, setOpenModal, acccountAddress, setAccountAddress }) {
   const { keyring } = useSubstrate();
+  const { t } = useTranslation();
   // Get the list of accounts we possess the private key for
   const keyringOptions = keyring.getPairs().map(account => ({
     key: account.address,
@@ -21,10 +23,7 @@ function AddressSelectModal ({ openModal, setOpenModal, acccountAddress, setAcco
             onClose={() => setOpenModal(!openModal)}>
             <Modal.Header className="py-2">
             <div className="text-2xl calamari-text text-center font-semibold">
-                Accounts
-            </div>
-            <div className="text-center purple-text text-lg font-normal">
-                Select an account
+                {t('Select an account')}
             </div>
             </Modal.Header>
             <Modal.Content>

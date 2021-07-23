@@ -16,6 +16,6 @@ export default class Calamari {
     }
 
     toString () {
-      return this.amountKMA.toNumber().toLocaleString(undefined, Calamari.DISPLAY_OPTIONS);
+      return this.amountKMA.toNumber().toLocaleString(undefined, Calamari.DISPLAY_OPTIONS) + ' KMA';
     }
 }
