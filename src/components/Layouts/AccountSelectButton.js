@@ -31,7 +31,7 @@ function Main ({ accountPair, setAccountAddress }) {
         </div>
           )
         : (
-            t('Connect Wallet')
+            t('Connect wallet')
           )}
     </div>
     {

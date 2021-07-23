@@ -27,7 +27,6 @@ const ConnectWalletPrompt = () => {
 };
 
 function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, urlReferralCode }) {
-  const [referralStatus, setReferralStatus] = useState(null);
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState();
@@ -85,12 +84,8 @@ function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, url
     );
   };
 
-  const onContributeSuccess = (referralTx = null) => {
-    return block => {
-      setContributionStatus(TxStatus.finalized(block));
-      const handleTxRes = makeTxResHandler(onReferralSuccess, onReferralFailure, onReferralUpdate)
-      referralTx?.send(handleTxRes)
-    }
+  const onContributeSuccess = block => {
+    setContributionStatus(TxStatus.finalized(block));
   };
   const onContributeFailure = (block, error) => {
     setContributionStatus(TxStatus.failed(block, error));
@@ -99,20 +94,8 @@ function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, url
     setContributionStatus(TxStatus.processing(message));
   };
 
-  const onReferralSuccess = block => {
-    setReferralStatus(TxStatus.finalized(block));
-  };
-  const onReferralFailure = (block, error) => {
-    setReferralStatus(TxStatus.failed(block, error));
-  };
-  const onReferralUpdate = message => {
-    setReferralStatus(TxStatus.processing(message));
-  };
-
   const buildReferralTx = () => {
     const memo = api.createType('Memo', referralCode.bytes);
-    // const handleTxResponse = makeTxResHandler(
-    //   api, onReferralSuccess, onReferralFailure, onReferralUpdate);
     return api.tx.crowdloan.addMemo(
       config.PARA_ID, memo.toHex()
     );
@@ -145,10 +128,9 @@ function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, url
     try {
       const contributeTx = buildContributeTx();
       const referralTx = referralCode && buildReferralTx();
-      await contributeTx.signAsync(fromAccount);
-      referralTx && await referralTx.signAsync();
-      const txResHandler = makeTxResHandler(api, onContributeSuccess(referralTx), onContributeFailure, onContributeUpdate);
-      contributeTx.send(txResHandler)
+      const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx]
+      const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
+      api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler)
     } catch(error) {
       console.error(error)
     }
@@ -234,10 +216,9 @@ function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, url
       <div
         onClick={onClickClaimButton}
         className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-        {t('Claim your KMA')}
+        {t('Contribute')}
       </div>
       <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
-      <TxStatusDisplay txStatus={referralStatus} transactionType={'Referral'} />
     </div>
   );
 }

@@ -77,9 +77,9 @@ const ContributeActivity = () => {
         <div className="mb-4 min-w-table">
           <TableHeaderWrapper className="px-2">
             {/* <TableColumnHeader label="Rank" width="5%" /> */}
-            <TableColumnHeader label="Kusama Account" width="30%" />
-            <TableColumnHeader label="Contributed" width="15%" />
-            <TableColumnHeader label="Contributed Reward" width="15%" />
+            <TableColumnHeader label={t('Address')} width="30%" />
+            <TableColumnHeader label={t("Contributed")} width="15%" />
+            <TableColumnHeader label={t("Rewards")} width="15%" />
             {/* <TableColumnHeader label="Participants Referred" width="20%" />
               <TableColumnHeader label="Referral Reward" width="15%" /> */}
           </TableHeaderWrapper>

@@ -18,6 +18,7 @@ import config from 'config';
 import { isHex, hexAddPrefix } from '@polkadot/util';
 import ReferralCode from 'types/ReferralCode';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function HomePage () {
   axios.defaults.baseURL = config.SUBSCAN_URL;
@@ -27,6 +28,7 @@ function HomePage () {
   axiosRetry(axios, { retries: 5, retryDelay: _ => 1000, retryCondition: error => error.response.status === 429 });
 
   const { referralCode } = useParams();
+  const { t } = useTranslation();
 
   const [fromAccount, setFromAccount] = useState(null);
   const [accountAddress, setAccountAddress] = useState(null);
@@ -161,7 +163,7 @@ function HomePage () {
     </Grid>;
 
   if (apiState === 'ERROR') return message(apiError);
-  else if (apiState !== 'READY') return loader('Connecting to Substrate');
+  else if (apiState !== 'READY') return loader(t('Connecting to Kusama'));
 
   if (keyringState !== 'READY') {
     return loader('Loading accounts (please review polkadot.js authorization)');

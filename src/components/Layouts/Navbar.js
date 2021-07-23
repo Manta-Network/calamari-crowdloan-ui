@@ -36,12 +36,12 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
       </div>
       <div className="navbar-menu">
         <div className="hidden lg:flex">
-          <NavLink to="#">
+          <a href="https://mantanetwork.medium.com/the-calamari-crowdloan-on-kusama-74a3cb2a2a4b">
             <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
               {t('How it works')}
             </div>
-          </NavLink>
-          <NavLink to="#" onClick={onClickMyReferralCode}>
+          </a>
+          <NavLink to={'#'} onClick={onClickMyReferralCode} >
             <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
               {t('My Referral code')}
             </div>
