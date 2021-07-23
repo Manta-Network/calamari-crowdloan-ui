@@ -14,7 +14,7 @@ function atomicUnitsToKSM (amount) {
 class Kusama {
     static ATOMIC_UNITS = 'atomic units'
     static KSM = 'KSM'
-    static DISPLAY_OPTIONS = { maximumFractionDigits: 2, minimumFractionDigits: 0 };
+    static DISPLAY_OPTIONS = { maximumFractionDigits: 1, minimumFractionDigits: 0 };
 
     constructor (denomination, value) {
       this.denomination = denomination;

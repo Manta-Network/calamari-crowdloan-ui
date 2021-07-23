@@ -19,7 +19,7 @@ const ConnectWalletPrompt = () => {
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <p className="mb-2 text-sm xl:text-base">
+      <p className="mb-2 text-md xl:text-base">
         {t('Connect wallet to continue')}
       </p>
     </div>
@@ -198,7 +198,7 @@ function Contribute ({
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-4 pb-2">
               <span>{t('Base')}</span>
-              <span className="font-semibold">{baseReward && baseReward.toString()} KMA</span>
+              <span className="font-semibold">{baseReward && baseReward.toString()}</span>
             </div>
             <div className="flex text-base xl:text-lg items-center justify-between px-3 xl:px-6 py-2 bg-gray">
               <div className="flex items-center">
@@ -207,16 +207,16 @@ function Contribute ({
                   {t('Limited Time')}
                 </span>
               </div>
-              <span className="font-semibold">{earlyBonus && earlyBonus.toString()} KMA</span>
+              <span className="font-semibold">{earlyBonus && earlyBonus.toString()}</span>
             </div>
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-2 pb-4">
               <span>{t('Referral')}</span>
-              <span className="font-semibold">{referralBonus && referralBonus.toString()} KMA</span>
+              <span className="font-semibold">{referralBonus && referralBonus.toString()}</span>
             </div>
           </div>
           <div className="flex text-2xl xl:text-2xl p-6 result justify-between text-white">
             <span>{t('Rewards')}:</span>
-            <span>{totalReward && totalReward.toString()} KMA</span>
+            <span>{totalReward && totalReward.toString()}</span>
           </div>
         </div>
       </div>

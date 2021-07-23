@@ -1,17 +1,10 @@
 class Contribution {
-  constructor (amountKSM, date, address) {
+  constructor (amountKSM, date, address, referral = null) {
     this.amountKSM = amountKSM;
     this.date = date;
     this.address = address;
+    this.referral = referral
   }
-
-  // static fromJson (json) {
-  //   return new Contribution(json.date, json.amountKSM, json.address);
-  // }
-
-  // toJson () {
-  //   return { amountKSM: this.amountKSM, date: this.date, rewardKSM: this.address };
-  // }
 }
 
 export default Contribution;

@@ -93,7 +93,6 @@ function HomePage () {
       let totalPages;
       let pageIdx = 0;
       const allContributions = [];
-      const allAddresses = [];
       const allReferrals = {};
 
       do {
@@ -102,9 +101,8 @@ function HomePage () {
         res.data.data.contributes?.forEach(contribution => {
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
-          const currentContribution = new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who);
+          const currentContribution = new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who, referralCode);
           allContributions.push(currentContribution);
-          allAddresses.push(contribution.who);
           if (referralCode) {
             allReferrals[contribution.who] = referralCode.toAddress();
           }
@@ -150,7 +148,7 @@ function HomePage () {
 
   useEffect(() => {
     const getTotalContributionsKSM = async () => {
-      const res = await axios.post('parachain/funds', { fund_id: config.fundID, row: 1, page: 0 });
+      const res = await axios.post('parachain/funds', { fund_id: config.FUND_ID, row: 1, page: 0 });
       setTotalContributionsKSM(new Kusama(Kusama.ATOMIC_UNITS, new Decimal(res.data.data.funds[0].raised)).toKSM());
     };
     getTotalContributionsKSM();
@@ -213,12 +211,14 @@ function HomePage () {
               <Crowdloan
                 totalContributionsKSM={totalContributionsKSM}
                 allContributions={allContributions}
+                allContributors={allContributors}
+                allReferrals={allReferrals}
               />
             </Grid.Column>
           </Grid.Row>
         </Grid>
       </div>
-      <ContributeActivity allContributors={allContributors} />
+      <ContributeActivity allContributions={allContributions} />
     </div>
   );
 }

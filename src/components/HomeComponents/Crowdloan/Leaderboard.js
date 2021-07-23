@@ -63,27 +63,27 @@ export default function Leaderboard ({ allContributions }) {
     <div className="item flex-auto p-8 mt-6 xl:px-10 xl:py-6 bg-white">
       <h1 className="title text-3xl md:text-4xl">{t('Leaderboard')}</h1>
       <div className="overflow-x-auto border-2 rounded-lg">
-        <div className="min-w-table-md ">
+        <div className="min-w-table-sm ">
           <TableHeaderWrapper className="px-2">
-            <TableColumnHeader label={t('Rank')} width="15%" />
-            <TableColumnHeader label={t('Address')} width="30%" />
-            <TableColumnHeader label={t('Contributed')} width="25%" />
+            <TableColumnHeader label={t('Rank')} width="20%" />
+            <TableColumnHeader label={t('Address')} width="40%" />
+            <TableColumnHeader label={t('Contributed')} width="40%" />
           </TableHeaderWrapper>
           {topThreeContributors.map((val, i) => (
             <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-2">
-              <TableRowItem width="15%">
+              <TableRowItem width="20%">
                 <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
                   {i + 1}
                 </div>
               </TableRowItem>
-              <TableRowItem width="30%">
+              <TableRowItem width="40%">
                 <div
                   style={{ textOverflow: 'ellipsis' }}
                   className="overflow-hidden">
                   {val.address}
                 </div>
               </TableRowItem>
-              <TableRowItem width="25%">
+              <TableRowItem width="40%">
                 <span className="text-thirdry font-semibold">
                   {val.amountKSM.toString()}
                 </span>

@@ -85,8 +85,10 @@ const DetailsSummary = ({
       if (!allReferrals || !accountAddress || !userTotalContributionsKSM) {
         return Calamari.zero();
       }
-      if (allReferrals[accountAddress]) {
+      else if (allReferrals[accountAddress]) {
         return userTotalContributionsKSM.toKMAWasReferredReward();
+      } else {
+        return Calamari.zero();
       }
     };
     setUserWasReferredRewards(getUserWasReferredRewards());
@@ -94,7 +96,7 @@ const DetailsSummary = ({
 
   useEffect(() => {
     const getUserTotalRewardsKMA = () => {
-      return userBaseRewardsKMA.add(userBonusRewardsKMA.add(userGaveReferralRewardsKMA).add(userWasReferredRewards));
+      return userBaseRewardsKMA.add(userBonusRewardsKMA.add(userGaveReferralRewardsKMA.add(userWasReferredRewards)));
     };
     setUserTotalRewardKMA(getUserTotalRewardsKMA());
   }, [userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards]);
@@ -113,7 +115,7 @@ const DetailsSummary = ({
       <div className="w-2/5">
         <p className="mb-0 pb-5">{t('Total rewards ')}</p>
         <span className="purple-text text-lg xl:text-xl font-semibold">
-          {userTotalRewardsKMA.toString()} KMA
+          {userTotalRewardsKMA.toString()}
         </span>
       </div>
     </div>
