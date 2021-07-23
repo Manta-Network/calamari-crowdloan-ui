@@ -5474,6 +5474,7 @@ __metadata:
     react-i18next: ^11.11.3
     react-router-dom: ^5.2.0
     react-scripts: ^4.0.3
+    react-toastify: ^7.0.4
     semantic-ui-css: ^2.4.1
     semantic-ui-react: ^2.0.3
     semistandard: ^16.0.0
@@ -14756,6 +14757,18 @@ fsevents@^1.2.7:
   bin:
     react-scripts: ./bin/react-scripts.js
   checksum: ee13d6fa1eef6c8ad0b5e4e5c26bdf59b136dfa24910e9ebb2d9f42a8fe7e77ed7ce221b87342e4f597954c42293d6d181ff1315d3b2bd3103362eb192a71d22
+  languageName: node
+  linkType: hard
+
+"react-toastify@npm:^7.0.4":
+  version: 7.0.4
+  resolution: "react-toastify@npm:7.0.4"
+  dependencies:
+    clsx: ^1.1.1
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 20e82333a0e1235853734e3d190a61473f8b58736a1249079dba8f35154a3465dbb074a9f90ebb18dc34b9dbbde54280d956c6e8a02dbf68e723cd9fb5325bb9
   languageName: node
   linkType: hard
 

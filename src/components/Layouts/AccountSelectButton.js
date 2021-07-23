@@ -10,7 +10,7 @@ function Main ({ accountPair, setAccountAddress }) {
     <>
     <div
       onClick={() => setOpenModal(true)}
-      className="menu-item text-base btn lg:text-xl py-3 lg:py-4 px-2 lg:px-8 xl:px-12 btn">
+      className="menu-item text-base btn lg:text-xl py-3 lg:ml-6 lg:py-4 px-4 lg:px-8 xl:px-12 btn">
       {accountPair
         ? (
         <div className="flex px-3 items-center">
