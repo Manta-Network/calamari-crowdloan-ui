@@ -78,8 +78,8 @@ const ContributeActivity = () => {
           <TableHeaderWrapper className="px-2">
             {/* <TableColumnHeader label="Rank" width="5%" /> */}
             <TableColumnHeader label={t('Address')} width="30%" />
-            <TableColumnHeader label={t("Contributed")} width="15%" />
-            <TableColumnHeader label={t("Rewards")} width="15%" />
+            <TableColumnHeader label={t('Contributed')} width="15%" />
+            <TableColumnHeader label={t('Rewards')} width="15%" />
             {/* <TableColumnHeader label="Participants Referred" width="20%" />
               <TableColumnHeader label="Referral Reward" width="15%" /> */}
           </TableHeaderWrapper>
@@ -113,7 +113,7 @@ const TableRowData = ({ contribution }) => {
       </TableRowItem> */}
       <TableRowItem width="30%">
         <span className="text-blue-thirdry">
-          {contribution.who}
+            {contribution.who}
         </span>
       </TableRowItem>
       <TableRowItem width="15%">

@@ -26,7 +26,13 @@ const ConnectWalletPrompt = () => {
   );
 };
 
-function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, urlReferralCode }) {
+function Contribute ({
+  fromAccount,
+  accountBalanceKSM,
+  urlReferralCode,
+  allContributors,
+  accountAddress
+}) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState();
@@ -45,14 +51,15 @@ function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, url
   const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
 
   const getEarlyBonus = () => {
-    if (!totalContributionsKSM || !contributeAmountKSM) {
-      return null;
+    if (!allContributors || !contributeAmountKSM) {
+      return Calamari.zero();
+    } else if (allContributors.length < config.EARLY_BONUS_TIER_1_CUTOFF || allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)) {
+      return contributeAmountKSM.toKMABonusRewardTier1();
+    } else if (allContributors.length < config.EARLY_BONUS_TIER_2_CUTOFF || allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)) {
+      return contributeAmountKSM.toKMABonusRewardTier2();
+    } else {
+      return Calamari.zero();
     }
-    const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000));
-    const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(totalContributionsKSM).max(Kusama.zero());
-    const userKSMIneligibleForBonus = contributeAmountKSM.minus(KSMEligibleForBonusRemaining).max(Kusama.zero());
-    const userKSMEligibleForBonus = contributeAmountKSM.minus(userKSMIneligibleForBonus);
-    return userKSMEligibleForBonus.toKMABonusReward();
   };
   const earlyBonus = getEarlyBonus();
 
@@ -128,11 +135,11 @@ function Contribute({ fromAccount, accountBalanceKSM, totalContributionsKSM, url
     try {
       const contributeTx = buildContributeTx();
       const referralTx = referralCode && buildReferralTx();
-      const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx]
+      const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx];
       const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
-      api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler)
-    } catch(error) {
-      console.error(error)
+      api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
+    } catch (error) {
+      console.error(error);
     }
   };
 

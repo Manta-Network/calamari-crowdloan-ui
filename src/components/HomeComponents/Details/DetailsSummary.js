@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Kusama from 'types/Kusama';
-import Decimal from 'decimal.js';
+import config from 'config';
 import Calamari from 'types/Calamari';
 import { Placeholder } from 'semantic-ui-react';
 
@@ -16,75 +16,88 @@ const DetailsSummaryPlaceholder = () => {
   );
 };
 
-const DetailsSummary = ({ userReferrals = [], userContributions, allContributions, accountAddress }) => {
+const DetailsSummary = ({
+  userReferrals = [],
+  allReferrals,
+  userContributions,
+  allContributions,
+  accountAddress,
+  allContributors
+}) => {
   const [userBaseRewardsKMA, setUserBaseRewardsKMA] = useState(Calamari.zero());
   const [userBonusRewardsKMA, setUserBonusRewardsKMA] = useState(Calamari.zero());
-  const [userReferralRewardsKMA, setUserReferralRewardsKMA] = useState(Calamari.zero());
+  const [userGaveReferralRewardsKMA, setUserGaveReferralRewardsKMA] = useState(Calamari.zero());
+  const [userWasReferredRewards, setUserWasReferredRewards] = useState(Calamari.zero());
   const [userTotalRewardsKMA, setUserTotalRewardKMA] = useState(Calamari.zero());
   const [userTotalContributionsKSM, setUserTotalContributionsKSM] = useState(Kusama.zero());
 
   const { t } = useTranslation();
-  useEffect(() => {
-    const getUserBaseRewardsKMA = () => {
-      if (!userContributions) {
-        return;
-      }
-      const userBaseRewards = userContributions.reduce((acc, cur) => cur.amountKSM.toKMABaseReward().add(acc), Calamari.zero());
-      setUserBaseRewardsKMA(userBaseRewards);
-    };
-    getUserBaseRewardsKMA();
-  }, [userContributions]);
-
-  useEffect(() => {
-    const getUserBonusRewardsKMA = () => {
-      if (!allContributions) {
-        return new Calamari(new Decimal(0));
-      }
-
-      const KSMEligibleForBonus = new Kusama(Kusama.KSM, new Decimal(1000)); // todo: is this number correct??
-      let runningTotalKSM = Kusama.zero();
-      let userBonusRewardKMA = Calamari.zero();
-      allContributions.forEach(contribution => {
-        if (contribution.address === accountAddress) {
-          const KSMEligibleForBonusRemaining = KSMEligibleForBonus.minus(runningTotalKSM).max(Kusama.zero());
-          const userKSMIneligibleForBonus = contribution.amountKSM.minus(KSMEligibleForBonusRemaining).max(Kusama.zero());
-          const userKSMEligibleForBonus = contribution.amountKSM.minus(userKSMIneligibleForBonus);
-
-          userBonusRewardKMA = userBonusRewardKMA.add(userKSMEligibleForBonus.toKMABonusReward());
-        }
-        runningTotalKSM = runningTotalKSM.add(contribution.amountKSM);
-      });
-      setUserBonusRewardsKMA(userBonusRewardKMA);
-    };
-    getUserBonusRewardsKMA();
-  }, [allContributions, accountAddress]);
-
-  useEffect(() => {
-    const getUserReferralRewards = () => {
-      const userReferralRewardsKMA = userReferrals.reduce((acc, curr) => acc.add(curr.amountKSM.toKMAReferralReward()), Calamari.zero());
-      setUserReferralRewardsKMA(userReferralRewardsKMA);
-    };
-    getUserReferralRewards();
-  }, [userReferrals]);
-
-  useEffect(() => {
-    const getUserTotalRewardsKMA = () => {
-      const userTotalRewardsKMA = userBaseRewardsKMA.add(userBonusRewardsKMA.add(userReferralRewardsKMA));
-      setUserTotalRewardKMA(userTotalRewardsKMA);
-    };
-    getUserTotalRewardsKMA();
-  }, [userBaseRewardsKMA, userBonusRewardsKMA, userReferralRewardsKMA]);
 
   useEffect(() => {
     const getUserTotalContributionsKSM = () => {
       if (!userContributions) {
-        return;
+        return Calamari.zero();
       }
       const userTotalContributionsKSM = userContributions.reduce((acc, curr) => acc.add(curr.amountKSM), Kusama.zero());
       setUserTotalContributionsKSM(userTotalContributionsKSM);
     };
     getUserTotalContributionsKSM();
   }, [userContributions]);
+
+  useEffect(() => {
+    const getUserBaseRewardsKMA = () => {
+      if (!userTotalContributionsKSM) {
+        return Calamari.zero();
+      }
+      const userBaseRewards = userTotalContributionsKSM.toKMABaseReward();
+      setUserBaseRewardsKMA(userBaseRewards);
+    };
+    getUserBaseRewardsKMA();
+  }, [userTotalContributionsKSM]);
+
+  useEffect(() => {
+    const getUserBonusRewardsKMA = () => {
+      if (!allContributions) {
+        return Calamari.zero();
+      } else if (allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)) {
+        return userReferrals.reduce((acc, curr) => acc.add(curr.amountKSM.toKMABonusRewardTier1()), Calamari.zero());
+      } else if (allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)) {
+        return userReferrals.reduce((acc, curr) => acc.add(curr.amountKSM.toKMABonusRewardTier2()), Calamari.zero());
+      } else {
+        return Calamari.zero();
+      }
+    };
+    setUserBonusRewardsKMA(getUserBonusRewardsKMA());
+  }, [allContributions, allContributors, accountAddress, userReferrals]);
+
+  useEffect(() => {
+    const getUserGaveReferralRewards = () => {
+      if (!userReferrals) {
+        return Calamari.zero();
+      }
+      return userReferrals.reduce((acc, curr) => acc.add(curr.amountKSM.toKMAGaveReferralReward()), Calamari.zero());
+    };
+    setUserGaveReferralRewardsKMA(getUserGaveReferralRewards());
+  }, [userReferrals]);
+
+  useEffect(() => {
+    const getUserWasReferredRewards = () => {
+      if (!allReferrals || !accountAddress || !userTotalContributionsKSM) {
+        return Calamari.zero();
+      }
+      if (allReferrals[accountAddress]) {
+        return userTotalContributionsKSM.toKMAWasReferredReward();
+      }
+    };
+    setUserWasReferredRewards(getUserWasReferredRewards());
+  }, [allReferrals, accountAddress, userTotalContributionsKSM]);
+
+  useEffect(() => {
+    const getUserTotalRewardsKMA = () => {
+      return userBaseRewardsKMA.add(userBonusRewardsKMA.add(userGaveReferralRewardsKMA).add(userWasReferredRewards));
+    };
+    setUserTotalRewardKMA(getUserTotalRewardsKMA());
+  }, [userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards]);
 
   if (!userContributions) {
     return <DetailsSummaryPlaceholder />;

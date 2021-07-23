@@ -17,7 +17,13 @@ const ConnectWalletPrompt = () => {
   );
 };
 
-const Details = ({ userContributions, allContributions, allReferrals, accountAddress }) => {
+const Details = ({
+  userContributions,
+  allContributions,
+  allReferrals,
+  accountAddress,
+  allContributors
+}) => {
   const [userReferrals, setUserReferrals] = useState([]);
   const { t } = useTranslation();
 
@@ -39,7 +45,7 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
           userReferrals.push(contribution);
         }
       });
-      setUserReferrals(userReferrals);
+      setUserReferrals(userReferrals.sort((a, b) => b.date - a.date));
     };
     getUserReferrals();
   }, [allContributions, allReferrals, accountAddress]);
@@ -54,7 +60,9 @@ const Details = ({ userContributions, allContributions, allReferrals, accountAdd
         userReferrals={userReferrals || []}
         userContributions={userContributions}
         allContributions={allContributions}
+        allReferrals={allReferrals}
         accountAddress={accountAddress}
+        allContributors={allContributors}
       />
       <ContributionHistory userContributions={userContributions} />
       <ReferralHistory userReferrals={userReferrals} />

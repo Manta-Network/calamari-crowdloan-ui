@@ -78,18 +78,32 @@ class Kusama {
       return new Calamari(this.value.mul(10000));
     }
 
-    toKMABonusReward () {
+    toKMABonusRewardTier1 () {
+      if (this.denomination !== Kusama.KSM) {
+        throw Error('Cannot calculate reward from atomic units');
+      }
+      return new Calamari(this.value.mul(1000));
+    }
+
+    toKMABonusRewardTier2 () {
       if (this.denomination !== Kusama.KSM) {
         throw Error('Cannot calculate reward from atomic units');
       }
       return new Calamari(this.value.mul(500));
     }
 
-    toKMAReferralReward () {
+    toKMAGaveReferralReward () {
       if (this.denomination !== Kusama.KSM) {
         throw Error('Cannot calculate reward from atomic units');
       }
-      return new Calamari(this.value.mul(500));
+      return new Calamari(this.value.mul(250));
+    }
+
+    toKMAWasReferredReward () {
+      if (this.denomination !== Kusama.KSM) {
+        throw Error('Cannot calculate reward from atomic units');
+      }
+      return new Calamari(this.value.mul(250));
     }
 
     toString (includeUnits = true) {

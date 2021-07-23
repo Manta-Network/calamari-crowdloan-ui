@@ -12,7 +12,6 @@
       color: $purple-color;
     }
     .menu-item.btn {
-      margin-left: 20px;
       color: white;
       background: $oriange-bg;
       border-radius: 9px;
@@ -157,8 +156,7 @@
 @media screen and (max-width: 640px) {
   .navbar-content {
     .navbar-menu .menu-item.btn {
-      width: 120px;
-      margin-left: 10px;
+      width: 180px;
       text-align: center;
     }
   }

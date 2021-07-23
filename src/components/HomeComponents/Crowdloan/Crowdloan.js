@@ -22,7 +22,7 @@ function Crowdloan ({ totalContributionsKSM, allContributions }) {
   const totalRewards = getTotalRewards();
 
   return (
-    <div className="content-item h-full mt-16 lg:mt-0 calamari-text crowdloan">
+    <div className="content-item lg:flex flex-col h-full mt-16 lg:mt-0 calamari-text crowdloan">
       <div className="bg-white item p-8 xl:p-10 xl:pb-4">
         <h1 className="title text-3xl md:text-4xl">{t('The Crowdloan')}</h1>
         {!totalContributionsKSM ? (

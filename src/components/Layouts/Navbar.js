@@ -7,12 +7,22 @@ import { useTranslation } from 'react-i18next';
 import ReactFlagsSelect from 'react-flags-select';
 import { setLanguage, getLanguage } from 'utils/LocalStorageValue';
 import AccountSelectButton from './AccountSelectButton';
+import 'react-toastify/dist/ReactToastify.css';
+import MenuIcon from 'assets/icons/menu.svg';
+import CloseMenuIcon from 'assets/icons/close-menu.svg';
+import { toast, ToastContainer } from 'react-toastify';
 import ReferralCode from 'types/ReferralCode';
 import config from 'config';
 
-function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, accountPair }) {
+function Navbar ({
+  setAccountAddress,
+  accountBalanceKSM,
+  accountAddress,
+  accountPair
+}) {
   const { t, i18n } = useTranslation();
   const [selected, setSelected] = useState('US');
+  const [isOpen, setIsOpen] = useState(false);
 
   const onChangeLanguage = (code) => {
     setSelected(code);
@@ -26,7 +36,19 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
   }, []);
 
   const onClickMyReferralCode = () => {
-    accountAddress && navigator.clipboard.writeText(config.APP_BASE_URL + ReferralCode.fromAddress(accountAddress).toString());
+    if (accountAddress) {
+      navigator.clipboard.writeText(
+        config.APP_BASE_URL +
+          ReferralCode.fromAddress(accountAddress).toString()
+      );
+      toast('Copied to clipboard', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: true,
+        draggable: true,
+        progress: undefined
+      });
+    }
   };
 
   return (
@@ -34,6 +56,7 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
       <div className="logo-content">
         <img src={Logo} alt="logo" />
       </div>
+      <ToastContainer />
       <div className="navbar-menu">
         <div className="hidden lg:flex">
           <a href="https://mantanetwork.medium.com/the-calamari-crowdloan-on-kusama-74a3cb2a2a4b">
@@ -41,11 +64,11 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
               {t('How it works')}
             </div>
           </a>
-          <NavLink to={'#'} onClick={onClickMyReferralCode} >
-            <div className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 lg:px-8 xl:px-12">
-              {t('My Referral code')}
-            </div>
-          </NavLink>
+          <div
+            onClick={onClickMyReferralCode}
+            className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 cursor-pointer lg:px-8 xl:px-12">
+            {t('My Referral code')}
+          </div>
         </div>
         <div className="hidden lg:block">
           <ReactFlagsSelect
@@ -55,11 +78,60 @@ function Navbar ({ setAccountAddress, accountBalanceKSM, accountAddress, account
             onSelect={(code) => onChangeLanguage(code)}
           />
         </div>
-        <AccountSelectButton
-          setAccountAddress={setAccountAddress}
-          accountPair={accountPair}
-        />
+        <div className="hidden lg:block">
+          <AccountSelectButton
+            setAccountAddress={setAccountAddress}
+            accountPair={accountPair}
+          />
+        </div>
+        <div className="lg:hidden flex items-center">
+          <img
+            src={MenuIcon}
+            onClick={() => setIsOpen(!isOpen)}
+            className="cursor-pointer w-10"
+            alt="menu-icon"
+          />
+        </div>
+        <div
+          style={{ transform: isOpen && 'none', overflow: isOpen && 'visible' }}
+          className="nav-menu-mobile">
+          {isOpen && (
+            <div>
+              <span onClick={() => setIsOpen(false)} className="close-icon">
+                <img src={CloseMenuIcon} alt="close-menu-icon" />
+              </span>
+              <div className="px-8 py-4">
+                <NavLink to="#">
+                  <div className="menu-item text-base py-2">
+                    {t('How it works')}
+                  </div>
+                </NavLink>
+                <div
+                  onClick={onClickMyReferralCode}
+                  className="menu-item text-base py-3 mb-2 cursor-pointer">
+                  {t('My Referral code')}
+                </div>
+                <ReactFlagsSelect
+                  className="w-2/5 mb-4"
+                  selected={selected}
+                  countries={['US', 'CN']}
+                  customLabels={{ US: 'EN', CN: 'CN' }}
+                  onSelect={(code) => onChangeLanguage(code)}
+                />
+                <AccountSelectButton
+                  setAccountAddress={setAccountAddress}
+                  accountPair={accountPair}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="navbar-mobile-overlay"></div>
+      )}
     </div>
   );
 }

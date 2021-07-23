@@ -38,6 +38,7 @@ function HomePage () {
   const [totalContributionsKSM, setTotalContributionsKSM] = useState(null);
   const [allReferrals, setAllReferrals] = useState(null);
   const [allContributions, setAllContributions] = useState(null);
+  const [allContributors, setAllContributors] = useState(null);
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
 
   const accountPair =
@@ -78,6 +79,12 @@ function HomePage () {
   }, [accountAddress, api]);
 
   useMemo(() => {
+    const getAllContributors = allContributions => {
+      return allContributions
+        .map(contribution => contribution.address)
+        .filter((address, i, self) => self.indexOf(address) === i);
+    };
+
     const getAllContributionsAndReferrals = async () => {
       if (!api) {
         return;
@@ -104,6 +111,8 @@ function HomePage () {
         });
         pageIdx++;
       } while (pageIdx < totalPages);
+      const allContributors = getAllContributors(allContributions);
+      setAllContributors(allContributors);
       setAllContributions(allContributions);
       setAllReferrals(allReferrals);
     };
@@ -182,6 +191,8 @@ function HomePage () {
           <Grid.Row className="flex-wrap flex-col flex">
             <Grid.Column className="flex-wrap item flex">
               <Contribute
+                accountAddress={accountAddress}
+                allContributors={allContributors}
                 urlReferralCode={referralCode}
                 fromAccount={fromAccount}
                 accountBalanceKSM={accountBalanceKSM}
@@ -194,6 +205,7 @@ function HomePage () {
                 accountAddress={accountAddress}
                 userContributions={userContributions}
                 allContributions={allContributions}
+                allContributors={allContributors}
                 allReferrals={allReferrals}
               />
             </Grid.Column>
@@ -206,7 +218,7 @@ function HomePage () {
           </Grid.Row>
         </Grid>
       </div>
-      <ContributeActivity />
+      <ContributeActivity allContributors={allContributors} />
     </div>
   );
 }

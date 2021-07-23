@@ -3,8 +3,10 @@
   "CROWDLOAN_START_TIMESTAMP": 1626580800000,
   "PARA_ID": 2059,
   "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
-  "FUND_ID": "2059-13",
+  "FUND_ID": "2059-14",
   "API_KEY": "35770f43091fd396d35192f5b6c499db",
   "BLOCK_EXPLORER_URL": "https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frococo-rpc.polkadot.io#/explorer/query/",
-  "APP_BASE_URL": "localhost:8000/"
+  "APP_BASE_URL": "localhost:8000/",
+  "EARLY_BONUS_TIER_1_CUTOFF": 50,
+  "EARLY_BONUS_TIER_2_CUTOFF": 100
 }

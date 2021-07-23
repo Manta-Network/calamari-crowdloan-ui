@@ -9,12 +9,11 @@ export default function Main ({ txStatus, transactionType = 'Transacion' }) {
     return <div/>;
   }
 
-
   let txStatusMesage;
   if (txStatus.isProcessing()) {
     txStatusMesage = '🕒 ' + t(`${transactionType} processing`);
   } else if (txStatus.isFinalized()) {
-    txStatusMesage = '✅ ' +  t(`${transactionType} finalized`);
+    txStatusMesage = '✅ ' + t(`${transactionType} finalized`);
   } else if (txStatus.isFailed()) {
     txStatusMesage = '❌ ' + t(`${transactionType} failed`);
   }
