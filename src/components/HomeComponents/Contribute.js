@@ -65,7 +65,7 @@ function Contribute ({
 
   const getReferalBonus = () => {
     if (!contributeAmountKSM) return null;
-    return referralCode ? contributeAmountKSM.toKMAReferralReward() : Calamari.zero();
+    return referralCode ? contributeAmountKSM.toKMAWasReferredReward() : Calamari.zero();
   };
   const referralBonus = getReferalBonus();
 
