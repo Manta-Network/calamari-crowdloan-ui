@@ -20,8 +20,7 @@ const ContributeActivityPlaceholder = () => {
       <h1 className="text-2xl title md:text-4xl">
         {t('Global Contribution Activity')}
       </h1>
-      <div className="overflow-x-auto">
-        <div className="mb-4 min-w-table">
+        <div className="mb-4 min-w-table-sm">
           <Placeholder fluid>
             <Placeholder.Paragraph>
               <Placeholder.Line />
@@ -34,10 +33,11 @@ const ContributeActivityPlaceholder = () => {
               <Placeholder.Line />
               <Placeholder.Line />
               <Placeholder.Line />
+              <Placeholder.Line />
+              <Placeholder.Line />
             </Placeholder.Paragraph>
           </Placeholder>
         </div>
-      </div>
     </div>
   );
 };
@@ -79,11 +79,10 @@ const ContributeActivity = ({ allContributions }) => {
       const referralCounts = referralsByContribution.map(referredTransactions => {
         return referredTransactions.map(transaction => transaction.address).filter((address, i, self) => self.indexOf(address) === i).length
       })
-      
+
       const referralRewards = referralsByContribution.map(referredTransactions => {
         return referredTransactions.reduce((acc, transaction) => acc.add(transaction.amountKSM.toKMAGaveReferralReward()), Calamari.zero())
       })
-      console.log('!', referralCounts, referralRewards)
       return [referralCounts, referralRewards]
     }
     const [referralCounts, referralRewards] = getReferralCountsAndRewards()
@@ -141,7 +140,6 @@ const ContributeActivity = ({ allContributions }) => {
 };
 
 const TableRowData = ({ contribution, referralCount, referralReward }) => {
-  console.log('@', referralReward, referralCount)
   const contributionKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
   return (
     <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
@@ -159,10 +157,10 @@ const TableRowData = ({ contribution, referralCount, referralReward }) => {
       {(referralCount !== null && referralReward !== null) &&
         <>
           <TableRowItem width="13%">
-            <span className="text-thirdry font-semibold">{referralCount}</span>
+            <span className="text-thirdry font-semibold">{referralCount && referralCount}</span>
           </TableRowItem>
           <TableRowItem width="17%">
-            <span className="text-thirdry font-semibold">{referralReward.toString()}</span>
+            <span className="text-thirdry font-semibold">{referralReward && referralReward.toString()}</span>
           </TableRowItem>
         </>
       }

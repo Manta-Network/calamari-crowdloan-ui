@@ -1,6 +1,6 @@
 {
   "PROVIDER_SOCKET": "wss://rococo-rpc.polkadot.io",
-  "CROWDLOAN_START_TIMESTAMP": 1627020000000,
+  "CROWDLOAN_START_TIMESTAMP": 1626900000000,
   "PARA_ID": 2059,
   "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
   "FUND_ID": "2059-14",

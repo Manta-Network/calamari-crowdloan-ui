@@ -15,6 +15,10 @@ export default class Calamari {
       return new Calamari(this.amountKMA.add(other.amountKMA));
     }
 
+    gt(other) {
+      return this.amountKMA.gt(other.amountKMA)
+    }
+
     toString () {
       return this.amountKMA.toNumber().toLocaleString(undefined, Calamari.DISPLAY_OPTIONS) + ' KMA';
     }

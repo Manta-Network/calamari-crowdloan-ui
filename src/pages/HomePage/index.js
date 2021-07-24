@@ -45,38 +45,35 @@ function HomePage () {
     accountAddress &&
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
-
-  useMemo(() => {
-    const getUserContributions = async () => {
-      if (!accountAddress || !api) {
+  
+  useEffect(() => {
+    async function loadFromAccount (accountPair) {
+      if (!api || !api.isConnected || !accountPair) {
         return;
       }
       await api.isReady;
-      const res = await axios.post('extrinsics', { call: 'contribute', address: accountAddress, module: 'crowdloan', row: 100, page: 0 });
-      const extrinsics = res.data.data.extrinsics || [];
-      let contributions = await Promise.all(extrinsics
-        .filter(ex => ex.success)
-        .map(ex => {
-          return { timestamp: ex.block_timestamp * 1000, blockNumber: ex.block_num, extrinsicIndex: parseInt(ex.extrinsic_index.split('-')[1]) };
+      const fromAccount = await getFromAccount(accountPair, api);
+      setFromAccount(fromAccount);
+    }
+    loadFromAccount(accountPair, api);
+  }, [api, accountPair]);
+
+  useEffect(() => {
+    let unsubscribe;
+    accountAddress &&
+      api.query.system.account(accountAddress, balance => {
+        const rawBalance = new Decimal(balance.data.free.toString());
+        setAccountBalanceKSM(new Kusama(Kusama.ATOMIC_UNITS, rawBalance).toKSM());
+      })
+        .then(unsub => {
+          unsubscribe = unsub;
         })
-        .map(async ex => {
-          const blockHash = await api.rpc.chain.getBlockHash(ex.blockNumber);
-          const signedBlock = await api.rpc.chain.getBlock(blockHash);
-          const paraID = signedBlock.block.extrinsics[ex.extrinsicIndex].method.args[0].toNumber();
-          if (paraID && ex.timestamp > config.CROWDLOAN_START_TIMESTAMP) {
-            const amountKSM = new Kusama(
-              Kusama.ATOMIC_UNITS,
-              new Decimal(signedBlock.block.extrinsics[ex.extrinsicIndex].method.args[1].toNumber())
-            ).toKSM();
-            return new Contribution(amountKSM, new Date(ex.timestamp), accountAddress);
-          }
-        })
-      );
-      contributions = contributions.filter(contribution => contribution !== undefined);
-      setUserContributions(contributions);
-    };
-    getUserContributions();
-  }, [accountAddress, api]);
+        .catch(console.error);
+
+    return () => unsubscribe && unsubscribe();
+  }, [api, accountAddress]);
+
+  
 
   useMemo(() => {
     const getAllContributors = allContributions => {
@@ -117,34 +114,20 @@ function HomePage () {
     getAllContributionsAndReferrals();
   }, [api]);
 
-  useEffect(() => {
-    async function loadFromAccount (accountPair) {
-      if (!api || !api.isConnected || !accountPair) {
+  useMemo(() => {
+    const getUserContributions = async () => {
+      if (!accountAddress || !allContributions) {
         return;
       }
-      await api.isReady;
-      const fromAccount = await getFromAccount(accountPair, api);
-      setFromAccount(fromAccount);
-    }
-    loadFromAccount(accountPair, api);
-  }, [api, accountPair]);
+      setUserContributions(
+        allContributions
+        .filter(contribution => contribution.address === accountAddress)
+        .sort((a, b) => b.date - a.date)
+      )
+    };
+    getUserContributions();
+  }, [accountAddress, allContributions]);
 
-  // When account address changes, update subscriptions
-  useEffect(() => {
-    let unsubscribe;
-    // If the user has selected an address, create a new subscription
-    accountAddress &&
-      api.query.system.account(accountAddress, balance => {
-        const rawBalance = new Decimal(balance.data.free.toString());
-        setAccountBalanceKSM(new Kusama(Kusama.ATOMIC_UNITS, rawBalance).toKSM());
-      })
-        .then(unsub => {
-          unsubscribe = unsub;
-        })
-        .catch(console.error);
-
-    return () => unsubscribe && unsubscribe();
-  }, [api, accountAddress]);
 
   useEffect(() => {
     const getTotalContributionsKSM = async () => {

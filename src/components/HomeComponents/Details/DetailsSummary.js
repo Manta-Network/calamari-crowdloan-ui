@@ -60,15 +60,15 @@ const DetailsSummary = ({
       if (!allContributions) {
         return Calamari.zero();
       } else if (allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)) {
-        return userReferrals.reduce((acc, curr) => acc.add(curr.amountKSM.toKMABonusRewardTier1()), Calamari.zero());
+        return userContributions.reduce((acc, curr) => acc.add(curr.amountKSM.toKMABonusRewardTier1()), Calamari.zero());
       } else if (allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)) {
-        return userReferrals.reduce((acc, curr) => acc.add(curr.amountKSM.toKMABonusRewardTier2()), Calamari.zero());
+        return userContributions.reduce((acc, curr) => acc.add(curr.amountKSM.toKMABonusRewardTier2()), Calamari.zero());
       } else {
         return Calamari.zero();
       }
     };
     setUserBonusRewardsKMA(getUserBonusRewardsKMA());
-  }, [allContributions, allContributors, accountAddress, userReferrals]);
+  }, [allContributions, allContributors, accountAddress, userContributions]);
 
   useEffect(() => {
     const getUserGaveReferralRewards = () => {
@@ -96,6 +96,7 @@ const DetailsSummary = ({
 
   useEffect(() => {
     const getUserTotalRewardsKMA = () => {
+      console.log('suffer', userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards)
       return userBaseRewardsKMA.add(userBonusRewardsKMA.add(userGaveReferralRewardsKMA.add(userWasReferredRewards)));
     };
     setUserTotalRewardKMA(getUserTotalRewardsKMA());
