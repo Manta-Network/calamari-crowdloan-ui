@@ -61,7 +61,7 @@ class Kusama {
       if (this.denomination !== kusama.denomination) {
         throw Error('Cannot get max; denominations do not match');
       } else {
-        return this.value.gt(kusama.value)
+        return this.value.gt(kusama.value);
       }
     }
 
@@ -69,7 +69,7 @@ class Kusama {
       if (this.denomination !== kusama.denomination) {
         throw Error('Cannot get max; denominations do not match');
       } else {
-        return this.value.lt(kusama.value)
+        return this.value.lt(kusama.value);
       }
     }
 

@@ -1,6 +1,6 @@
 /* eslint-disable multiline-ternary */
 import React, { useEffect, useState, useMemo } from 'react';
-import { Input, Loader } from 'semantic-ui-react';
+import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
 import Decimal from 'decimal.js';
 import { makeTxResHandler } from '../../utils/MakeTxResHandler';
@@ -37,11 +37,10 @@ function Contribute ({
   const [contributeAmountInput, setContributeAmountInput] = useState('');
   const [referralCodeInput, setReferralCodeInput] = useState('');
   const [referralCode, setReferralCode] = useState();
-  const [referralCodeInvalid, setReferralCodeInvalid] = useState(false)
+  const [referralCodeInvalid, setReferralCodeInvalid] = useState(false);
   const [userReferredSelf, setUserReferredSelf] = useState(false);
   const { api } = useSubstrate();
   const { t } = useTranslation();
-
 
   const getContributeAmounKSM = () => {
     try {
@@ -84,8 +83,6 @@ function Contribute ({
     totalReward = baseReward.add(referralBonus.add(earlyBonus));
   }
 
-
-
   const onContributeSuccess = block => {
     setContributionStatus(TxStatus.finalized(block));
   };
@@ -105,12 +102,12 @@ function Contribute ({
 
   const getMaxContribution = () => {
     if (!accountBalanceKSM) {
-      return Kusama.zero()
+      return Kusama.zero();
     }
     const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1));
-    return accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero())
-  }
-  const maxContribution = getMaxContribution()
+    return accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero());
+  };
+  const maxContribution = getMaxContribution();
 
   const onClickMax = () => {
     accountBalanceKSM && setContributeAmountInput(maxContribution.toString(false));
@@ -118,12 +115,12 @@ function Contribute ({
 
   const onChangeContributeAmountInput = e => {
     const input = e.target.value;
-    if (isNaN(input) && input !== '' || parseFloat(e.target.value)  < 0) {
+    if ((isNaN(input) && input !== '') || (parseFloat(e.target.value) < 0)) {
       return;
     }
     setContributeAmountInput(input);
   };
-  
+
   const buildContributeTx = () => {
     return api.tx.crowdloan.contribute(
       ...formatPayloadForSubstrate([
@@ -135,61 +132,58 @@ function Contribute ({
   };
 
   useEffect(() => {
-    if(!accountAddress) {
-      return
+    if (!accountAddress) {
+      return;
     }
     const handleReferralCodeInputChange = () => {
       if (referralCodeInput === '') {
-        setReferralCode(null)
-        setUserReferredSelf(false)
-        setReferralCodeInvalid(false)
-        console.lof
-        return
+        setReferralCode(null);
+        setUserReferredSelf(false);
+        setReferralCodeInvalid(false);
+        return;
       }
       try {
         const referralCode = ReferralCode.fromHexStr(referralCodeInput);
         if (referralCode.toAddress() === accountAddress) {
-          setReferralCode(null) 
-          setUserReferredSelf(true)
-          setReferralCodeInvalid(false)
+          setReferralCode(null);
+          setUserReferredSelf(true);
+          setReferralCodeInvalid(false);
         } else {
-          setReferralCode(referralCode); 
-          setUserReferredSelf(false) 
-          setReferralCodeInvalid(false)
+          setReferralCode(referralCode);
+          setUserReferredSelf(false);
+          setReferralCodeInvalid(false);
         }
       } catch (error) {
         setReferralCode(null);
-        setUserReferredSelf(false) 
-        setReferralCodeInvalid(true)
+        setUserReferredSelf(false);
+        setReferralCodeInvalid(true);
       }
-    }
-    handleReferralCodeInputChange()
-  }, [accountAddress, referralCodeInput])
+    };
+    handleReferralCodeInputChange();
+  }, [accountAddress, referralCodeInput]);
 
   const onChangeReferralCodeInput = value => {
     setReferralCodeInput(value);
   };
 
-
-
   useMemo(() => {
     const setReferralCodeFromURL = () => {
       if (urlReferralCode) {
-        console.log(urlReferralCode)
-        onChangeReferralCodeInput(urlReferralCode)
+        console.log(urlReferralCode);
+        onChangeReferralCodeInput(urlReferralCode);
       }
     };
     setReferralCodeFromURL();
   }, [urlReferralCode]);
 
-  const formIsDisabled = contributionStatus && contributionStatus.isProcessing()
-  const insufficientFunds = contributeAmountKSM && contributeAmountKSM.gt(maxContribution)
-  const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(1)))
+  const formIsDisabled = contributionStatus && contributionStatus.isProcessing();
+  const insufficientFunds = contributeAmountKSM && contributeAmountKSM.gt(maxContribution);
+  const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(1)));
   const shouldShowInsufficientFundsWarning = insufficientFunds && contributeAmountInput.length;
   const shouldShowMinContributionWarning = !shouldShowInsufficientFundsWarning && belowMinContribution && contributeAmountInput.length > 0;
 
   const onClickClaimButton = async () => {
-    console.log()
+    console.log();
     if (!contributeAmountKSM || insufficientFunds || belowMinContribution) {
       return;
     }
@@ -234,7 +228,7 @@ function Contribute ({
       </div>
       <div className="pt-8">
         <p className="mb-2 text-sm xl:text-base">
-          {(!referralCodeInvalid && !userReferredSelf)&& t('Enter your referral code (optional)')}
+          {(!referralCodeInvalid && !userReferredSelf) && t('Enter your referral code (optional)')}
           {userReferredSelf && '❌ ' + t('Cannot refer self')}
           {referralCodeInvalid && '❌ ' + t('Referral code invalid')}
         </p>

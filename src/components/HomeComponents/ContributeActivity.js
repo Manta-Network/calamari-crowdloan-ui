@@ -47,7 +47,7 @@ const ContributeActivity = ({ allContributions }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [contributions, setContributions] = useState(null);
   const [referralCounts, setReferralCounts] = useState(null);
-  const [referralRewards, setReferralRewards] = useState(null)
+  const [referralRewards, setReferralRewards] = useState(null);
 
   const { t } = useTranslation();
   const PAGE_SIZE = 10;
@@ -73,24 +73,22 @@ const ContributeActivity = ({ allContributions }) => {
     const getReferralCountsAndRewards = () => {
       const referralsByContribution = contributions.map(currentPageContribution => {
         return allContributions.filter(someContribution => {
-          return someContribution.referral?.toAddress() === currentPageContribution.who
-        })
-      })
+          return someContribution.referral?.toAddress() === currentPageContribution.who;
+        });
+      });
       const referralCounts = referralsByContribution.map(referredTransactions => {
-        return referredTransactions.map(transaction => transaction.address).filter((address, i, self) => self.indexOf(address) === i).length
-      })
+        return referredTransactions.map(transaction => transaction.address).filter((address, i, self) => self.indexOf(address) === i).length;
+      });
 
       const referralRewards = referralsByContribution.map(referredTransactions => {
-        return referredTransactions.reduce((acc, transaction) => acc.add(transaction.amountKSM.toKMAGaveReferralReward()), Calamari.zero())
-      })
-      return [referralCounts, referralRewards]
-    }
-    const [referralCounts, referralRewards] = getReferralCountsAndRewards()
-    setReferralCounts(referralCounts)
-    setReferralRewards(referralRewards)
-  }, [allContributions, contributions])
-
-
+        return referredTransactions.reduce((acc, transaction) => acc.add(transaction.amountKSM.toKMAGaveReferralReward()), Calamari.zero());
+      });
+      return [referralCounts, referralRewards];
+    };
+    const [referralCounts, referralRewards] = getReferralCountsAndRewards();
+    setReferralCounts(referralCounts);
+    setReferralRewards(referralRewards);
+  }, [allContributions, contributions]);
 
   if (!contributions) {
     return <ContributeActivityPlaceholder />;
@@ -107,8 +105,8 @@ const ContributeActivity = ({ allContributions }) => {
           <TableColumnHeader label={t('Rewards')} width="17%" />
           {(referralCounts && referralRewards) &&
             <>
-              <TableColumnHeader label={t("Referrals")} width="13%" />
-              <TableColumnHeader label={t("Referral rewards")} width="17%" />
+              <TableColumnHeader label={t('Referrals')} width="13%" />
+              <TableColumnHeader label={t('Referral rewards')} width="17%" />
             </>
           }
         </TableHeaderWrapper>
@@ -121,7 +119,7 @@ const ContributeActivity = ({ allContributions }) => {
                 referralCount={referralCounts && referralCounts[i]}
                 referralReward={referralRewards && referralRewards[i]}
               />
-            )
+            );
           })
         }
       </div>
@@ -144,7 +142,7 @@ const TableRowData = ({ contribution, referralCount, referralReward }) => {
   return (
     <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
       <TableRowItem width="40%">
-        <div className="text-blue-thirdry" className="overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
+        <div className="text-blue-thirdry overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
           {contribution.who}
         </div>
       </TableRowItem>

@@ -45,7 +45,7 @@ function HomePage () {
     accountAddress &&
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
-  
+
   useEffect(() => {
     async function loadFromAccount (accountPair) {
       if (!api || !api.isConnected || !accountPair) {
@@ -72,8 +72,6 @@ function HomePage () {
 
     return () => unsubscribe && unsubscribe();
   }, [api, accountAddress]);
-
-  
 
   useMemo(() => {
     const getAllContributors = allContributions => {
@@ -121,13 +119,12 @@ function HomePage () {
       }
       setUserContributions(
         allContributions
-        .filter(contribution => contribution.address === accountAddress)
-        .sort((a, b) => b.date - a.date)
-      )
+          .filter(contribution => contribution.address === accountAddress)
+          .sort((a, b) => b.date - a.date)
+      );
     };
     getUserContributions();
   }, [accountAddress, allContributions]);
-
 
   useEffect(() => {
     const getTotalContributionsKSM = async () => {

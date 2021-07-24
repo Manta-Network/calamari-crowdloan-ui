@@ -84,8 +84,7 @@ const DetailsSummary = ({
     const getUserWasReferredRewards = () => {
       if (!allReferrals || !accountAddress || !userTotalContributionsKSM) {
         return Calamari.zero();
-      }
-      else if (allReferrals[accountAddress]) {
+      } else if (allReferrals[accountAddress]) {
         return userTotalContributionsKSM.toKMAWasReferredReward();
       } else {
         return Calamari.zero();
@@ -96,7 +95,7 @@ const DetailsSummary = ({
 
   useEffect(() => {
     const getUserTotalRewardsKMA = () => {
-      console.log('suffer', userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards)
+      console.log('suffer', userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards);
       return userBaseRewardsKMA.add(userBonusRewardsKMA.add(userGaveReferralRewardsKMA.add(userWasReferredRewards)));
     };
     setUserTotalRewardKMA(getUserTotalRewardsKMA());

@@ -3,13 +3,12 @@ import config from 'config';
 import { useTranslation } from 'react-i18next';
 import { Loader } from 'semantic-ui-react';
 
-
-export default function Main({ txStatus, transactionType = 'Transacion' }) {
+export default function Main ({ txStatus, transactionType = 'Transacion' }) {
   const { t } = useTranslation();
 
   let txStatusMesage;
   if (txStatus.isProcessing()) {
-    txStatusMesage = t(`${transactionType} processing`)
+    txStatusMesage = t(`${transactionType} processing`);
   } else if (txStatus.isFinalized()) {
     txStatusMesage = '✅ ' + t(`${transactionType} finalized`);
   } else if (txStatus.isFailed()) {
@@ -31,4 +30,3 @@ export default function Main({ txStatus, transactionType = 'Transacion' }) {
     </div>
   );
 }
-
