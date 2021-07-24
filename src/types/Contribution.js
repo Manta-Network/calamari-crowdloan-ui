@@ -3,7 +3,7 @@ class Contribution {
     this.amountKSM = amountKSM;
     this.date = date;
     this.address = address;
-    this.referral = referral
+    this.referral = referral;
   }
 }
 

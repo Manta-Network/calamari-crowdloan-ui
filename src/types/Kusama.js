@@ -57,6 +57,22 @@ class Kusama {
       }
     }
 
+    gt (kusama) {
+      if (this.denomination !== kusama.denomination) {
+        throw Error('Cannot get max; denominations do not match');
+      } else {
+        return this.value.gt(kusama.value);
+      }
+    }
+
+    lt (kusama) {
+      if (this.denomination !== kusama.denomination) {
+        throw Error('Cannot get max; denominations do not match');
+      } else {
+        return this.value.lt(kusama.value);
+      }
+    }
+
     toAtomicUnits () {
       if (this.denomination === Kusama.ATOMIC_UNITS) {
         throw Error('Cannot convert atomic units to atomic units');

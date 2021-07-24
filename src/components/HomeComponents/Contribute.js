@@ -1,5 +1,5 @@
 /* eslint-disable multiline-ternary */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Input } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
 import Decimal from 'decimal.js';
@@ -35,8 +35,10 @@ function Contribute ({
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
-  const [referralCodeInput, setReferralCodeInput] = useState();
+  const [referralCodeInput, setReferralCodeInput] = useState('');
   const [referralCode, setReferralCode] = useState();
+  const [referralCodeInvalid, setReferralCodeInvalid] = useState(false);
+  const [userReferredSelf, setUserReferredSelf] = useState(false);
   const { api } = useSubstrate();
   const { t } = useTranslation();
 
@@ -48,7 +50,7 @@ function Contribute ({
     }
   };
   const contributeAmountKSM = getContributeAmounKSM();
-  const contributeAmountAtomicUnits = contributeAmountKSM.toAtomicUnits();
+  const contributeAmountAtomicUnits = contributeAmountKSM?.toAtomicUnits();
 
   const getEarlyBonus = () => {
     if (!allContributors || !contributeAmountKSM) {
@@ -81,16 +83,6 @@ function Contribute ({
     totalReward = baseReward.add(referralBonus.add(earlyBonus));
   }
 
-  const buildContributeTx = () => {
-    return api.tx.crowdloan.contribute(
-      ...formatPayloadForSubstrate([
-        config.PARA_ID,
-        new BN(contributeAmountAtomicUnits.value.toString()),
-        null
-      ])
-    );
-  };
-
   const onContributeSuccess = block => {
     setContributionStatus(TxStatus.finalized(block));
   };
@@ -108,31 +100,95 @@ function Contribute ({
     );
   };
 
-  const onClickMax = () => {
+  const getMaxContribution = () => {
+    if (!accountBalanceKSM) {
+      return Kusama.zero();
+    }
     const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1));
-    accountBalanceKSM && setContributeAmountInput(accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero()).toString(false));
+    return accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero());
+  };
+  const maxContribution = getMaxContribution();
+
+  const onClickMax = () => {
+    accountBalanceKSM && setContributeAmountInput(maxContribution.toString(false));
   };
 
   const onChangeContributeAmountInput = e => {
     const input = e.target.value;
-    if (isNaN(input) && input !== '') {
+    if ((isNaN(input) && input !== '') || (parseFloat(e.target.value) < 0)) {
       return;
     }
     setContributeAmountInput(input);
   };
 
-  const onChangeReferralCodeInput = e => {
-    setReferralCodeInput(e.target.value);
-    try {
-      const referralCode = ReferralCode.fromHexStr(e.target.value);
-      setReferralCode(referralCode);
-    } catch (error) {
-      setReferralCode(null);
-    }
+  const buildContributeTx = () => {
+    return api.tx.crowdloan.contribute(
+      ...formatPayloadForSubstrate([
+        config.PARA_ID,
+        new BN(contributeAmountAtomicUnits.value.toString()),
+        null
+      ])
+    );
   };
 
+  useEffect(() => {
+    if (!accountAddress) {
+      return;
+    }
+    const handleReferralCodeInputChange = () => {
+      if (referralCodeInput === '') {
+        setReferralCode(null);
+        setUserReferredSelf(false);
+        setReferralCodeInvalid(false);
+        return;
+      }
+      try {
+        const referralCode = ReferralCode.fromHexStr(referralCodeInput);
+        if (referralCode.toAddress() === accountAddress) {
+          setReferralCode(null);
+          setUserReferredSelf(true);
+          setReferralCodeInvalid(false);
+        } else {
+          setReferralCode(referralCode);
+          setUserReferredSelf(false);
+          setReferralCodeInvalid(false);
+        }
+      } catch (error) {
+        setReferralCode(null);
+        setUserReferredSelf(false);
+        setReferralCodeInvalid(true);
+      }
+    };
+    handleReferralCodeInputChange();
+  }, [accountAddress, referralCodeInput]);
+
+  const onChangeReferralCodeInput = value => {
+    setReferralCodeInput(value);
+  };
+
+  useMemo(() => {
+    const setReferralCodeFromURL = () => {
+      if (urlReferralCode) {
+        console.log(urlReferralCode);
+        onChangeReferralCodeInput(urlReferralCode);
+      }
+    };
+    setReferralCodeFromURL();
+  }, [urlReferralCode]);
+
+  const formIsDisabled = contributionStatus && contributionStatus.isProcessing();
+  const insufficientFunds = contributeAmountKSM && contributeAmountKSM.gt(maxContribution);
+  const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(1)));
+  const shouldShowInsufficientFundsWarning = insufficientFunds && contributeAmountInput.length;
+  const shouldShowMinContributionWarning = !shouldShowInsufficientFundsWarning && belowMinContribution && contributeAmountInput.length > 0;
+
   const onClickClaimButton = async () => {
+    console.log();
+    if (!contributeAmountKSM || insufficientFunds || belowMinContribution) {
+      return;
+    }
     try {
+      setContributionStatus(TxStatus.processing(''));
       const contributeTx = buildContributeTx();
       const referralTx = referralCode && buildReferralTx();
       const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx];
@@ -143,19 +199,6 @@ function Contribute ({
     }
   };
 
-  useEffect(() => {
-    const setReferralCodeFromURL = () => {
-      if (urlReferralCode && !referralCodeInput) {
-        try {
-          const referralCode = ReferralCode.fromHexStr(urlReferralCode);
-          setReferralCode(referralCode);
-          setReferralCodeInput(urlReferralCode);
-        } catch (error) { }
-      }
-    };
-    setReferralCodeFromURL();
-  }, [referralCodeInput, urlReferralCode]);
-
   if (!fromAccount) {
     return <ConnectWalletPrompt />;
   }
@@ -164,7 +207,9 @@ function Contribute ({
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
       <p className="mb-2 text-sm xl:text-base">
-        {t('Enter your contribution amount')}
+        {(!shouldShowInsufficientFundsWarning && !shouldShowMinContributionWarning) && t('Enter your contribution amount')}
+        {shouldShowInsufficientFundsWarning && '❌ ' + t('Insufficient funds')}
+        {shouldShowMinContributionWarning && '❌ ' + t('Minimum contribution is 1 KSM')}
       </p>
       <div className="flex items-center">
         <div className="form-input w-4/5 amount relative h-20">
@@ -173,6 +218,7 @@ function Contribute ({
             value={contributeAmountInput && contributeAmountInput.toString()}
             type='numher'
             onChange={onChangeContributeAmountInput}
+            disabled={formIsDisabled}
           />
           <span onClick={onClickMax} className="uppercase cursor-pointer text-xl xl:text-2xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
             {t('Max')}
@@ -182,13 +228,16 @@ function Contribute ({
       </div>
       <div className="pt-8">
         <p className="mb-2 text-sm xl:text-base">
-          {t('Enter your referral code (optional)')}
+          {(!referralCodeInvalid && !userReferredSelf) && t('Enter your referral code (optional)')}
+          {userReferredSelf && '❌ ' + t('Cannot refer self')}
+          {referralCodeInvalid && '❌ ' + t('Referral code invalid')}
         </p>
         <div className="w-full form-input relative h-20">
           <Input
             value={referralCodeInput}
-            onChange={onChangeReferralCodeInput}
+            onChange={e => setReferralCodeInput(e.target.value)}
             className="w-full h-full outline-none"
+            disabled={formIsDisabled}
           />
         </div>
       </div>
@@ -214,20 +263,36 @@ function Contribute ({
               <span className="font-semibold">{referralBonus && referralBonus.toString()}</span>
             </div>
           </div>
-          <div className="flex text-2xl xl:text-2xl p-6 result justify-between text-white">
+          <div className="flex text-xl p-6 result justify-between text-white">
             <span>{t('Rewards')}:</span>
             <span>{totalReward && totalReward.toString()}</span>
           </div>
         </div>
       </div>
-      <div
-        onClick={onClickClaimButton}
-        className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-        {t('Contribute')}
-      </div>
+      {!contributionStatus ? (
+        <div
+          onClick={onClickClaimButton}
+          className="py-6 rounded-lg text-2xl xl:text-2xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
+          {t('Contribute')}
+        </div>
+      ) : (
       <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
+      )}
     </div>
   );
 }
 
 export default Contribute;
+
+// {loading ? (
+//   <div className="py-6 px-4 mt-8 items-center flex">
+//     <Loader active inline />
+//     <span className="text-white pl-4">Processing...</span>
+//   </div>
+// ) : (
+//   <div
+//     onClick={onClickClaimButton}
+//     className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
+//     {t('Contribute')}
+//   </div>
+// )}

@@ -7,23 +7,23 @@ import Graph from './Graph';
 import Leaderboard from './Leaderboard';
 import config from 'config';
 
-function Crowdloan({ totalContributionsKSM, allContributions, allContributors, allReferrals }) {
+function Crowdloan ({ totalContributionsKSM, allContributions, allContributors, allReferrals }) {
   const { t } = useTranslation();
 
-  const [totalBaseRewardsKMA, setTotalBaseRewardsKMA] = useState(Calamari.zero())
-  const [totalBonusRewardsKMA, setTotalBonusRewardsKMA] = useState(Calamari.zero())
-  const [totalReferralRewardsKMA, setTotalReferralRewardsKMA] = useState(Calamari.zero())
-  const [totalRewardsKMA, setTotalRewardsKMA] = useState(Calamari.zero())
+  const [totalBaseRewardsKMA, setTotalBaseRewardsKMA] = useState(Calamari.zero());
+  const [totalBonusRewardsKMA, setTotalBonusRewardsKMA] = useState(Calamari.zero());
+  const [totalReferralRewardsKMA, setTotalReferralRewardsKMA] = useState(Calamari.zero());
+  const [totalRewardsKMA, setTotalRewardsKMA] = useState(Calamari.zero());
 
   useEffect(() => {
     const getTotalBaseRewardsKMA = () => {
       if (!totalContributionsKSM) {
         return Calamari.zero();
       }
-      return totalContributionsKSM.toKMABaseReward()
+      return totalContributionsKSM.toKMABaseReward();
     };
-    setTotalBaseRewardsKMA(getTotalBaseRewardsKMA())
-  }, [totalContributionsKSM])
+    setTotalBaseRewardsKMA(getTotalBaseRewardsKMA());
+  }, [totalContributionsKSM]);
 
   useEffect(() => {
     const getTotalBonusRewardsKMA = () => {
@@ -38,32 +38,31 @@ function Crowdloan({ totalContributionsKSM, allContributions, allContributors, a
         } else {
           return acc;
         }
-      }, Calamari.zero())
+      }, Calamari.zero());
     };
-    setTotalBonusRewardsKMA(getTotalBonusRewardsKMA())
-  }, [allContributions, allContributors])
+    setTotalBonusRewardsKMA(getTotalBonusRewardsKMA());
+  }, [allContributions, allContributors]);
 
   useEffect(() => {
     const getTotalReferralRewardsKMA = () => {
-      console.log(allReferrals, allContributions)
+      console.log(allReferrals, allContributions);
       // console.log(allReferrals, allContributions[0], allReferrals[allContributions[0].address])
       if (!allContributions || !allReferrals) {
         return Calamari.zero();
       }
       return allContributions.reduce((acc, contribution) => {
         if (allReferrals[contribution.address]) {
-          const giveReferralReward = contribution.amountKSM.toKMAGaveReferralReward()
-          const receiveReferralReward = contribution.amountKSM.toKMAWasReferredReward()
-          const referralReward = giveReferralReward.add(receiveReferralReward)
+          const giveReferralReward = contribution.amountKSM.toKMAGaveReferralReward();
+          const receiveReferralReward = contribution.amountKSM.toKMAWasReferredReward();
+          const referralReward = giveReferralReward.add(receiveReferralReward);
           return acc.add(referralReward);
         } else {
           return acc;
         }
-      }, Calamari.zero())
+      }, Calamari.zero());
     };
-    setTotalReferralRewardsKMA(getTotalReferralRewardsKMA())
-  }, [allContributions, allReferrals])
-
+    setTotalReferralRewardsKMA(getTotalReferralRewardsKMA());
+  }, [allContributions, allReferrals]);
 
   useEffect(() => {
     const getTotalRewardsKMA = () => {
