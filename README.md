@@ -37,6 +37,11 @@ yarn build
 ```
 and open `build/index.html` in your favorite browser.
 
+Deploy to `gh-page`:
+```bash
+yarn deploy
+```
+
 ## Configuration
 
 The template's configuration is stored in the `src/config` directory, with
