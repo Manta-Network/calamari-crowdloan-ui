@@ -1,12 +1,13 @@
 {
+  "APP_NAME": "calamari-crowdloan-dev",
   "PROVIDER_SOCKET": "wss://rococo-rpc.polkadot.io",
   "CROWDLOAN_START_TIMESTAMP": 1626900000000,
   "PARA_ID": 2059,
   "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
-  "FUND_ID": "2059-14",
-  "API_KEY": "35770f43091fd396d35192f5b6c499db",
+  "FUND_ID": "2059-16",
+  "API_KEY": "x",
   "BLOCK_EXPLORER_URL": "https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frococo-rpc.polkadot.io#/explorer/query/",
-  "APP_BASE_URL": "localhost:8000/",
+  "APP_BASE_URL": "localhost:3333/",
   "EARLY_BONUS_TIER_1_CUTOFF": 50,
   "EARLY_BONUS_TIER_2_CUTOFF": 100
 }

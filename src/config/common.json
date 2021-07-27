@@ -1,5 +1,5 @@
 {
-  "APP_NAME": "Calamari Crowdloan",
   "DEVELOPMENT_KEYRING": false,
-  "RPC": {}
+  "RPC": {},
+  "GIT_HASH": "0be83fe7cc68d5577cd7a6ec74704f5090ee1782"
 }
