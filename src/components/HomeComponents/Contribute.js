@@ -13,15 +13,40 @@ import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
 import config from 'config';
 import ReferralCode from 'types/ReferralCode';
+import AccountSelectModal from '../Layouts/AccountSelectModal';
 
-const ConnectWalletPrompt = () => {
+const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
+  const { t } = useTranslation();
+  const [openModal, setOpenModal] = useState(false);
+  return (
+    <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
+      <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
+      <div onClick={() => setOpenModal(true)} >
+      <a href='#' className="mb-2 text-md xl:text-base">
+        {t('Connect wallet to continue')}
+      </a>
+      </div>
+      {
+      openModal &&
+      <AccountSelectModal
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        setAccountAddress={setAccountAddress}
+        accountPair={accountPair}
+      />
+    }
+    </div>
+  );
+};
+
+const InstallPJSPrompt = () => {
   const { t } = useTranslation();
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <p className="mb-2 text-md xl:text-base">
-        {t('Connect wallet to continue')}
-      </p>
+      <a className="mb-2 text-md xl:text-base" href='https://polkadot.js.org/extension/'>
+        {t('Install polkadot.js wallet to continue')}
+      </a>
     </div>
   );
 };
@@ -31,7 +56,10 @@ function Contribute ({
   accountBalanceKSM,
   urlReferralCode,
   allContributors,
-  accountAddress
+  accountAddress,
+  polkadotJSInstalled,
+  setAccountAddress,
+  accountPair
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -39,7 +67,7 @@ function Contribute ({
   const [referralCode, setReferralCode] = useState();
   const [referralCodeInvalid, setReferralCodeInvalid] = useState(false);
   const [userReferredSelf, setUserReferredSelf] = useState(false);
-  const { api } = useSubstrate();
+  const { api, keyringState } = useSubstrate();
   const { t } = useTranslation();
 
   const getContributeAmounKSM = () => {
@@ -183,7 +211,6 @@ function Contribute ({
   const shouldShowMinContributionWarning = !shouldShowInsufficientFundsWarning && belowMinContribution && contributeAmountInput.length > 0;
 
   const onClickClaimButton = async () => {
-    console.log();
     if (!contributeAmountKSM || insufficientFunds || belowMinContribution) {
       return;
     }
@@ -199,8 +226,10 @@ function Contribute ({
     }
   };
 
-  if (!fromAccount) {
-    return <ConnectWalletPrompt />;
+  if (!polkadotJSInstalled) {
+    return <InstallPJSPrompt />;
+  } else if (!fromAccount) {
+    return <ConnectWalletPrompt setAccountAddress={setAccountAddress} accountPair={accountPair}/>;
   }
 
   return (

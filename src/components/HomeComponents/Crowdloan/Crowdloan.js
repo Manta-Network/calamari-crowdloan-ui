@@ -45,8 +45,6 @@ function Crowdloan ({ totalContributionsKSM, allContributions, allContributors, 
 
   useEffect(() => {
     const getTotalReferralRewardsKMA = () => {
-      console.log(allReferrals, allContributions);
-      // console.log(allReferrals, allContributions[0], allReferrals[allContributions[0].address])
       if (!allContributions || !allReferrals) {
         return Calamari.zero();
       }

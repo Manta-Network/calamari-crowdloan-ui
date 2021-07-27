@@ -6,7 +6,7 @@ import {
   Crowdloan,
   ContributeActivity
 } from 'components/HomeComponents';
-import { useSubstrate } from '../../substrate-lib';
+import { useSubstrate, SubstrateContextProvider } from '../../substrate-lib';
 import { Dimmer, Loader, Grid, Message } from 'semantic-ui-react';
 import getFromAccount from '../../utils/GetFromAccount';
 import Decimal from 'decimal.js';
@@ -19,13 +19,16 @@ import { isHex, hexAddPrefix } from '@polkadot/util';
 import ReferralCode from 'types/ReferralCode';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { web3Enable } from '@polkadot/extension-dapp';
 
-function HomePage () {
+function Main () {
+  const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
+
   axios.defaults.baseURL = config.SUBSCAN_URL;
   axios.defaults.headers.post['Content-Type'] = 'application/json';
   axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
   axios.defaults.headers.post['X-API-Key'] = config.API_KEY;
-  axiosRetry(axios, { retries: 5, retryDelay: _ => 1000, retryCondition: error => error.response.status === 429 });
+  axiosRetry(axios, { retries: 5, retryDelay: _ => 600, retryCondition: error => error.response.status === 429 });
 
   const { referralCode } = useParams();
   const { t } = useTranslation();
@@ -34,17 +37,22 @@ function HomePage () {
   const [accountAddress, setAccountAddress] = useState(null);
   const [accountBalanceKSM, setAccountBalanceKSM] = useState(null);
   const [userContributions, setUserContributions] = useState(null);
+  const [polkadotJSInstalled, setPolkadotJSInstalled] = useState(null);
 
   const [totalContributionsKSM, setTotalContributionsKSM] = useState(null);
   const [allReferrals, setAllReferrals] = useState(null);
   const [allContributions, setAllContributions] = useState(null);
   const [allContributors, setAllContributors] = useState(null);
-  const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
 
   const accountPair =
     accountAddress &&
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
+
+
+  useEffect(() => {
+    console.log(`Version: ${config.GIT_HASH}`);
+  })
 
   useEffect(() => {
     async function loadFromAccount (accountPair) {
@@ -73,6 +81,14 @@ function HomePage () {
     return () => unsubscribe && unsubscribe();
   }, [api, accountAddress]);
 
+  useEffect(() => {
+    const checkForPolkadotJS = async () => {
+      const extensions = await web3Enable(config.APP_NAME);
+      setPolkadotJSInstalled(extensions.length > 0);
+    };
+    checkForPolkadotJS();
+  }, []);
+
   useMemo(() => {
     const getAllContributors = allContributions => {
       return allContributions
@@ -93,6 +109,7 @@ function HomePage () {
       do {
         const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageIdx, from_history: true });
         totalPages = Math.floor(res.data.data.count / 100);
+        console.log(totalPages);
         res.data.data.contributes?.forEach(contribution => {
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
@@ -107,6 +124,7 @@ function HomePage () {
       const allContributors = getAllContributors(allContributions);
       setAllContributors(allContributors);
       setAllContributions(allContributions);
+      console.log('all contributions', allContributions);
       setAllReferrals(allReferrals);
     };
     getAllContributionsAndReferrals();
@@ -149,11 +167,21 @@ function HomePage () {
       </Grid.Column>
     </Grid>;
 
-  if (apiState === 'ERROR') return message(apiError);
-  else if (apiState !== 'READY') return loader(t('Connecting to Kusama'));
+  const walletMessage = () =>
+  <Dimmer active>
+    <Message compact floating >
+      <a href='https://polkadot.js.org/extension/'>
+      {t('Install polkadot.js wallet to continue')}
+      </a>
+    </Message>
+  </Dimmer>;
 
-  if (keyringState !== 'READY') {
-    return loader('Loading accounts (please review polkadot.js authorization)');
+  if (apiState === 'ERROR') {
+    return message(apiError);
+  } else if (keyringState === 'NO_EXTENSION') {
+    return walletMessage();
+  } else if (apiState !== 'READY') {
+    return loader(t('Connecting to Kusama'));
   }
 
   return (
@@ -169,6 +197,7 @@ function HomePage () {
           <Grid.Row className="flex-wrap flex-col flex">
             <Grid.Column className="flex-wrap item flex">
               <Contribute
+                polkadotJSInstalled={polkadotJSInstalled}
                 accountAddress={accountAddress}
                 allContributors={allContributors}
                 urlReferralCode={referralCode}
@@ -176,15 +205,20 @@ function HomePage () {
                 accountBalanceKSM={accountBalanceKSM}
                 totalContributionsKSM={totalContributionsKSM}
                 setUserContributions={setUserContributions}
+                setAccountAddress={setAccountAddress}
+                accountPair={accountPair}
               />
             </Grid.Column>
             <Grid.Column className="flex-wrap item flex">
               <Details
+                polkadotJSInstalled={polkadotJSInstalled}
                 accountAddress={accountAddress}
                 userContributions={userContributions}
                 allContributions={allContributions}
                 allContributors={allContributors}
                 allReferrals={allReferrals}
+                setAccountAddress={setAccountAddress}
+                accountPair={accountPair}
               />
             </Grid.Column>
             <Grid.Column className="flex-wrap item flex">
@@ -203,4 +237,10 @@ function HomePage () {
   );
 }
 
-export default HomePage;
+export default function HomePage () {
+  return (
+    <SubstrateContextProvider>
+      <Main />
+    </SubstrateContextProvider>
+  );
+}

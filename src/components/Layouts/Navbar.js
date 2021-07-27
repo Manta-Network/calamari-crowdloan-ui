@@ -67,7 +67,7 @@ function Navbar ({
           <div
             onClick={onClickMyReferralCode}
             className="menu-item text-base lg:text-xl py-2 lg:py-4 px-4 cursor-pointer lg:px-8 xl:px-12">
-            {t('My Referral link')}
+            {t('My referral link')}
           </div>
         </div>
         <div className="hidden lg:block">
@@ -109,7 +109,7 @@ function Navbar ({
                 <div
                   onClick={onClickMyReferralCode}
                   className="menu-item text-base py-3 mb-2 cursor-pointer">
-                  {t('My Referral link')}
+                  {t('My referral link')}
                 </div>
                 <ReactFlagsSelect
                   className="w-2/5 mb-4"
