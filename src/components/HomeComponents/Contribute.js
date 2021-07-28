@@ -13,28 +13,15 @@ import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
 import config from 'config';
 import ReferralCode from 'types/ReferralCode';
-import AccountSelectModal from '../Layouts/AccountSelectModal';
 
-const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
+const CreateAccountPrompt = () => {
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = useState(false);
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <div onClick={() => setOpenModal(true)} >
-      <a href='#' className="mb-2 text-md xl:text-base">
-        {t('Connect wallet to continue')}
-      </a>
-      </div>
-      {
-      openModal &&
-      <AccountSelectModal
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-        setAccountAddress={setAccountAddress}
-        accountPair={accountPair}
-      />
-    }
+      <p href='#' className="mb-2 text-md xl:text-base">
+        {t('Create an account in polkadot.js to continue')}
+      </p>
     </div>
   );
 };
@@ -57,9 +44,7 @@ function Contribute ({
   urlReferralCode,
   allContributors,
   accountAddress,
-  polkadotJSInstalled,
-  setAccountAddress,
-  accountPair
+  polkadotJSInstalled
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -67,7 +52,7 @@ function Contribute ({
   const [referralCode, setReferralCode] = useState();
   const [referralCodeInvalid, setReferralCodeInvalid] = useState(false);
   const [userReferredSelf, setUserReferredSelf] = useState(false);
-  const { api, keyringState } = useSubstrate();
+  const { api } = useSubstrate();
   const { t } = useTranslation();
 
   const getContributeAmounKSM = () => {
@@ -191,13 +176,15 @@ function Contribute ({
   }, [accountAddress, referralCodeInput]);
 
   const onChangeReferralCodeInput = value => {
+    if (value.startsWith(config.APP_BASE_URL)) {
+      value = value.replace(config.APP_BASE_URL, '');
+    }
     setReferralCodeInput(value);
   };
 
   useMemo(() => {
     const setReferralCodeFromURL = () => {
       if (urlReferralCode) {
-        console.log(urlReferralCode);
         onChangeReferralCodeInput(urlReferralCode);
       }
     };
@@ -207,7 +194,7 @@ function Contribute ({
   const formIsDisabled = contributionStatus && contributionStatus.isProcessing();
   const insufficientFunds = contributeAmountKSM && contributeAmountKSM.gt(maxContribution);
   const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(1)));
-  const shouldShowInsufficientFundsWarning = insufficientFunds && contributeAmountInput.length;
+  const shouldShowInsufficientFundsWarning = insufficientFunds && contributeAmountInput.length > 0;
   const shouldShowMinContributionWarning = !shouldShowInsufficientFundsWarning && belowMinContribution && contributeAmountInput.length > 0;
 
   const onClickClaimButton = async () => {
@@ -229,7 +216,7 @@ function Contribute ({
   if (!polkadotJSInstalled) {
     return <InstallPJSPrompt />;
   } else if (!fromAccount) {
-    return <ConnectWalletPrompt setAccountAddress={setAccountAddress} accountPair={accountPair}/>;
+    return <CreateAccountPrompt />;
   }
 
   return (
@@ -264,7 +251,7 @@ function Contribute ({
         <div className="w-full form-input relative h-20">
           <Input
             value={referralCodeInput}
-            onChange={e => setReferralCodeInput(e.target.value)}
+            onChange={e => onChangeReferralCodeInput(e.target.value)}
             className="w-full h-full outline-none"
             disabled={formIsDisabled}
           />
@@ -312,16 +299,3 @@ function Contribute ({
 }
 
 export default Contribute;
-
-// {loading ? (
-//   <div className="py-6 px-4 mt-8 items-center flex">
-//     <Loader active inline />
-//     <span className="text-white pl-4">Processing...</span>
-//   </div>
-// ) : (
-//   <div
-//     onClick={onClickClaimButton}
-//     className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-//     {t('Contribute')}
-//   </div>
-// )}

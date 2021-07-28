@@ -58,7 +58,13 @@ const ContributeActivity = ({ allContributions }) => {
 
   useEffect(() => {
     const getContributions = () => {
-      axios.post('parachain/contributes', { fund_id: config.FUND_ID, row: PAGE_SIZE, page: pageNumber - 1, order: 'block_num desc', from_history: true }).then(res => {
+      axios.post('parachain/contributes', {
+        fund_id: config.FUND_ID,
+        row: PAGE_SIZE,
+        page: pageNumber - 1,
+        order: 'block_num desc',
+        from_history: true
+      }).then(res => {
         setContributions(res.data.data.contributes || []);
         setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
       });
@@ -142,9 +148,11 @@ const TableRowData = ({ contribution, referralCount, referralReward }) => {
   return (
     <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
       <TableRowItem width="40%">
+        <a target="_blank" rel="noopener noreferrer" href={config.ADDRESS_BLOCK_EXPLORER_URL + contribution.who}>
         <div className="text-blue-thirdry overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
           {contribution.who}
         </div>
+        </a>
       </TableRowItem>
       <TableRowItem width="13%">
         <span className="text-thirdry font-semibold">{contributionKSM.toString()}</span>

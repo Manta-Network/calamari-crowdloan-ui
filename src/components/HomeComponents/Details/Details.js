@@ -4,29 +4,15 @@ import { useTranslation } from 'react-i18next';
 import ContributionHistory from './ContributionHistory';
 import ReferralHistory from './ReferralHistory';
 import DetailsSummary from './DetailsSummary';
-import AccountSelectModal from '../../Layouts/AccountSelectModal';
 
-const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
+const CreateAccountPrompt = () => {
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = useState(false);
-
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
     <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
-    <div onClick={() => setOpenModal(true)} >
-      <a href='#' className="mb-2 text-md xl:text-base">
-        {t('Connect wallet to continue')}
-      </a>
-    </div>
-    {
-      openModal &&
-      <AccountSelectModal
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-        setAccountAddress={setAccountAddress}
-        accountPair={accountPair}
-      />
-    }
+      <p href='#' className="mb-2 text-md xl:text-base">
+        {t('Create an account in polkadot.js to continue')}
+      </p>
     </div>
   );
 };
@@ -49,9 +35,7 @@ const Details = ({
   allReferrals,
   accountAddress,
   allContributors,
-  polkadotJSInstalled,
-  setAccountAddress,
-  accountPair
+  polkadotJSInstalled
 }) => {
   const [userReferrals, setUserReferrals] = useState([]);
   const { t } = useTranslation();
@@ -82,7 +66,7 @@ const Details = ({
   if (!polkadotJSInstalled) {
     return <InstallPJSPrompt />;
   } else if (!accountAddress) {
-    return <ConnectWalletPrompt setAccountAddress={setAccountAddress} accountPair={accountPair} />;
+    return <CreateAccountPrompt />;
   }
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">

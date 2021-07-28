@@ -4,15 +4,12 @@ import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
 import queryString from 'query-string';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
 
 import config from '../config';
 
 const parsedQuery = queryString.parse(window.location.search);
 const connectedSocket = parsedQuery.rpc || config.PROVIDER_SOCKET;
-console.log(`Connected socket: ${connectedSocket}`);
-
 ///
 // Initial state for `useReducer`
 
@@ -89,11 +86,6 @@ const loadAccounts = (state, dispatch) => {
   const asyncLoadAccounts = async () => {
     dispatch({ type: 'LOAD_KEYRING' });
     try {
-      await web3Enable(config.APP_NAME);
-      let allAccounts = await web3Accounts();
-      allAccounts = allAccounts.map(({ address, meta }) =>
-        ({ address, meta: { ...meta, name: meta.name } }));
-      keyring.loadAll({ isDevelopment: config.DEVELOPMENT_KEYRING }, allAccounts);
       dispatch({ type: 'SET_KEYRING', payload: keyring });
     } catch (e) {
       console.error(e);

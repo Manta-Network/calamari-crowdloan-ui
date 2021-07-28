@@ -42,6 +42,6 @@
   "Connecting to Kusama": "连接到 Kusama 中",
   "Install polkadot.js wallet to continue": "请安装 polkadot.js 以继续",
   "Connect wallet to continue": "连接到钱包以继续",
-  "Create a polkadot.js acount to continue(edited)": "请先在Polkadot.js中创建账户",
+  "Create an account in polkadot.js to continue": "请先在Polkadot.js中创建账户",
   "Insufficient funds": "资金不足"
 }

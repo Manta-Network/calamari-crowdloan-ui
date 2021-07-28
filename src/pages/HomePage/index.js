@@ -49,10 +49,18 @@ function Main () {
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
 
-
   useEffect(() => {
+    const setDefaultAccount = async () => {
+      if (keyringState === 'READY' && keyring.getPairs().length > 0 && !accountAddress) {
+        setAccountAddress(keyring.getPairs()[0].address);
+      }
+    };
+    setDefaultAccount();
+  });
+
+  useMemo(() => {
     console.log(`Version: ${config.GIT_HASH}`);
-  })
+  }, []);
 
   useEffect(() => {
     async function loadFromAccount (accountPair) {
@@ -67,8 +75,12 @@ function Main () {
   }, [api, accountPair]);
 
   useEffect(() => {
-    let unsubscribe;
-    accountAddress &&
+    const getAccountBalance = async () => {
+      if (!api || !api.isConnected || !accountAddress) {
+        return;
+      }
+      await api.isReady;
+      let unsubscribe;
       api.query.system.account(accountAddress, balance => {
         const rawBalance = new Decimal(balance.data.free.toString());
         setAccountBalanceKSM(new Kusama(Kusama.ATOMIC_UNITS, rawBalance).toKSM());
@@ -77,8 +89,9 @@ function Main () {
           unsubscribe = unsub;
         })
         .catch(console.error);
-
-    return () => unsubscribe && unsubscribe();
+      return () => unsubscribe && unsubscribe();
+    };
+    getAccountBalance();
   }, [api, accountAddress]);
 
   useEffect(() => {
@@ -105,11 +118,14 @@ function Main () {
       let pageIdx = 0;
       const allContributions = [];
       const allReferrals = {};
-
       do {
-        const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageIdx, from_history: true });
-        totalPages = Math.floor(res.data.data.count / 100);
-        console.log(totalPages);
+        const res = await axios.post('parachain/contributes', {
+          fund_id: config.FUND_ID,
+          row: 100,
+          page: pageIdx,
+          from_history: true
+        });
+        totalPages = Math.ceil(res.data.data.count / 100);
         res.data.data.contributes?.forEach(contribution => {
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
@@ -124,7 +140,6 @@ function Main () {
       const allContributors = getAllContributors(allContributions);
       setAllContributors(allContributors);
       setAllContributions(allContributions);
-      console.log('all contributions', allContributions);
       setAllReferrals(allReferrals);
     };
     getAllContributionsAndReferrals();
@@ -168,13 +183,13 @@ function Main () {
     </Grid>;
 
   const walletMessage = () =>
-  <Dimmer active>
-    <Message compact floating >
-      <a href='https://polkadot.js.org/extension/'>
-      {t('Install polkadot.js wallet to continue')}
-      </a>
-    </Message>
-  </Dimmer>;
+    <Dimmer active>
+      <Message compact floating >
+        <a href='https://polkadot.js.org/extension/'>
+          {t('Install polkadot.js wallet to continue')}
+        </a>
+      </Message>
+    </Dimmer>;
 
   if (apiState === 'ERROR') {
     return message(apiError);
