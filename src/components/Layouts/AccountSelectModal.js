@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { Modal } from 'semantic-ui-react';
 import { useSubstrate } from '../../substrate-lib';
 import { useTranslation } from 'react-i18next';
+import { setLastAccessedAccount } from '../../utils/LocalStorageValue';
 
 function AddressSelectModal ({ openModal, setOpenModal, acccountAddress, setAccountAddress }) {
   const { keyring } = useSubstrate();
@@ -32,6 +33,7 @@ function AddressSelectModal ({ openModal, setOpenModal, acccountAddress, setAcco
                 <div
                     onClick={() => {
                       setAccountAddress(option.value);
+                      setLastAccessedAccount(option.value);
                       setOpenModal(false);
                     }}
                     className={classNames(

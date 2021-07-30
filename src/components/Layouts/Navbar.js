@@ -17,7 +17,8 @@ function Navbar ({
   setAccountAddress,
   accountBalanceKSM,
   accountAddress,
-  accountPair
+  accountPair,
+  keyringIsInit
 }) {
   const { t, i18n } = useTranslation();
   const [selected, setSelected] = useState('US');
@@ -36,16 +37,12 @@ function Navbar ({
 
   const onClickMyReferralCode = () => {
     if (accountAddress) {
-      navigator.clipboard.writeText(
-        config.APP_BASE_URL +
-          ReferralCode.fromAddress(accountAddress).toString()
-      );
+      navigator.clipboard.writeText(`${config.APP_BASE_URL}?referral=${ReferralCode.fromAddress(accountAddress).toString()}`);
       toast('Copied to clipboard', {
         position: 'top-right',
         autoClose: 2000,
         hideProgressBar: true,
-        draggable: true,
-        progress: undefined
+        draggable: true
       });
     }
   };
@@ -65,11 +62,13 @@ function Navbar ({
               {t('How it works')}
             </div>
           </a>
-          <div
-            onClick={onClickMyReferralCode}
-            className="menu-item text-base lg:text-lg py-2 lg:py-4 px-3 cursor-pointer lg:px-6 xl:px-9">
-            {t('My referral link')}
-          </div>
+          {keyringIsInit && (
+            <div
+              onClick={onClickMyReferralCode}
+              className="menu-item text-base lg:text-lg py-2 lg:py-4 px-3 cursor-pointer lg:px-6 xl:px-9">
+              {t('My referral link')}
+            </div>
+          )}
           <a target="_blank" rel="noopener noreferrer" href="https://discord.com/invite/5khsf6QmCb">
             <div className="menu-item text-base lg:text-lg py-2 lg:py-4 px-3 lg:px-6 xl:px-9">
               {t('Support')}
@@ -84,12 +83,14 @@ function Navbar ({
             onSelect={(code) => onChangeLanguage(code)}
           />
         </div>
-        <div className="hidden lg:block">
-          <AccountSelectButton
-            setAccountAddress={setAccountAddress}
-            accountPair={accountPair}
-          />
-        </div>
+        {keyringIsInit && (
+          <div className="hidden lg:block">
+            <AccountSelectButton
+              setAccountAddress={setAccountAddress}
+              accountPair={accountPair}
+            />
+          </div>
+        )}
         <div className="lg:hidden flex items-center">
           <img
             src={MenuIcon}
@@ -101,8 +102,9 @@ function Navbar ({
         <div
           style={{ transform: isOpen && 'none', overflow: isOpen && 'visible' }}
           className="nav-menu-mobile">
+          <div>
           {isOpen && (
-            <div>
+            <>
               <span onClick={() => setIsOpen(false)} className="close-icon">
                 <img src={CloseMenuIcon} alt="close-menu-icon" />
               </span>
@@ -117,11 +119,13 @@ function Navbar ({
                     {t('Support')}
                   </div>
                 </a>
+                {keyringIsInit && (
                 <div
                   onClick={onClickMyReferralCode}
                   className="menu-item text-base py-3 mb-2 cursor-pointer">
                   {t('My referral link')}
                 </div>
+                )}
                 <ReactFlagsSelect
                   className="w-2/5 mb-4"
                   selected={selected}
@@ -129,13 +133,16 @@ function Navbar ({
                   customLabels={{ US: 'EN', CN: 'CN' }}
                   onSelect={(code) => onChangeLanguage(code)}
                 />
-                <AccountSelectButton
-                  setAccountAddress={setAccountAddress}
-                  accountPair={accountPair}
-                />
+                {keyringIsInit && (
+                  <AccountSelectButton
+                    setAccountAddress={setAccountAddress}
+                    accountPair={accountPair}
+                  />
+                )}
               </div>
-            </div>
+              </>
           )}
+          </div>
         </div>
       </div>
       {isOpen && (

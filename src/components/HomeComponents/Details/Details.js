@@ -35,7 +35,7 @@ const Details = ({
   allReferrals,
   accountAddress,
   allContributors,
-  polkadotJSInstalled
+  keyringIsInit
 }) => {
   const [userReferrals, setUserReferrals] = useState([]);
   const { t } = useTranslation();
@@ -63,7 +63,7 @@ const Details = ({
     getUserReferrals();
   }, [allContributions, allReferrals, accountAddress]);
 
-  if (!polkadotJSInstalled) {
+  if (!keyringIsInit) {
     return <InstallPJSPrompt />;
   } else if (!accountAddress) {
     return <CreateAccountPrompt />;

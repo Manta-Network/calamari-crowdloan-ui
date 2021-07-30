@@ -12,13 +12,12 @@ const App = () => {
 
   useEffect(() => {
     i18n.changeLanguage(getLanguage());
-    // eslint-disable-next-line
-  }, []);
+  }, [i18n]);
   return (
     <SubstrateContextProvider>
       <Router>
         <Switch>
-          <Route path="/:referralCode" component={HomePage} />
+          <Route path="/?referral:referralCode" component={HomePage} />
           <Route path="/" component={HomePage} />
         </Switch>
       </Router>

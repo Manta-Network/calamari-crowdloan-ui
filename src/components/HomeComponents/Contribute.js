@@ -44,7 +44,7 @@ function Contribute ({
   urlReferralCode,
   allContributors,
   accountAddress,
-  polkadotJSInstalled
+  keyringIsInit
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -176,8 +176,9 @@ function Contribute ({
   }, [accountAddress, referralCodeInput]);
 
   const onChangeReferralCodeInput = value => {
-    if (value.startsWith(config.APP_BASE_URL)) {
-      value = value.replace(config.APP_BASE_URL, '');
+    console.log(`${config.APP_BASE_URL}?referral=`);
+    if (value.startsWith(`${config.APP_BASE_URL}?referral=`)) {
+      value = value.replace(`${config.APP_BASE_URL}?referral=`, '');
     }
     setReferralCodeInput(value);
   };
@@ -213,7 +214,7 @@ function Contribute ({
     }
   };
 
-  if (!polkadotJSInstalled) {
+  if (!keyringIsInit) {
     return <InstallPJSPrompt />;
   } else if (!fromAccount) {
     return <CreateAccountPrompt />;
