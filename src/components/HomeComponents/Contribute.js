@@ -22,19 +22,19 @@ const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
       <div onClick={() => setOpenModal(true)} >
-      <a href='#' className="mb-2 text-md xl:text-base">
-        {t('Connect wallet to continue')}
-      </a>
+        <a href='#' className="mb-2 text-md xl:text-base">
+          {t('Connect wallet to continue')}
+        </a>
       </div>
       {
-      openModal &&
-      <AccountSelectModal
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-        setAccountAddress={setAccountAddress}
-        accountPair={accountPair}
-      />
-    }
+        openModal &&
+        <AccountSelectModal
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+          setAccountAddress={setAccountAddress}
+          accountPair={accountPair}
+        />
+      }
     </div>
   );
 };
@@ -51,7 +51,7 @@ const InstallPJSPrompt = () => {
   );
 };
 
-function Contribute ({
+function Contribute({
   fromAccount,
   accountBalanceKSM,
   urlReferralCode,
@@ -206,7 +206,7 @@ function Contribute ({
 
   const formIsDisabled = contributionStatus && contributionStatus.isProcessing();
   const insufficientFunds = contributeAmountKSM && contributeAmountKSM.gt(maxContribution);
-  const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(1)));
+  const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(config.MIN_CONTRIBUTION)));
   const shouldShowInsufficientFundsWarning = insufficientFunds && contributeAmountInput.length;
   const shouldShowMinContributionWarning = !shouldShowInsufficientFundsWarning && belowMinContribution && contributeAmountInput.length > 0;
 
@@ -229,7 +229,7 @@ function Contribute ({
   if (!polkadotJSInstalled) {
     return <InstallPJSPrompt />;
   } else if (!fromAccount) {
-    return <ConnectWalletPrompt setAccountAddress={setAccountAddress} accountPair={accountPair}/>;
+    return <ConnectWalletPrompt setAccountAddress={setAccountAddress} accountPair={accountPair} />;
   }
 
   return (
@@ -238,7 +238,7 @@ function Contribute ({
       <p className="mb-2 text-sm xl:text-base">
         {(!shouldShowInsufficientFundsWarning && !shouldShowMinContributionWarning) && t('Enter your contribution amount')}
         {shouldShowInsufficientFundsWarning && '❌ ' + t('Insufficient funds')}
-        {shouldShowMinContributionWarning && '❌ ' + t('Minimum contribution is 1 KSM')}
+        {shouldShowMinContributionWarning && '❌ ' + t(`Minimum contribution is ${config.MIN_CONTRIBUTION} KSM`)}
       </p>
       <div className="flex items-center">
         <div className="form-input w-4/5 amount relative h-20">
@@ -305,7 +305,7 @@ function Contribute ({
           {t('Contribute')}
         </div>
       ) : (
-      <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
+        <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
       )}
     </div>
   );
