@@ -1,22 +1,22 @@
 /* eslint-disable multiline-ternary */
 /* eslint-disable react/style-prop-object */
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import Logo from 'assets/images/calamari-logo.svg';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ReactFlagsSelect from 'react-flags-select';
 import { setLanguage, getLanguage } from 'utils/LocalStorageValue';
-import AccountSelectButton from './AccountSelectButton';
 import 'react-toastify/dist/ReactToastify.css';
 import MenuIcon from 'assets/icons/menu.svg';
 import CloseMenuIcon from 'assets/icons/close-menu.svg';
 import { toast, ToastContainer } from 'react-toastify';
 import ReferralCode from 'types/ReferralCode';
 import config from 'config';
+import AccountSelectButton from './AccountSelectButton';
 
 function Navbar ({
   setAccountAddress,
-  accountBalanceKSM,
   accountAddress,
   accountPair
 }) {
@@ -135,5 +135,11 @@ function Navbar ({
     </div>
   );
 }
+
+Navbar.propTypes = {
+  setAccountAddress: PropTypes.func,
+  accountAddress: PropTypes.string,
+  accountPair: PropTypes.object
+};
 
 export default Navbar;

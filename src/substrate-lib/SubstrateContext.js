@@ -11,7 +11,6 @@ import config from '../config';
 
 const parsedQuery = queryString.parse(window.location.search);
 const connectedSocket = parsedQuery.rpc || config.PROVIDER_SOCKET;
-console.log(`Connected socket: ${connectedSocket}`);
 
 ///
 // Initial state for `useReducer`
@@ -32,29 +31,29 @@ const INIT_STATE = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'CONNECT_INIT':
-      return { ...state, apiState: 'CONNECT_INIT' };
+  case 'CONNECT_INIT':
+    return { ...state, apiState: 'CONNECT_INIT' };
 
-    case 'CONNECT':
-      return { ...state, api: action.payload, apiState: 'CONNECTING' };
+  case 'CONNECT':
+    return { ...state, api: action.payload, apiState: 'CONNECTING' };
 
-    case 'CONNECT_SUCCESS':
-      return { ...state, apiState: 'READY' };
+  case 'CONNECT_SUCCESS':
+    return { ...state, apiState: 'READY' };
 
-    case 'CONNECT_ERROR':
-      return { ...state, apiState: 'ERROR', apiError: action.payload };
+  case 'CONNECT_ERROR':
+    return { ...state, apiState: 'ERROR', apiError: action.payload };
 
-    case 'LOAD_KEYRING':
-      return { ...state, keyringState: 'LOADING' };
+  case 'LOAD_KEYRING':
+    return { ...state, keyringState: 'LOADING' };
 
-    case 'SET_KEYRING':
-      return { ...state, keyring: action.payload, keyringState: 'READY' };
+  case 'SET_KEYRING':
+    return { ...state, keyring: action.payload, keyringState: 'READY' };
 
-    case 'KEYRING_ERROR':
-      return { ...state, keyring: null, keyringState: 'ERROR' };
+  case 'KEYRING_ERROR':
+    return { ...state, keyring: null, keyringState: 'ERROR' };
 
-    default:
-      throw new Error(`Unknown type: ${action.type}`);
+  default:
+    throw new Error(`Unknown type: ${action.type}`);
   }
 };
 
@@ -75,7 +74,7 @@ const connect = (state, dispatch) => {
   _api.on('connected', () => {
     dispatch({ type: 'CONNECT', payload: _api });
     // `ready` event is not emitted upon reconnection and is checked explicitly here.
-    _api.isReady.then((_api) => dispatch({ type: 'CONNECT_SUCCESS' }));
+    _api.isReady.then(() => dispatch({ type: 'CONNECT_SUCCESS' }));
   });
   _api.on('ready', () => dispatch({ type: 'CONNECT_SUCCESS' }));
   _api.on('error', err => dispatch({ type: 'CONNECT_ERROR', payload: err }));
@@ -131,10 +130,11 @@ const SubstrateContextProvider = (props) => {
   </SubstrateContext.Provider>;
 };
 
-// prop typechecking
+
 SubstrateContextProvider.propTypes = {
   socket: PropTypes.string,
-  types: PropTypes.object
+  types: PropTypes.object,
+  children: PropTypes.any
 };
 
 const useSubstrate = () => ({ ...useContext(SubstrateContext) });

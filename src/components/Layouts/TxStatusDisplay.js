@@ -1,7 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import config from 'config';
 import { useTranslation } from 'react-i18next';
 import { Loader } from 'semantic-ui-react';
+import TxStatus from 'utils/TxStatus';
+
 
 export default function Main ({ txStatus, transactionType = 'Transacion' }) {
   const { t } = useTranslation();
@@ -30,3 +33,7 @@ export default function Main ({ txStatus, transactionType = 'Transacion' }) {
     </div>
   );
 }
+
+Main.propTypes = {
+  txStatus: PropTypes.instanceOf(TxStatus), transactionType: PropTypes.string
+};

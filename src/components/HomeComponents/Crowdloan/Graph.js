@@ -1,27 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Line } from 'react-chartjs-2';
 import Kusama from 'types/Kusama';
 import { Placeholder } from 'semantic-ui-react';
+import Contribution from 'types/Contribution';
 import config from '../../../config';
 
 const GraphPlaceholder = () => {
   return (
-        <div className="py-8">
-            <Placeholder fluid>
-            <Placeholder.Paragraph>
-                <Placeholder.Line />
-                <Placeholder.Line />
-                <Placeholder.Line />
-                <Placeholder.Line />
-            </Placeholder.Paragraph>
-            <Placeholder.Paragraph>
-                <Placeholder.Line />
-                <Placeholder.Line />
-                <Placeholder.Line />
-                <Placeholder.Line />
-            </Placeholder.Paragraph>
-            </Placeholder>
-        </div>
+    <div className="py-8">
+      <Placeholder fluid>
+        <Placeholder.Paragraph>
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+        </Placeholder.Paragraph>
+        <Placeholder.Paragraph>
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+        </Placeholder.Paragraph>
+      </Placeholder>
+    </div>
   );
 };
 
@@ -107,9 +109,14 @@ export default function Graph ({ allContributions }) {
     return <GraphPlaceholder />;
   }
   return (
-        <div className="py-4 relative graph-line pt-4">
-            <span className="absolute right-0">KSM</span>
-            <Line data={graphData} options={options} />
-        </div>
+    <div className="py-4 relative graph-line pt-4">
+      <span className="absolute right-0">KSM</span>
+      <Line data={graphData} options={options} />
+    </div>
   );
 }
+
+
+Graph.propTypes = {
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution))
+};

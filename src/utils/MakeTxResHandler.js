@@ -2,9 +2,9 @@ import getFailedExtrinsicError from './GetFailedExtrinsicError';
 
 export function makeTxResHandler (
   api,
-  onSuccess = block => null,
-  onFailure = (block, error) => null,
-  onUpdate = message => null
+  onSuccess = block => null,  // eslint-disable-line no-unused-vars
+  onFailure = (block, error) => null,  // eslint-disable-line no-unused-vars
+  onUpdate = message => null  // eslint-disable-line no-unused-vars
 ) {
   return ({ status, events }) => {
     let error;
@@ -22,22 +22,3 @@ export function makeTxResHandler (
     }
   };
 }
-
-// export function makeDefaultTxResHandler (
-//   api,
-//   setStatus
-// ) {
-//   const onSuccess = block => {
-//     console.log('success');
-//     setStatus(TxStatus.finalized(block));
-//   };
-//   const onFailure = (block, error) => {
-//     console.log('failure');
-//     console.log(error);
-//     setStatus(TxStatus.failed(block, error));
-//   };
-//   const onUpdate = message => {
-//     setStatus(TxStatus.processing(message));
-//   };
-//   return makeTxResHandler(api, onSuccess, onFailure, onUpdate);
-// }

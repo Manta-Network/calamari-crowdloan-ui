@@ -1,11 +1,14 @@
 /* eslint-disable multiline-ternary */
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { Placeholder } from 'semantic-ui-react';
 import Calamari from 'types/Calamari';
+import config from 'config';
+import Kusama from 'types/Kusama';
+import Contribution from 'types/Contribution';
 import Graph from './Graph';
 import Leaderboard from './Leaderboard';
-import config from 'config';
 
 function Crowdloan ({ totalContributionsKSM, allContributions, allContributors, allReferrals }) {
   const { t } = useTranslation();
@@ -104,5 +107,12 @@ function Crowdloan ({ totalContributionsKSM, allContributions, allContributors, 
     </div>
   );
 }
+
+Crowdloan.propTypes = {
+  totalContributionsKSM: PropTypes.instanceOf(Kusama),
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  allContributors: PropTypes.arrayOf(PropTypes.string),
+  allReferrals: PropTypes.object
+};
 
 export default Crowdloan;

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import Kusama from 'types/Kusama';
 import config from 'config';
 import Calamari from 'types/Calamari';
 import { Placeholder } from 'semantic-ui-react';
+import Contribution from 'types/Contribution';
 
 const DetailsSummaryPlaceholder = () => {
   return (
@@ -95,7 +97,6 @@ const DetailsSummary = ({
 
   useEffect(() => {
     const getUserTotalRewardsKMA = () => {
-      console.log('suffer', userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards);
       return userBaseRewardsKMA.add(userBonusRewardsKMA.add(userGaveReferralRewardsKMA.add(userWasReferredRewards)));
     };
     setUserTotalRewardKMA(getUserTotalRewardsKMA());
@@ -120,6 +121,15 @@ const DetailsSummary = ({
       </div>
     </div>
   );
+};
+
+DetailsSummary.propTypes = {
+  userReferrals: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  allReferrals: PropTypes.object,
+  userContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  accountAddress: PropTypes.string,
+  allContributors: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default DetailsSummary;

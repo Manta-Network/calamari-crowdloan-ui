@@ -2,18 +2,16 @@ import React, { useEffect } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import HomePage from 'pages/HomePage';
-import { SubstrateContextProvider } from './substrate-lib';
-import { DeveloperConsole } from './substrate-lib/components';
 import { useTranslation } from 'react-i18next';
 import { getLanguage } from 'utils/LocalStorageValue';
+import { SubstrateContextProvider } from './substrate-lib';
 
 const App = () => {
   const { i18n } = useTranslation();
 
   useEffect(() => {
     i18n.changeLanguage(getLanguage());
-    // eslint-disable-next-line
-  }, []);
+  }, [i18n]);
   return (
     <SubstrateContextProvider>
       <Router>
@@ -22,8 +20,7 @@ const App = () => {
           <Route path="/" component={HomePage} />
         </Switch>
       </Router>
-      <DeveloperConsole />
-    </SubstrateContextProvider>
+\    </SubstrateContextProvider>
   );
 };
 export default App;

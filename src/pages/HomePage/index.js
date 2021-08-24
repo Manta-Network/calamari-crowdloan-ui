@@ -6,9 +6,7 @@ import {
   Crowdloan,
   ContributeActivity
 } from 'components/HomeComponents';
-import { useSubstrate, SubstrateContextProvider } from '../../substrate-lib';
 import { Dimmer, Loader, Grid, Message } from 'semantic-ui-react';
-import getFromAccount from '../../utils/GetFromAccount';
 import Decimal from 'decimal.js';
 import Kusama from 'types/Kusama';
 import Contribution from 'types/Contribution';
@@ -20,6 +18,8 @@ import ReferralCode from 'types/ReferralCode';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { web3Enable } from '@polkadot/extension-dapp';
+import getFromAccount from '../../utils/GetFromAccount';
+import { useSubstrate, SubstrateContextProvider } from '../../substrate-lib';
 
 function Main () {
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
@@ -28,7 +28,7 @@ function Main () {
   axios.defaults.headers.post['Content-Type'] = 'application/json';
   axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
   axios.defaults.headers.post['X-API-Key'] = config.API_KEY;
-  axiosRetry(axios, { retries: 5, retryDelay: _ => 600, retryCondition: error => error.response.status === 429 });
+  axiosRetry(axios, { retries: 5, retryDelay: () => 600, retryCondition: error => error.response.status === 429 });
 
   const { referralCode } = useParams();
   const { t } = useTranslation();
@@ -49,10 +49,9 @@ function Main () {
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
 
-
   useEffect(() => {
     console.log(`Version: ${config.GIT_HASH}`);
-  })
+  });
 
   useEffect(() => {
     async function loadFromAccount (accountPair) {
@@ -109,7 +108,6 @@ function Main () {
       do {
         const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageIdx, from_history: true });
         totalPages = Math.floor(res.data.data.count / 100);
-        console.log(totalPages);
         res.data.data.contributes?.forEach(contribution => {
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
@@ -124,7 +122,6 @@ function Main () {
       const allContributors = getAllContributors(allContributions);
       setAllContributors(allContributors);
       setAllContributions(allContributions);
-      console.log('all contributions', allContributions);
       setAllReferrals(allReferrals);
     };
     getAllContributionsAndReferrals();
@@ -168,13 +165,13 @@ function Main () {
     </Grid>;
 
   const walletMessage = () =>
-  <Dimmer active>
-    <Message compact floating >
-      <a href='https://polkadot.js.org/extension/'>
-      {t('Install polkadot.js wallet to continue')}
-      </a>
-    </Message>
-  </Dimmer>;
+    <Dimmer active>
+      <Message compact floating >
+        <a href='https://polkadot.js.org/extension/'>
+          {t('Install polkadot.js wallet to continue')}
+        </a>
+      </Message>
+    </Dimmer>;
 
   if (apiState === 'ERROR') {
     return message(apiError);

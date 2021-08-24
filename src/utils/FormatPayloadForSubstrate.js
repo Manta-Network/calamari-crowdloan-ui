@@ -5,7 +5,7 @@ function isNumType (type) {
 }
 
 export default function formatPayloadForSubstrate (payload, opts = { emptyAsNull: true }) {
-  const paramFields = payload.map(_ => true);
+  const paramFields = new Array(payload.length).fill(true);
 
   // if `opts.emptyAsNull` is true, empty param value will be added to res as `null`.
   //   Otherwise, it will not be added

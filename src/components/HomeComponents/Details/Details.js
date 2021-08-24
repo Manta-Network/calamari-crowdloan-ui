@@ -1,10 +1,12 @@
 /* eslint-disable multiline-ternary */
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import AccountSelectModal from '../../Layouts/AccountSelectModal';
+import Contribution from '../../../types/Contribution';
 import ContributionHistory from './ContributionHistory';
 import ReferralHistory from './ReferralHistory';
 import DetailsSummary from './DetailsSummary';
-import AccountSelectModal from '../../Layouts/AccountSelectModal';
 
 const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
   const { t } = useTranslation();
@@ -12,33 +14,37 @@ const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
 
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
-    <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
-    <div onClick={() => setOpenModal(true)} >
-      <a href='#' className="mb-2 text-md xl:text-base">
-        {t('Connect wallet to continue')}
-      </a>
-    </div>
-    {
-      openModal &&
+      <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
+      <div onClick={() => setOpenModal(true)} >
+        <a href='#' className="mb-2 text-md xl:text-base">
+          {t('Connect wallet to continue')}
+        </a>
+      </div>
+      {
+        openModal &&
       <AccountSelectModal
         openModal={openModal}
         setOpenModal={setOpenModal}
         setAccountAddress={setAccountAddress}
         accountPair={accountPair}
       />
-    }
+      }
     </div>
   );
+};
+
+ConnectWalletPrompt.propTypes = {
+  setAccountAddress: PropTypes.func, accountPair: PropTypes.object
 };
 
 const InstallPJSPrompt = () => {
   const { t } = useTranslation();
   return (
     <div className="content-item p-8 xl:p-10 h-full mt-8 lg:mt-0 bg-white calamari-text details">
-    <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
-    <a className="mb-2 text-md xl:text-base" href='https://polkadot.js.org/extension/'>
-    {t('Install polkadot.js wallet to continue')}
-    </a>
+      <h1 className="title text-3xl md:text-4xl">{t('Your details')}</h1>
+      <a className="mb-2 text-md xl:text-base" href='https://polkadot.js.org/extension/'>
+        {t('Install polkadot.js wallet to continue')}
+      </a>
     </div>
   );
 };
@@ -99,6 +105,17 @@ const Details = ({
       <ReferralHistory userReferrals={userReferrals} />
     </div>
   );
+};
+
+Details.propTypes = {
+  userContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  allReferrals: PropTypes.object,
+  accountAddress: PropTypes.string,
+  allContributors: PropTypes.arrayOf(PropTypes.string),
+  polkadotJSInstalled: PropTypes.bool,
+  setAccountAddress: PropTypes.func,
+  accountPair: PropTypes.object
 };
 
 export default Details;

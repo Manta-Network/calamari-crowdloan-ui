@@ -1,29 +1,31 @@
 /* eslint-disable multiline-ternary */
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import ArrowDown from 'assets/icons/arrow-down.svg';
 import ArrowUp from 'assets/icons/arrow-up.svg';
 import { Placeholder } from 'semantic-ui-react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import Contribution from 'types/Contribution';
 
 const ReferralHistoryPlaceholder = () => {
   return (
-  <div className="py-12">
-    <Placeholder fluid>
-      <Placeholder.Paragraph>
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-      </Placeholder.Paragraph>
-      <Placeholder.Paragraph>
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-      </Placeholder.Paragraph>
-    </Placeholder>
-  </div>
+    <div className="py-12">
+      <Placeholder fluid>
+        <Placeholder.Paragraph>
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+        </Placeholder.Paragraph>
+        <Placeholder.Paragraph>
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+        </Placeholder.Paragraph>
+      </Placeholder>
+    </div>
   );
 };
 
@@ -40,8 +42,8 @@ const ReferralHistory = ({ userReferrals }) => {
     return <ReferralHistoryPlaceholder />;
   }
   return (
-        <>
-        <div className="flex justify-between pt-10">
+    <>
+      <div className="flex justify-between pt-10">
         <p className="mb-1">{t('Referral history')}</p>
         <span className="opacity-50">{currentPageNumberUserReferrals} of {totalPagesUserReferrals}</span>
       </div>
@@ -80,8 +82,12 @@ const ReferralHistory = ({ userReferrals }) => {
           />
         </div>
       </div>
-      </>
+    </>
   );
+};
+
+ReferralHistory.propTypes = {
+  userReferrals:  PropTypes.arrayOf(PropTypes.instanceOf(Contribution))
 };
 
 export default ReferralHistory;

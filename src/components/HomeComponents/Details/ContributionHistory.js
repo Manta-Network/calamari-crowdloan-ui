@@ -1,29 +1,31 @@
 /* eslint-disable multiline-ternary */
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import ArrowDown from 'assets/icons/arrow-down.svg';
 import ArrowUp from 'assets/icons/arrow-up.svg';
 import { Placeholder } from 'semantic-ui-react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import Contribution from 'types/Contribution';
 
 const ContributionHistoryPlaceholder = () => {
   return (
-  <div className="py-12">
-    <Placeholder fluid>
-      <Placeholder.Paragraph>
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-      </Placeholder.Paragraph>
-      <Placeholder.Paragraph>
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-        <Placeholder.Line />
-      </Placeholder.Paragraph>
-    </Placeholder>
-  </div>
+    <div className="py-12">
+      <Placeholder fluid>
+        <Placeholder.Paragraph>
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+        </Placeholder.Paragraph>
+        <Placeholder.Paragraph>
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+          <Placeholder.Line />
+        </Placeholder.Paragraph>
+      </Placeholder>
+    </div>
   );
 };
 
@@ -39,12 +41,12 @@ const ContributionHistory = ({ userContributions }) => {
     return <ContributionHistoryPlaceholder />;
   }
   return (
-        <>
-        <div className="flex justify-between pt-6">
+    <>
+      <div className="flex justify-between pt-6">
         <p className="mb-1">{t('Contribution history')}</p>
         <span className="opacity-50">{currentPageNumberUserContributions} of {totalPagesUserContributions}</span>
-        </div>
-        <div>
+      </div>
+      <div>
         <div className="artibute border-2 py-2 z-10 history relative rounded-lg calamari-text bg-white">
           {currentPageUserContributions.map((contribution, index) => (
             <div
@@ -75,8 +77,12 @@ const ContributionHistory = ({ userContributions }) => {
           />
         </div>
       </div>
-      </>
+    </>
   );
+};
+
+ContributionHistory.propTypes = {
+  userContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution))
 };
 
 export default ContributionHistory;

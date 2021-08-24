@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Kusama from 'types/Kusama';
 import { useTranslation } from 'react-i18next';
 import { Placeholder } from 'semantic-ui-react';
@@ -6,6 +7,7 @@ import TableColumnHeader from 'components/Table/TableColumnHeader';
 import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
 import TableRow from 'components/Table/TableRow';
 import TableRowItem from 'components/Table/TableRowItem';
+import Contribution from 'types/Contribution';
 
 const LeaderboardPlaceholder = () => {
   const { t } = useTranslation();
@@ -70,7 +72,7 @@ export default function Leaderboard ({ allContributions }) {
             <TableColumnHeader label={t('Contributed')} width="40%" />
           </TableHeaderWrapper>
           {topThreeContributors.map((val, i) => (
-            <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-2">
+            <TableRow className="bg-light-gray calamari-text rounded-lg px-2 my-2" key={val.address}>
               <TableRowItem width="20%">
                 <div className="w-8 h-8 bg-purple text-white leading-8 text-center rounded-md">
                   {i + 1}
@@ -95,3 +97,7 @@ export default function Leaderboard ({ allContributions }) {
     </div>
   );
 }
+
+Leaderboard.propTypes = {
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution))
+};

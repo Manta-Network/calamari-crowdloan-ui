@@ -1,18 +1,19 @@
 /* eslint-disable multiline-ternary */
 import React, { useEffect, useState, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { Input } from 'semantic-ui-react';
-import { useSubstrate } from '../../substrate-lib';
 import Decimal from 'decimal.js';
-import { makeTxResHandler } from '../../utils/MakeTxResHandler';
-import Kusama from '../../types/Kusama';
-import TxStatusDisplay from '../../TxStatusDisplay';
-import TxStatus from '../../utils/TxStatus';
 import formatPayloadForSubstrate from 'utils/FormatPayloadForSubstrate';
 import BN from 'bn.js';
 import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
 import config from 'config';
 import ReferralCode from 'types/ReferralCode';
+import TxStatus from '../../utils/TxStatus';
+import TxStatusDisplay from '../Layouts/TxStatusDisplay';
+import Kusama from '../../types/Kusama';
+import { makeTxResHandler } from '../../utils/MakeTxResHandler';
+import { useSubstrate } from '../../substrate-lib';
 import AccountSelectModal from '../Layouts/AccountSelectModal';
 
 const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
@@ -39,6 +40,10 @@ const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
   );
 };
 
+ConnectWalletPrompt.propTypes = {
+  setAccountAddress: PropTypes.func, accountPair: PropTypes.object
+};
+
 const InstallPJSPrompt = () => {
   const { t } = useTranslation();
   return (
@@ -51,7 +56,11 @@ const InstallPJSPrompt = () => {
   );
 };
 
-function Contribute({
+ConnectWalletPrompt.PropTypes = {
+  setAccountAddress: PropTypes.func, accountPair: PropTypes.object
+};
+
+function Contribute ({
   fromAccount,
   accountBalanceKSM,
   urlReferralCode,
@@ -67,7 +76,7 @@ function Contribute({
   const [referralCode, setReferralCode] = useState();
   const [referralCodeInvalid, setReferralCodeInvalid] = useState(false);
   const [userReferredSelf, setUserReferredSelf] = useState(false);
-  const { api, keyringState } = useSubstrate();
+  const { api } = useSubstrate();
   const { t } = useTranslation();
 
   const getContributeAmounKSM = () => {
@@ -197,7 +206,6 @@ function Contribute({
   useMemo(() => {
     const setReferralCodeFromURL = () => {
       if (urlReferralCode) {
-        console.log(urlReferralCode);
         onChangeReferralCodeInput(urlReferralCode);
       }
     };
@@ -311,17 +319,15 @@ function Contribute({
   );
 }
 
-export default Contribute;
+Contribute.propTypes = {
+  fromAccount: PropTypes.string,
+  accountBalanceKSM: PropTypes.instanceOf(Kusama),
+  urlReferralCode: PropTypes.string,
+  allContributors: PropTypes.arrayOf(PropTypes.string),
+  accountAddress: PropTypes.string,
+  polkadotJSInstalled: PropTypes.bool,
+  setAccountAddress: PropTypes.func,
+  accountPair: PropTypes.object
+};
 
-// {loading ? (
-//   <div className="py-6 px-4 mt-8 items-center flex">
-//     <Loader active inline />
-//     <span className="text-white pl-4">Processing...</span>
-//   </div>
-// ) : (
-//   <div
-//     onClick={onClickClaimButton}
-//     className="py-6 rounded-lg text-3xl xl:text-3xl cursor-pointer text-center mt-8 mb-4 bg-oriange">
-//     {t('Contribute')}
-//   </div>
-// )}
+export default Contribute;

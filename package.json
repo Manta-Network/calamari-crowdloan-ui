@@ -52,6 +52,7 @@
   "homepage": "https://crowdloan.calamari.manta.network",
   "devDependencies": {
     "@babel/core": "^7.14.3",
+    "@babel/eslint-parser": "^7.15.0",
     "babel-preset-env": "^1.7.0",
     "eslint": "^7.20.0",
     "eslint-config-semistandard": "^15.0.1",

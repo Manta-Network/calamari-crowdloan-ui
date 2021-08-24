@@ -2,7 +2,7 @@ export default function getFailedExtrinsicError (events, api) {
   let errorMessage = null;
   events.filter(({ event }) =>
     api.events.system.ExtrinsicFailed.is(event))
-    .forEach(({ event: { data: [error, info] } }) => {
+    .forEach(({ event: { data: [error,] } }) => {
       if (error.isModule) {
         // for module errors, we have the section indexed, lookup
         const decoded = api.registry.findMetaError(error.asModule);

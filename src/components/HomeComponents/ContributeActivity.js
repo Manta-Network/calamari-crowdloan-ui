@@ -1,5 +1,6 @@
 /* eslint-disable multiline-ternary */
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Pagination, Placeholder } from 'semantic-ui-react';
 import TableColumnHeader from 'components/Table/TableColumnHeader';
 import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
@@ -7,10 +8,13 @@ import TableRow from 'components/Table/TableRow';
 import TableRowItem from 'components/Table/TableRowItem';
 import axios from 'axios';
 import Decimal from 'decimal.js';
-import Kusama from '../../types/Kusama';
-import config from '../../config';
 import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
+import Contribution from 'types/Contribution';
+import Kusama from 'types/Kusama';
+import config from 'config';
+import ReferralCode from 'types/ReferralCode';
+import { hexAddPrefix, isHex } from '@polkadot/util';
 
 const ContributeActivityPlaceholder = () => {
   const { t } = useTranslation();
@@ -20,24 +24,24 @@ const ContributeActivityPlaceholder = () => {
       <h1 className="text-2xl title md:text-4xl">
         {t('Global Contribution Activity')}
       </h1>
-        <div className="mb-4 min-w-table-sm">
-          <Placeholder fluid>
-            <Placeholder.Paragraph>
-              <Placeholder.Line />
-              <Placeholder.Line />
-              <Placeholder.Line />
-              <Placeholder.Line />
-              <Placeholder.Line />
-            </Placeholder.Paragraph>
-            <Placeholder.Paragraph>
-              <Placeholder.Line />
-              <Placeholder.Line />
-              <Placeholder.Line />
-              <Placeholder.Line />
-              <Placeholder.Line />
-            </Placeholder.Paragraph>
-          </Placeholder>
-        </div>
+      <div className="mb-4 min-w-table-sm">
+        <Placeholder fluid>
+          <Placeholder.Paragraph>
+            <Placeholder.Line />
+            <Placeholder.Line />
+            <Placeholder.Line />
+            <Placeholder.Line />
+            <Placeholder.Line />
+          </Placeholder.Paragraph>
+          <Placeholder.Paragraph>
+            <Placeholder.Line />
+            <Placeholder.Line />
+            <Placeholder.Line />
+            <Placeholder.Line />
+            <Placeholder.Line />
+          </Placeholder.Paragraph>
+        </Placeholder>
+      </div>
     </div>
   );
 };
@@ -59,7 +63,12 @@ const ContributeActivity = ({ allContributions }) => {
   useEffect(() => {
     const getContributions = () => {
       axios.post('parachain/contributes', { fund_id: config.FUND_ID, row: PAGE_SIZE, page: pageNumber - 1, order: 'block_num desc', from_history: true }).then(res => {
-        setContributions(res.data.data.contributes || []);
+        const contributions = res.data.data.contributes.map(contribution => {
+          const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
+          const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
+          return new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who, referralCode);
+        });
+        setContributions(contributions);
         setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
       });
     };
@@ -115,7 +124,7 @@ const ContributeActivity = ({ allContributions }) => {
             return (
               <TableRowData
                 contribution={contribution}
-                key={contribution.extrinsic_index}
+                key={contribution.address + contribution.date.toString()}
                 referralCount={referralCounts && referralCounts[i]}
                 referralReward={referralRewards && referralRewards[i]}
               />
@@ -137,20 +146,23 @@ const ContributeActivity = ({ allContributions }) => {
   );
 };
 
+ContributeActivity.propTypes = {
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution))
+};
+
 const TableRowData = ({ contribution, referralCount, referralReward }) => {
-  const contributionKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
   return (
     <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
       <TableRowItem width="40%">
         <div className="text-blue-thirdry overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
-          {contribution.who}
+          {contribution.address}
         </div>
       </TableRowItem>
       <TableRowItem width="13%">
-        <span className="text-thirdry font-semibold">{contributionKSM.toString()}</span>
+        <span className="text-thirdry font-semibold">{contribution.amountKSM.toString()}</span>
       </TableRowItem>
       <TableRowItem width="17%">
-        <span className="manta-prime-blue font-semibold">{contributionKSM.value.mul(10000).toString()} KMA</span>
+        <span className="manta-prime-blue font-semibold">{contribution.amountKSM.value.mul(10000).toString()} KMA</span>
       </TableRowItem>
       {(referralCount !== null && referralReward !== null) &&
         <>
@@ -164,6 +176,12 @@ const TableRowData = ({ contribution, referralCount, referralReward }) => {
       }
     </TableRow>
   );
+};
+
+TableRowData.propTypes = {
+  contribution: PropTypes.instanceOf(Contribution),
+  referralCount: PropTypes.number,
+  referralReward: PropTypes.instanceOf(Calamari)
 };
 
 export default ContributeActivity;
