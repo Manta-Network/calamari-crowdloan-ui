@@ -9,5 +9,6 @@
     "APP_BASE_URL": "https://crowdloan.calamari.manta.network/",
     "EARLY_BONUS_TIER_1_CUTOFF": 500,
     "EARLY_BONUS_TIER_2_CUTOFF": 1000,
-    "MIN_CONTRIBUTION": 0.1
+    "MIN_CONTRIBUTION": 0.1,
+    "SS58_FORMAT": 2
 }
