@@ -20,7 +20,7 @@ const App = () => {
           <Route path="/" component={HomePage} />
         </Switch>
       </Router>
-\    </SubstrateContextProvider>
+    </SubstrateContextProvider>
   );
 };
 export default App;

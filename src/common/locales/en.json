@@ -26,5 +26,11 @@
   "Address": "Address",
   "Amount (KSM)": "Amount(KSM)",
   "Rewards (KMA)": "Rewards(KMA)",
-  "View all board": "View all board"
+  "View all board": "View all board",
+  "Support": "Support",
+  "Minimum contribution is 0.1 KSM": "Minimum contribution is 0.1 KSM",
+  "Minimum contribution is 1 KSM": "Minimum contribution is 1 KSM",
+  "Referral code invalid": "Referral code invalid",
+  "Cannot refer yourself": "Cannot refer yourself",
+  "Create an account in polkadot.js to continue": "Create an account in polkadot.js to continue"
 }

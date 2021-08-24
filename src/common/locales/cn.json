@@ -43,5 +43,11 @@
   "Install polkadot.js wallet to continue": "请安装 polkadot.js 以继续",
   "Connect wallet to continue": "连接到钱包以继续",
   "Create a polkadot.js acount to continue(edited)": "请先在Polkadot.js中创建账户",
-  "Insufficient funds": "资金不足"
+  "Insufficient funds": "资金不足",
+  "Support": "技术支持",
+  "Minimum contribution is 0.1 KSM": "最低贡献 0.1 KSM",
+  "Minimum contribution is 1 KSM": "最低贡献 1 KSM",
+  "Referral code invalid": "无效的推荐码",
+  "Cannot refer yourself": "无法推荐自己",
+  "Create an account in polkadot.js to continue": "请在 polkadot.js 创建账户以继续"
 }
