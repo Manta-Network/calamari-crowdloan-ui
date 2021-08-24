@@ -1,7 +1,7 @@
 {
     "APP_NAME": "calamari-crowdloan-prod",
     "PROVIDER_SOCKET": "wss://rococo-rpc.polkadot.io",
-    "CROWDLOAN_START_TIMESTAMP": 1626580800000,
+    "CROWDLOAN_START_TIMESTAMP": 1629784800000,
     "PARA_ID": 2059,
     "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
     "FUND_ID": "2059-14",
