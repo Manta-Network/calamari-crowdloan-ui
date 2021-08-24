@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import config from 'config';
 import { useTranslation } from 'react-i18next';
 import { Loader } from 'semantic-ui-react';
-import TxStatus from 'utils/TxStatus';
+import TxStatus from 'types/TxStatus';
 
 
 export default function Main ({ txStatus, transactionType = 'Transacion' }) {

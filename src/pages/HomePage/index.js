@@ -11,25 +11,20 @@ import Decimal from 'decimal.js';
 import Kusama from 'types/Kusama';
 import Contribution from 'types/Contribution';
 import axios from 'axios';
-import axiosRetry from 'axios-retry';
 import config from 'config';
 import { isHex, hexAddPrefix } from '@polkadot/util';
 import ReferralCode from 'types/ReferralCode';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { web3Enable } from '@polkadot/extension-dapp';
+import initAxios from 'utils/InitAxios';
 import getFromAccount from '../../utils/GetFromAccount';
 import { useSubstrate, SubstrateContextProvider } from '../../substrate-lib';
 
 function Main () {
+  initAxios();
+
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
-
-  axios.defaults.baseURL = config.SUBSCAN_URL;
-  axios.defaults.headers.post['Content-Type'] = 'application/json';
-  axios.defaults.headers.post['Access-Control-Allow-Origin'] = true;
-  axios.defaults.headers.post['X-API-Key'] = config.API_KEY;
-  axiosRetry(axios, { retries: 5, retryDelay: () => 600, retryCondition: error => error.response.status === 429 });
-
   const { referralCode } = useParams();
   const { t } = useTranslation();
 

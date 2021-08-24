@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
 import config from 'config';
 import ReferralCode from 'types/ReferralCode';
-import TxStatus from '../../utils/TxStatus';
+import TxStatus from '../../types/TxStatus';
 import TxStatusDisplay from '../Layouts/TxStatusDisplay';
 import Kusama from '../../types/Kusama';
 import { makeTxResHandler } from '../../utils/MakeTxResHandler';
