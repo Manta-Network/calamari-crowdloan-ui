@@ -1,5 +1,5 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const TableRowItem = ({ children, className, width = '', onTableRow }) => {
@@ -11,6 +11,13 @@ const TableRowItem = ({ children, className, width = '', onTableRow }) => {
       {children}
     </div>
   );
+};
+
+TableRowItem.propTypes = {
+  children: PropTypes.any,
+  className: PropTypes.string,
+  width: PropTypes.string,
+  onTableRow: PropTypes.func
 };
 
 export default TableRowItem;

@@ -1,9 +1,7 @@
-/* eslint-disable no-unneeded-ternary */
 const LANGUAGE_KEY = 'lang';
 
 export const getLanguage = () => {
-  const lang = localStorage.getItem(LANGUAGE_KEY);
-  return lang ? lang : 'en';
+  return localStorage.getItem(LANGUAGE_KEY) ?? 'en';
 };
 
 export const setLanguage = (lang) => {

@@ -1,5 +1,5 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const TableRow = ({ children, className, highlight }) => {
@@ -10,6 +10,12 @@ const TableRow = ({ children, className, highlight }) => {
       {children}
     </div>
   );
+};
+
+TableRow.propTypes = {
+  children: PropTypes.any,
+  className: PropTypes.string,
+  highlight: PropTypes.bool
 };
 
 export default TableRow;

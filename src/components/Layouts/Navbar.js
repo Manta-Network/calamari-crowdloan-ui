@@ -1,5 +1,4 @@
 /* eslint-disable multiline-ternary */
-/* eslint-disable react/style-prop-object */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Logo from 'assets/images/calamari-logo.svg';
