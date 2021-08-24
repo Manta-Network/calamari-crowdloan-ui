@@ -32,7 +32,7 @@ function AddressSelectModal ({ openModal, setOpenModal, acccountAddress, setAcco
           {keyringOptions?.map((option, index) => (
             <div
               onClick={() => {
-\                setAccountAddress(option.value);
+                setAccountAddress(option.value);
                 setOpenModal(false);
               }}
               className={classNames(
