@@ -46,10 +46,11 @@ const ContributeActivityPlaceholder = () => {
   );
 };
 
-const ContributeActivity = ({ allContributions }) => {
+const ContributeActivity = ({ allContributions, allContributors }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [pageNumber, setPageNumber] = useState(1);
   const [contributions, setContributions] = useState(null);
+  const [contributionRewards, setContributionRewards] = useState(null);
   const [referralCounts, setReferralCounts] = useState(null);
   const [referralRewards, setReferralRewards] = useState(null);
 
@@ -61,19 +62,45 @@ const ContributeActivity = ({ allContributions }) => {
   };
 
   useEffect(() => {
-    const getContributions = () => {
-      axios.post('parachain/contributes', { fund_id: config.FUND_ID, row: PAGE_SIZE, page: pageNumber - 1, order: 'block_num desc', from_history: true }).then(res => {
-        const contributions = res.data.data.contributes.map(contribution => {
-          const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
-          const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
-          return new Contribution(amountKSM, new Date(contribution.block_timestamp * 1000), contribution.who, referralCode);
-        });
-        setContributions(contributions);
-        setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
+    const getContributions = async () => {
+      const res = await axios.post('parachain/contributes', {
+        fund_id: config.FUND_ID,
+        row: PAGE_SIZE,
+        page: pageNumber - 1,
+        order: 'block_num desc',
+        from_history: true
       });
+      setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
+      setContributions(res.data.data.contributes?.map(rawContribution => {
+        const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(rawContribution.contributing)).toKSM();
+        const referralCode = (isHex(hexAddPrefix(rawContribution.memo)) && rawContribution.memo.length === 64) ? ReferralCode.fromHexStr(rawContribution.memo) : null;
+        return new Contribution(amountKSM, new Date(rawContribution.block_timestamp * 1000), rawContribution.who, referralCode);
+      }));
     };
     getContributions();
   }, [pageNumber]);
+
+  useEffect(() => {
+    if (!contributions) {
+      return;
+    }
+    const getContributionsRewards = () => {
+      return contributions.map(contribution => {
+        const baseReward = contribution.amountKSM.toKMABaseReward();
+        if (!allContributors || !allContributions) {
+          return baseReward;
+        }
+        let bonusReward = Calamari.zero();
+        if (allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(contribution.address)) {
+          bonusReward = contribution.amountKSM.toKMABonusRewardTier1();
+        } else if (allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(contribution.address)) {
+          bonusReward = contribution.amountKSM.toKMABonusRewardTier2();
+        }
+        return baseReward.add(bonusReward);
+      });
+    };
+    setContributionRewards(getContributionsRewards());
+  }, [contributions, allContributors, allContributions]);
 
   useEffect(() => {
     if (!allContributions || !contributions) {
@@ -82,7 +109,7 @@ const ContributeActivity = ({ allContributions }) => {
     const getReferralCountsAndRewards = () => {
       const referralsByContribution = contributions.map(currentPageContribution => {
         return allContributions.filter(someContribution => {
-          return someContribution.referral?.toAddress() === currentPageContribution.who;
+          return someContribution.referral?.toAddress() === currentPageContribution.address;
         });
       });
       const referralCounts = referralsByContribution.map(referredTransactions => {
@@ -125,6 +152,7 @@ const ContributeActivity = ({ allContributions }) => {
               <TableRowData
                 contribution={contribution}
                 key={contribution.address + contribution.date.toString()}
+                contributionReward={contributionRewards && contributionRewards[i]}
                 referralCount={referralCounts && referralCounts[i]}
                 referralReward={referralRewards && referralRewards[i]}
               />
@@ -147,22 +175,25 @@ const ContributeActivity = ({ allContributions }) => {
 };
 
 ContributeActivity.propTypes = {
-  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution))
+  allContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
+  allContributors: PropTypes.arrayOf(PropTypes.string),
 };
 
-const TableRowData = ({ contribution, referralCount, referralReward }) => {
+const TableRowData = ({ contribution, contributionReward, referralCount, referralReward }) => {
   return (
     <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
       <TableRowItem width="40%">
-        <div className="text-blue-thirdry overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
-          {contribution.address}
-        </div>
+        <a target="_blank" rel="noopener noreferrer" href={config.ADDRESS_BLOCK_EXPLORER_URL + contribution.who}>
+          <div className="text-blue-thirdry overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
+            {contribution.address}
+          </div>
+        </a>
       </TableRowItem>
       <TableRowItem width="13%">
         <span className="text-thirdry font-semibold">{contribution.amountKSM.toString()}</span>
       </TableRowItem>
       <TableRowItem width="17%">
-        <span className="manta-prime-blue font-semibold">{contribution.amountKSM.value.mul(10000).toString()} KMA</span>
+        <span className="manta-prime-blue font-semibold">{contributionReward && contributionReward.toString()}</span>
       </TableRowItem>
       {(referralCount !== null && referralReward !== null) &&
         <>
@@ -181,7 +212,8 @@ const TableRowData = ({ contribution, referralCount, referralReward }) => {
 TableRowData.propTypes = {
   contribution: PropTypes.instanceOf(Contribution),
   referralCount: PropTypes.number,
-  referralReward: PropTypes.instanceOf(Calamari)
+  referralReward: PropTypes.instanceOf(Calamari),
+  contributionReward: PropTypes.instanceOf(Calamari)
 };
 
 export default ContributeActivity;

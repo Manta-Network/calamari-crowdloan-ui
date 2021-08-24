@@ -13,7 +13,7 @@
     "lint:ci": "eslint src/**/*.js --max-warnings=0",
     "lint:fix": "eslint --fix src/**/*.js",
     "predeploy": "react-app-rewired build",
-    "deploy": "gh-pages -d build -m '[ci skip] Updates'"
+    "deploy": "./record_hash.sh && gh-pages -d build -m '[ci skip] Updates'"
   },
   "dependencies": {
     "@polkadot/api": "^4.16.2",

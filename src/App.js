@@ -16,7 +16,7 @@ const App = () => {
     <SubstrateContextProvider>
       <Router>
         <Switch>
-          <Route path="/:referralCode" component={HomePage} />
+          <Route path="/?referral:referralCode" component={HomePage} />
           <Route path="/" component={HomePage} />
         </Switch>
       </Router>

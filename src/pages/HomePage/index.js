@@ -14,25 +14,28 @@ import axios from 'axios';
 import config from 'config';
 import { isHex, hexAddPrefix } from '@polkadot/util';
 import ReferralCode from 'types/ReferralCode';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { web3Enable } from '@polkadot/extension-dapp';
+import { web3Enable, web3Accounts } from '@polkadot/extension-dapp';
 import initAxios from 'utils/InitAxios';
 import getFromAccount from '../../utils/GetFromAccount';
+import { getLastAccessedAccount } from '../../utils/LocalStorageValue';
 import { useSubstrate, SubstrateContextProvider } from '../../substrate-lib';
 
 function Main () {
   initAxios();
 
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
-  const { referralCode } = useParams();
+  const referralCode = new URLSearchParams(useLocation().search).get('referral');
   const { t } = useTranslation();
 
   const [fromAccount, setFromAccount] = useState(null);
   const [accountAddress, setAccountAddress] = useState(null);
   const [accountBalanceKSM, setAccountBalanceKSM] = useState(null);
   const [userContributions, setUserContributions] = useState(null);
-  const [polkadotJSInstalled, setPolkadotJSInstalled] = useState(null);
+  const [hasLoggedVersion, setHasLoggedVersion] = useState(false);
+  const [waitingForKeyring, setWaitingForKeyring] = useState(false);
+  const [keyringIsInit, setKeyringIsInit] = useState(false);
 
   const [totalContributionsKSM, setTotalContributionsKSM] = useState(null);
   const [allReferrals, setAllReferrals] = useState(null);
@@ -41,12 +44,55 @@ function Main () {
 
   const accountPair =
     accountAddress &&
-    keyringState === 'READY' &&
+    keyringIsInit &&
     keyring.getPair(accountAddress);
 
   useEffect(() => {
-    console.log(`Version: ${config.GIT_HASH}`);
-  });
+    const polkadotJsIsInjected = () => !!window.injectedWeb3['polkadot-js'];
+
+    const initKeyring = async () => {
+      await web3Enable(config.APP_NAME);
+      let allAccounts = await web3Accounts();
+      allAccounts = allAccounts.map(({ address, meta }) =>
+        ({ address, meta: { ...meta, name: meta.name } }));
+      keyring.loadAll({ isDevelopment: false }, allAccounts);
+      setKeyringIsInit(true);
+    };
+
+    const initKeyringWhenInjected = async () => {
+      if (polkadotJsIsInjected()) {
+        initKeyring();
+      } else {
+        setWaitingForKeyring(true);
+        const timer = setInterval(async () => {
+          if (!polkadotJsIsInjected()) return;
+          await initKeyring();
+          setWaitingForKeyring(false);
+          clearInterval(timer);
+        }, 500);
+      }
+    };
+
+    if (keyringIsInit || waitingForKeyring) return;
+    initKeyringWhenInjected();
+  }, [keyringIsInit, waitingForKeyring, keyring]);
+
+  useMemo(() => {
+    if (!hasLoggedVersion) {
+      console.log(`Calmari Crowdloan UI Version ${config.GIT_HASH}`);
+      setHasLoggedVersion(true);
+    }
+  }, [hasLoggedVersion]);
+
+  useEffect(() => {
+    const setDefaultAccount = async () => {
+      if (keyringIsInit && keyring.getPairs().length > 0 && !accountAddress) {
+        const defaultAccount = getLastAccessedAccount() || keyring.getPairs()[0].address;
+        setAccountAddress(defaultAccount);
+      }
+    };
+    setDefaultAccount();
+  }, [keyringIsInit, keyring, accountAddress]);
 
   useEffect(() => {
     async function loadFromAccount (accountPair) {
@@ -61,8 +107,12 @@ function Main () {
   }, [api, accountPair]);
 
   useEffect(() => {
-    let unsubscribe;
-    accountAddress &&
+    const getAccountBalance = async () => {
+      if (!api || !api.isConnected || !accountAddress) {
+        return;
+      }
+      await api.isReady;
+      let unsubscribe;
       api.query.system.account(accountAddress, balance => {
         const rawBalance = new Decimal(balance.data.free.toString());
         setAccountBalanceKSM(new Kusama(Kusama.ATOMIC_UNITS, rawBalance).toKSM());
@@ -71,17 +121,10 @@ function Main () {
           unsubscribe = unsub;
         })
         .catch(console.error);
-
-    return () => unsubscribe && unsubscribe();
-  }, [api, accountAddress]);
-
-  useEffect(() => {
-    const checkForPolkadotJS = async () => {
-      const extensions = await web3Enable(config.APP_NAME);
-      setPolkadotJSInstalled(extensions.length > 0);
+      return () => unsubscribe && unsubscribe();
     };
-    checkForPolkadotJS();
-  }, []);
+    getAccountBalance();
+  }, [api, accountAddress]);
 
   useMemo(() => {
     const getAllContributors = allContributions => {
@@ -99,10 +142,14 @@ function Main () {
       let pageIdx = 0;
       const allContributions = [];
       const allReferrals = {};
-
       do {
-        const res = await axios.post('parachain/contributes', { order: 'block_num asc', fund_id: config.FUND_ID, row: 100, page: pageIdx, from_history: true });
-        totalPages = Math.floor(res.data.data.count / 100);
+        const res = await axios.post('parachain/contributes', {
+          fund_id: config.FUND_ID,
+          row: 100,
+          page: pageIdx,
+          from_history: true
+        });
+        totalPages = Math.ceil(res.data.data.count / 100);
         res.data.data.contributes?.forEach(contribution => {
           const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(contribution.contributing)).toKSM();
           const referralCode = (isHex(hexAddPrefix(contribution.memo)) && contribution.memo.length === 64) ? ReferralCode.fromHexStr(contribution.memo) : null;
@@ -179,6 +226,7 @@ function Main () {
   return (
     <div className="home-page px-6 sm:px-16 xl:px-40">
       <Navbar
+        keyringIsInit={keyringIsInit}
         accountPair={accountPair}
         accountAddress={accountAddress}
         setAccountAddress={setAccountAddress}
@@ -189,7 +237,7 @@ function Main () {
           <Grid.Row className="flex-wrap flex-col flex">
             <Grid.Column className="flex-wrap item flex">
               <Contribute
-                polkadotJSInstalled={polkadotJSInstalled}
+                keyringIsInit={keyringIsInit}
                 accountAddress={accountAddress}
                 allContributors={allContributors}
                 urlReferralCode={referralCode}
@@ -203,7 +251,7 @@ function Main () {
             </Grid.Column>
             <Grid.Column className="flex-wrap item flex">
               <Details
-                polkadotJSInstalled={polkadotJSInstalled}
+                keyringIsInit={keyringIsInit}
                 accountAddress={accountAddress}
                 userContributions={userContributions}
                 allContributions={allContributions}
@@ -224,7 +272,7 @@ function Main () {
           </Grid.Row>
         </Grid>
       </div>
-      <ContributeActivity allContributions={allContributions} />
+      <ContributeActivity allContributions={allContributions} allContributors={allContributors} />
     </div>
   );
 }

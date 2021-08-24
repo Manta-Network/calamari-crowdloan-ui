@@ -126,7 +126,7 @@ class Kusama {
       if (this.denomination === Kusama.ATOMIC_UNITS) {
         return this.value.toNumber().toLocaleString(undefined, Kusama.DISPLAY_OPTIONS);
       } else if (this.denomination === Kusama.KSM) {
-        let string = this.value.toNumber().toLocaleString(undefined, Kusama.DISPLAY_OPTIONS);
+        let string = this.value.toNearest(0.1, Decimal.ROUND_DOWN).toNumber().toLocaleString(undefined, Kusama.DISPLAY_OPTIONS);
         if (includeUnits) {
           string = string + ' KSM';
         }

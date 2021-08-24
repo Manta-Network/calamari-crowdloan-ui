@@ -14,34 +14,17 @@ import TxStatusDisplay from '../Layouts/TxStatusDisplay';
 import Kusama from '../../types/Kusama';
 import { makeTxResHandler } from '../../utils/MakeTxResHandler';
 import { useSubstrate } from '../../substrate-lib';
-import AccountSelectModal from '../Layouts/AccountSelectModal';
 
-const ConnectWalletPrompt = ({ setAccountAddress, accountPair }) => {
+const CreateAccountPrompt = () => {
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = useState(false);
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <div onClick={() => setOpenModal(true)} >
-        <a href='#' className="mb-2 text-md xl:text-base">
-          {t('Connect wallet to continue')}
-        </a>
-      </div>
-      {
-        openModal &&
-        <AccountSelectModal
-          openModal={openModal}
-          setOpenModal={setOpenModal}
-          setAccountAddress={setAccountAddress}
-          accountPair={accountPair}
-        />
-      }
+      <p href='#' className="mb-2 text-md xl:text-base">
+        {t('Create an account in polkadot.js to continue')}
+      </p>
     </div>
   );
-};
-
-ConnectWalletPrompt.propTypes = {
-  setAccountAddress: PropTypes.func, accountPair: PropTypes.object
 };
 
 const InstallPJSPrompt = () => {
@@ -56,19 +39,13 @@ const InstallPJSPrompt = () => {
   );
 };
 
-ConnectWalletPrompt.PropTypes = {
-  setAccountAddress: PropTypes.func, accountPair: PropTypes.object
-};
-
 function Contribute ({
   fromAccount,
   accountBalanceKSM,
   urlReferralCode,
   allContributors,
   accountAddress,
-  polkadotJSInstalled,
-  setAccountAddress,
-  accountPair
+  keyringIsInit
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -200,6 +177,10 @@ function Contribute ({
   }, [accountAddress, referralCodeInput]);
 
   const onChangeReferralCodeInput = value => {
+    console.log(`${config.APP_BASE_URL}?referral=`);
+    if (value.startsWith(`${config.APP_BASE_URL}?referral=`)) {
+      value = value.replace(`${config.APP_BASE_URL}?referral=`, '');
+    }
     setReferralCodeInput(value);
   };
 
@@ -234,10 +215,10 @@ function Contribute ({
     }
   };
 
-  if (!polkadotJSInstalled) {
+  if (!keyringIsInit) {
     return <InstallPJSPrompt />;
   } else if (!fromAccount) {
-    return <ConnectWalletPrompt setAccountAddress={setAccountAddress} accountPair={accountPair} />;
+    return <CreateAccountPrompt />;
   }
 
   return (
@@ -272,7 +253,7 @@ function Contribute ({
         <div className="w-full form-input relative h-20">
           <Input
             value={referralCodeInput}
-            onChange={e => setReferralCodeInput(e.target.value)}
+            onChange={e => onChangeReferralCodeInput(e.target.value)}
             className="w-full h-full outline-none"
             disabled={formIsDisabled}
           />
@@ -327,7 +308,8 @@ Contribute.propTypes = {
   accountAddress: PropTypes.string,
   polkadotJSInstalled: PropTypes.bool,
   setAccountAddress: PropTypes.func,
-  accountPair: PropTypes.object
+  accountPair: PropTypes.object,
+  keyringIsInit: PropTypes.bool
 };
 
 export default Contribute;
