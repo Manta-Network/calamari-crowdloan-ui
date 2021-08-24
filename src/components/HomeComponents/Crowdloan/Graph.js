@@ -37,7 +37,6 @@ export default function Graph ({ allContributions }) {
     }
     const getContributionsByDay = () => {
       const CROWDLOAN_START_DATE = new Date(config.CROWDLOAN_START_TIMESTAMP);
-      console.log(CROWDLOAN_START_DATE);
       const MS_PER_DAY = 1000 * 60 * 60 * 24;
       const msIntoCrowdloan = new Date() - CROWDLOAN_START_DATE;
       const daysIntoCrowdloan = Math.ceil(msIntoCrowdloan / MS_PER_DAY);

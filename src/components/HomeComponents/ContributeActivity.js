@@ -183,7 +183,7 @@ const TableRowData = ({ contribution, contributionReward, referralCount, referra
   return (
     <TableRow className="bg-light-gray calamari-text rounded-md px-2 my-2">
       <TableRowItem width="40%">
-        <a target="_blank" rel="noopener noreferrer" href={config.ADDRESS_BLOCK_EXPLORER_URL + contribution.who}>
+        <a target="_blank" rel="noopener noreferrer" href={config.ADDRESS_BLOCK_EXPLORER_URL + contribution.address}>
           <div className="text-blue-thirdry overflow-hidden" style={{ textOverflow: 'ellipsis' }}>
             {contribution.address}
           </div>

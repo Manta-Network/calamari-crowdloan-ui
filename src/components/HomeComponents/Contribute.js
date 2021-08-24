@@ -101,6 +101,7 @@ function Contribute ({
     setContributionStatus(TxStatus.finalized(block));
   };
   const onContributeFailure = (block, error) => {
+    console.error(error);
     setContributionStatus(TxStatus.failed(block, error));
   };
   const onContributeUpdate = message => {
@@ -177,7 +178,6 @@ function Contribute ({
   }, [accountAddress, referralCodeInput]);
 
   const onChangeReferralCodeInput = value => {
-    console.log(`${config.APP_BASE_URL}?referral=`);
     if (value.startsWith(`${config.APP_BASE_URL}?referral=`)) {
       value = value.replace(`${config.APP_BASE_URL}?referral=`, '');
     }
@@ -211,7 +211,9 @@ function Contribute ({
       const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
       api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
     } catch (error) {
+      console.error('caught');
       console.error(error);
+      setContributionStatus(TxStatus.failed(null, error));
     }
   };
 
