@@ -37,7 +37,7 @@ function Navbar ({
   const onClickMyReferralCode = () => {
     if (accountAddress) {
       navigator.clipboard.writeText(`${config.APP_BASE_URL}?referral=${ReferralCode.fromAddress(accountAddress).toString()}`);
-      toast('Copied to clipboard', {
+      toast(t('Copied to clipboard'), {
         position: 'top-right',
         autoClose: 2000,
         hideProgressBar: true,
