@@ -1,5 +1,6 @@
 import { encodeAddress, decodeAddress } from '@polkadot/util-crypto';
 import { hexToU8a, u8aToHex, hexAddPrefix, hexStripPrefix } from '@polkadot/util';
+import config from 'config';
 
 export default class ReferralCode {
   constructor (bytes) {
@@ -18,7 +19,7 @@ export default class ReferralCode {
   }
 
   toAddress () {
-    return encodeAddress(this.bytes);
+    return encodeAddress(this.bytes, config.SS58_FORMAT);
   }
 
   toString () {
