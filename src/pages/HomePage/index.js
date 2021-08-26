@@ -49,10 +49,9 @@ function Main () {
     keyringState === 'READY' &&
     keyring.getPair(accountAddress);
 
-
   useEffect(() => {
     console.log(`Version: ${config.GIT_HASH}`);
-  })
+  });
 
   useEffect(() => {
     async function loadFromAccount (accountPair) {

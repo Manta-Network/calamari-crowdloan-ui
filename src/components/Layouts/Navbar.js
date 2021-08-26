@@ -14,7 +14,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import ReferralCode from 'types/ReferralCode';
 import config from 'config';
 
-function Navbar ({
+function Navbar({
   setAccountAddress,
   accountBalanceKSM,
   accountAddress,
@@ -26,13 +26,15 @@ function Navbar ({
 
   const onChangeLanguage = (code) => {
     setSelected(code);
-    const langCode = code === 'US' ? 'en' : 'cn';
+    const langCode = code === 'US' ? 'en' : code === 'RU' ? 'ru' : 'cn';
     i18n.changeLanguage(langCode);
     setLanguage(langCode);
   };
 
   useEffect(() => {
-    setSelected(getLanguage() === 'en' ? 'US' : 'CN');
+    setSelected(
+      getLanguage() === 'en' ? 'US' : getLanguage() === 'cn' ? 'CN' : 'RU'
+    );
   }, []);
 
   const onClickMyReferralCode = () => {
@@ -73,8 +75,8 @@ function Navbar ({
         <div className="hidden lg:block">
           <ReactFlagsSelect
             selected={selected}
-            countries={['US', 'CN']}
-            customLabels={{ US: 'EN', CN: 'CN' }}
+            countries={['US', 'CN', 'RU']}
+            customLabels={{ US: 'EN', CN: 'CN', RU: 'RU' }}
             onSelect={(code) => onChangeLanguage(code)}
           />
         </div>
