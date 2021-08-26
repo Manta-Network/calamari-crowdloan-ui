@@ -8,6 +8,7 @@ import TableHeaderWrapper from 'components/Table/TableHeaderWrapper';
 import TableRow from 'components/Table/TableRow';
 import TableRowItem from 'components/Table/TableRowItem';
 import Contribution from 'types/Contribution';
+import config from 'config';
 
 const LeaderboardPlaceholder = () => {
   const { t } = useTranslation();
@@ -79,11 +80,13 @@ export default function Leaderboard ({ allContributions }) {
                 </div>
               </TableRowItem>
               <TableRowItem width="40%">
-                <div
-                  style={{ textOverflow: 'ellipsis' }}
-                  className="overflow-hidden">
-                  {val.address}
-                </div>
+                <a target="_blank" rel="noopener noreferrer" href={config.ADDRESS_BLOCK_EXPLORER_URL + val.address}>
+                  <div
+                    style={{ textOverflow: 'ellipsis' }}
+                    className="overflow-hidden">
+                    {val.address}
+                  </div>
+                </a>
               </TableRowItem>
               <TableRowItem width="40%">
                 <span className="text-thirdry font-semibold">
