@@ -21,7 +21,7 @@ const CreateAccountPrompt = () => {
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <p href='#' className="mb-2 text-md xl:text-base">
+      <p className="mb-2 text-md xl:text-base">
         {t('Create an account in polkadot.js to continue')}
       </p>
     </div>

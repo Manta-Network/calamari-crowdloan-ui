@@ -25,7 +25,7 @@ export default function Main ({ txStatus, transactionType = 'Transacion' }) {
           ? <p>
             <Loader active inline size='small' inverted />{' ' + txStatusMesage}
           </p>
-          : <a href={config.BLOCK_EXPLORER_URL + txStatus.block} style={{ textAlign: 'center', overflowWrap: 'break-word' }}>
+          : <a target="_blank" rel="noopener noreferrer" href={config.BLOCK_EXPLORER_URL + txStatus.block} style={{ textAlign: 'center', overflowWrap: 'break-word' }}>
             <p>{txStatusMesage}</p>
           </a>
         }
