@@ -54,7 +54,7 @@ function Main () {
       let allAccounts = await web3Accounts();
       allAccounts = allAccounts.map(({ address, meta }) =>
         ({ address, meta: { ...meta, name: meta.name } }));
-      keyring.loadAll({ isDevelopment: false }, allAccounts);
+      keyring.loadAll({ ss58Format: config.SS58_FORMAT, isDevelopment: false }, allAccounts);
       setKeyringIsInit(true);
     };
 
