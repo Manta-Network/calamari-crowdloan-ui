@@ -11,6 +11,7 @@
     "EARLY_BONUS_TIER_2_CUTOFF": 1000,
     "MIN_CONTRIBUTION": 0.1,
     "SS58_FORMAT": 2,
-    "ADDRESS_BLOCK_EXPLORER_URL": "https://rococo.subscan.io/account/"
-
+    "ADDRESS_BLOCK_EXPLORER_URL": "https://rococo.subscan.io/account/",
+    "CROWDLOAN_KSM_TARGET": 200,
+    "DEFENSIVE_FEE_ESTIMATE_KSM": 0.1
 }

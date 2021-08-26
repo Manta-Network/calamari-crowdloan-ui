@@ -26,8 +26,8 @@ function Main () {
   initAxios();
 
   const { api, apiState, keyring, keyringState, apiError } = useSubstrate();
-  const referralCode = new URLSearchParams(useLocation().search).get('referral');
   const { t } = useTranslation();
+  const referralCode = new URLSearchParams(useLocation().search).get('referral');
 
   const [fromAccount, setFromAccount] = useState(null);
   const [accountAddress, setAccountAddress] = useState(null);
@@ -36,7 +36,6 @@ function Main () {
   const [hasLoggedVersion, setHasLoggedVersion] = useState(false);
   const [waitingForKeyring, setWaitingForKeyring] = useState(false);
   const [keyringIsInit, setKeyringIsInit] = useState(false);
-
   const [totalContributionsKSM, setTotalContributionsKSM] = useState(null);
   const [allReferrals, setAllReferrals] = useState(null);
   const [allContributions, setAllContributions] = useState(null);
@@ -87,7 +86,7 @@ function Main () {
   useEffect(() => {
     const setDefaultAccount = async () => {
       if (keyringIsInit && keyring.getPairs().length > 0 && !accountAddress) {
-        const defaultAccount = getLastAccessedAccount() || keyring.getPairs()[0].address;
+        const defaultAccount = getLastAccessedAccount(keyring) || keyring.getPairs()[0].address;
         setAccountAddress(defaultAccount);
       }
     };
@@ -95,7 +94,7 @@ function Main () {
   }, [keyringIsInit, keyring, accountAddress]);
 
   useEffect(() => {
-    async function loadFromAccount (accountPair) {
+    async function loadFromAccount () {
       if (!api || !api.isConnected || !accountPair) {
         return;
       }
@@ -103,7 +102,7 @@ function Main () {
       const fromAccount = await getFromAccount(accountPair, api);
       setFromAccount(fromAccount);
     }
-    loadFromAccount(accountPair, api);
+    loadFromAccount();
   }, [api, accountPair]);
 
   useEffect(() => {

@@ -45,7 +45,8 @@ function Contribute ({
   urlReferralCode,
   allContributors,
   accountAddress,
-  keyringIsInit
+  keyringIsInit,
+  totalContributionsKSM
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -69,9 +70,15 @@ function Contribute ({
   const getEarlyBonus = () => {
     if (!allContributors || !contributeAmountKSM) {
       return Calamari.zero();
-    } else if (allContributors.length < config.EARLY_BONUS_TIER_1_CUTOFF || allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)) {
+    } else if (
+      allContributors.length < config.EARLY_BONUS_TIER_1_CUTOFF
+      || allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)
+    ) {
       return contributeAmountKSM.toKMABonusRewardTier1();
-    } else if (allContributors.length < config.EARLY_BONUS_TIER_2_CUTOFF || allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)) {
+    } else if (
+      allContributors.length < config.EARLY_BONUS_TIER_2_CUTOFF
+      || allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)
+    ) {
       return contributeAmountKSM.toKMABonusRewardTier2();
     } else {
       return Calamari.zero();
@@ -115,17 +122,25 @@ function Contribute ({
     );
   };
 
-  const getMaxContribution = () => {
+  const getUserMaxContributionKSM = () => {
     if (!accountBalanceKSM) {
       return Kusama.zero();
     }
     const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1));
     return accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero());
   };
-  const maxContribution = getMaxContribution();
+  const userMaxContributionKSM = getUserMaxContributionKSM();
+
+  const getCrowdloanRemainingFundsKSM = () => {
+    const crowdloanKSMTarget = new Kusama(Kusama.KSM, new Decimal(config.CROWDLOAN_KSM_TARGET));
+    return crowdloanKSMTarget.minus(totalContributionsKSM).max(Kusama.zero());
+  };
+  const crowdloanRemainingFundsKSM = getCrowdloanRemainingFundsKSM();
+
+  const maxContributionKSM = userMaxContributionKSM.min(crowdloanRemainingFundsKSM);
 
   const onClickMax = () => {
-    accountBalanceKSM && setContributeAmountInput(maxContribution.toString(false));
+    accountBalanceKSM && setContributeAmountInput(maxContributionKSM.toString(false));
   };
 
   const onChangeContributeAmountInput = e => {
@@ -194,13 +209,25 @@ function Contribute ({
   }, [urlReferralCode]);
 
   const formIsDisabled = contributionStatus && contributionStatus.isProcessing();
-  const insufficientFunds = contributeAmountKSM && contributeAmountKSM.gt(maxContribution);
-  const belowMinContribution = contributeAmountKSM && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(config.MIN_CONTRIBUTION)));
-  const shouldShowInsufficientFundsWarning = insufficientFunds && contributeAmountInput.length;
-  const shouldShowMinContributionWarning = !shouldShowInsufficientFundsWarning && belowMinContribution && contributeAmountInput.length > 0;
+
+  const exceedsTarget = (
+    contributeAmountKSM
+    && crowdloanRemainingFundsKSM.lt(contributeAmountKSM)
+    && contributeAmountInput.length > 0
+  );
+  const insufficientFunds = (
+    contributeAmountKSM
+    && contributeAmountKSM.gt(maxContributionKSM)
+    && contributeAmountInput.length > 0
+  );
+  const belowMinContribution = (
+    contributeAmountKSM
+    && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(config.MIN_CONTRIBUTION)))
+    && contributeAmountInput.length > 0
+  );
 
   const onClickClaimButton = async () => {
-    if (!contributeAmountKSM || insufficientFunds || belowMinContribution) {
+    if (!contributeAmountKSM || insufficientFunds || belowMinContribution || exceedsTarget) {
       return;
     }
     try {
@@ -211,7 +238,6 @@ function Contribute ({
       const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
       api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
     } catch (error) {
-      console.error('caught');
       console.error(error);
       setContributionStatus(TxStatus.failed(null, error));
     }
@@ -223,13 +249,20 @@ function Contribute ({
     return <CreateAccountPrompt />;
   }
 
+  let amountLabel = t('Enter your contribution amount');
+  if (insufficientFunds) {
+    amountLabel  = '❌ ' + t('Insufficient funds');
+  } else if (belowMinContribution) {
+    amountLabel  = '❌ ' + t(`Minimum contribution is ${config.MIN_CONTRIBUTION} KSM`);
+  } else if (exceedsTarget) {
+    amountLabel  = '❌ ' + t('Contribution exceeds crowdloan target');
+  }
+
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
       <p className="mb-2 text-sm xl:text-base">
-        {(!shouldShowInsufficientFundsWarning && !shouldShowMinContributionWarning) && t('Enter your contribution amount')}
-        {shouldShowInsufficientFundsWarning && '❌ ' + t('Insufficient funds')}
-        {shouldShowMinContributionWarning && '❌ ' + t(`Minimum contribution is ${config.MIN_CONTRIBUTION} KSM`)}
+        {amountLabel}
       </p>
       <div className="flex items-center">
         <div className="form-input w-4/5 amount relative h-20">
@@ -311,7 +344,8 @@ Contribute.propTypes = {
   polkadotJSInstalled: PropTypes.bool,
   setAccountAddress: PropTypes.func,
   accountPair: PropTypes.object,
-  keyringIsInit: PropTypes.bool
+  keyringIsInit: PropTypes.bool,
+  totalContributionsKSM: PropTypes.instanceOf(Kusama)
 };
 
 export default Contribute;
