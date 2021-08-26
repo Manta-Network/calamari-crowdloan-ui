@@ -249,13 +249,17 @@ function Contribute ({
     return <CreateAccountPrompt />;
   }
 
-  let amountLabel = t('Enter your contribution amount');
-  if (insufficientFunds) {
+  let amountLabel;
+  if (contributionStatus) {
+    amountLabel = t('Enter your contribution amount');
+  } else if (insufficientFunds) {
     amountLabel  = '❌ ' + t('Insufficient funds');
   } else if (belowMinContribution) {
     amountLabel  = '❌ ' + t(`Minimum contribution is ${config.MIN_CONTRIBUTION} KSM`);
   } else if (exceedsTarget) {
     amountLabel  = '❌ ' + t('Contribution exceeds crowdloan target');
+  } else {
+    amountLabel = t('Enter your contribution amount');
   }
 
   return (
