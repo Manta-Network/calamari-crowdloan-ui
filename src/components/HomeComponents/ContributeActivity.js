@@ -71,7 +71,8 @@ const ContributeActivity = ({ allContributions, allContributors }) => {
         from_history: true
       });
       setTotalPages(Math.ceil(res.data.data.count / PAGE_SIZE));
-      setContributions(res.data.data.contributes?.map(rawContribution => {
+      const rawContributions = res.data.data.contributes ?? [];
+      setContributions(rawContributions.map(rawContribution => {
         const amountKSM = new Kusama(Kusama.ATOMIC_UNITS, new Decimal(rawContribution.contributing)).toKSM();
         const referralCode = (isHex(hexAddPrefix(rawContribution.memo)) && rawContribution.memo.length === 64) ? ReferralCode.fromHexStr(rawContribution.memo) : null;
         return new Contribution(amountKSM, new Date(rawContribution.block_timestamp * 1000), rawContribution.who, referralCode);
@@ -81,7 +82,7 @@ const ContributeActivity = ({ allContributions, allContributors }) => {
   }, [pageNumber]);
 
   useEffect(() => {
-    if (!contributions) {
+    if (contributions === null) {
       return;
     }
     const getContributionsRewards = () => {
