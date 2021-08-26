@@ -220,7 +220,7 @@ function Contribute ({
   );
   const insufficientFunds = (
     contributeAmountKSM
-    && contributeAmountKSM.gt(maxContributionKSM)
+    && contributeAmountKSM.gt(userMaxContributionKSM)
     && contributeAmountInput.length > 0
   );
   const belowMinContribution = (
