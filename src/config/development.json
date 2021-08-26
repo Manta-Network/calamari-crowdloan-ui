@@ -1,17 +1,17 @@
 {
     "APP_NAME": "calamari-crowdloan-dev",
     "PROVIDER_SOCKET": "wss://rococo-rpc.polkadot.io",
+    "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
+    "BLOCK_EXPLORER_URL": "https://rococo.subscan.io/block/",
+    "ADDRESS_BLOCK_EXPLORER_URL": "https://rococo.subscan.io/account/",
+    "APP_BASE_URL": "localhost:3333/",
     "CROWDLOAN_START_TIMESTAMP": 1629784800000,
     "PARA_ID": 2085,
-    "SUBSCAN_URL": "https://rococo.api.subscan.io/api/scan/",
     "FUND_ID": "2085-27",
-    "BLOCK_EXPLORER_URL": "https://rococo.subscan.io/block/",
-    "APP_BASE_URL": "localhost:3333/",
     "EARLY_BONUS_TIER_1_CUTOFF": 50,
     "EARLY_BONUS_TIER_2_CUTOFF": 100,
     "MIN_CONTRIBUTION": 1,
-    "SS58_FORMAT": 42,
-    "ADDRESS_BLOCK_EXPLORER_URL": "https://rococo.subscan.io/account/",
     "CROWDLOAN_KSM_TARGET": 200,
+    "SS58_FORMAT": 42,
     "DEFENSIVE_FEE_ESTIMATE_KSM": 0.1
 }
