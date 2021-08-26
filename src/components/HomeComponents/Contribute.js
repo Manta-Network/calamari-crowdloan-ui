@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
 import config from 'config';
 import ReferralCode from 'types/ReferralCode';
+import Contribution from 'types/Contribution';
 import TxStatus from '../../types/TxStatus';
 import TxStatusDisplay from '../Layouts/TxStatusDisplay';
 import Kusama from '../../types/Kusama';
@@ -46,7 +47,8 @@ function Contribute ({
   allContributors,
   accountAddress,
   keyringIsInit,
-  totalContributionsKSM
+  totalContributionsKSM,
+  userContributions
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -87,8 +89,9 @@ function Contribute ({
   const earlyBonus = getEarlyBonus();
 
   const getReferalBonus = () => {
-    if (!contributeAmountKSM) return null;
-    return referralCode ? contributeAmountKSM.toKMAWasReferredReward() : Calamari.zero();
+    if (!contributeAmountKSM && !userContributions) return null;
+    const previousReferral = userContributions?.some(contribution => contribution.referral);
+    return (referralCode || previousReferral) ? contributeAmountKSM.toKMAWasReferredReward() : Calamari.zero();
   };
   const referralBonus = getReferalBonus();
 
@@ -232,11 +235,15 @@ function Contribute ({
     }
     try {
       setContributionStatus(TxStatus.processing(''));
+      const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
       const contributeTx = buildContributeTx();
       const referralTx = referralCode && buildReferralTx();
-      const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx];
-      const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
-      api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
+      if (referralTx) {
+        const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx];
+        api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
+      } else {
+        contributeTx.signAndSend(fromAccount, txResHandler);
+      }
     } catch (error) {
       console.error(error);
       setContributionStatus(TxStatus.failed(null, error));
@@ -349,7 +356,8 @@ Contribute.propTypes = {
   setAccountAddress: PropTypes.func,
   accountPair: PropTypes.object,
   keyringIsInit: PropTypes.bool,
-  totalContributionsKSM: PropTypes.instanceOf(Kusama)
+  totalContributionsKSM: PropTypes.instanceOf(Kusama),
+  userContributions: PropTypes.arrayOf(PropTypes.instanceOf(Contribution)),
 };
 
 export default Contribute;

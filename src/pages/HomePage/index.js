@@ -246,6 +246,7 @@ function Main () {
                 setUserContributions={setUserContributions}
                 setAccountAddress={setAccountAddress}
                 accountPair={accountPair}
+                userContributions={userContributions}
               />
             </Grid.Column>
             <Grid.Column className="flex-wrap item flex">
