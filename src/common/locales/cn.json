@@ -49,5 +49,6 @@
     "Minimum contribution is 1 KSM": "最低贡献 1 KSM",
     "Referral code invalid": "无效的推荐码",
     "Cannot refer self": "无法推荐自己",
-    "Create an account in polkadot.js to continue": "请在 polkadot.js 创建账户以继续"
+    "Create an account in polkadot.js to continue": "请在 polkadot.js 创建账户以继续",
+    "Contribution exceeds crowdloan target": "贡献超过众贷目标"
 }
