@@ -16,6 +16,7 @@ export function makeTxResHandler (
     } else if (status.isFinalized && error) {
       onFailure(status.asFinalized.toString(), error);
     } else if (status.isFinalized) {
+      console.log(status);
       onSuccess(status.asFinalized.toString());
     } else {
       onUpdate(status.type);
