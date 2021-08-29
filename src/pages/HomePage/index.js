@@ -144,6 +144,7 @@ function Main () {
       do {
         const res = await axios.post('parachain/contributes', {
           fund_id: config.FUND_ID,
+          order: 'block_num asc',
           row: 100,
           page: pageIdx,
           from_history: true
