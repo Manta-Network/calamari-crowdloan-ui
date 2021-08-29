@@ -18,6 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { web3Enable, web3Accounts } from '@polkadot/extension-dapp';
 import initAxios from 'utils/InitAxios';
+import VersionTag from 'components/Layouts/VersionTag';
 import getFromAccount from '../../utils/GetFromAccount';
 import { getLastAccessedAccount } from '../../utils/LocalStorageValue';
 import { useSubstrate, SubstrateContextProvider } from '../../substrate-lib';
@@ -274,6 +275,7 @@ function Main () {
         </Grid>
       </div>
       <ContributeActivity allContributions={allContributions} allContributors={allContributors} />
+      <VersionTag />
     </div>
   );
 }

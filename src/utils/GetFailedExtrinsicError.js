@@ -13,6 +13,5 @@ export default function getFailedExtrinsicError (events, api) {
         errorMessage = error.toString();
       }
     });
-  console.error(errorMessage);
   return errorMessage;
 }
