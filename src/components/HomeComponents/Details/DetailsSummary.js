@@ -102,7 +102,7 @@ const DetailsSummary = ({
     setUserTotalRewardKMA(getUserTotalRewardsKMA());
   }, [userBaseRewardsKMA, userBonusRewardsKMA, userGaveReferralRewardsKMA, userWasReferredRewards]);
 
-  if (!userContributions) {
+  if (!userContributions || !allContributions) {
     return <DetailsSummaryPlaceholder />;
   }
   return (
