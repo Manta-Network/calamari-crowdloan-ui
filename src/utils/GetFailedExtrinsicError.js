@@ -1,8 +1,7 @@
 export default function getFailedExtrinsicError (events, api) {
-  console.log(events);
   let errorMessage = null;
   events.filter(({ event }) =>
-    api.events.system.ExtrinsicFailed.is(event) || api.events.utility.BatchInterrupted)
+    api.events.system.ExtrinsicFailed.is(event) || api.events.utility.BatchInterrupted.is(event))
     .forEach(({ event: { data: [error,] } }) => {
       if (error.isModule) {
         // for module errors, we have the section indexed, lookup
@@ -14,5 +13,6 @@ export default function getFailedExtrinsicError (events, api) {
         errorMessage = error.toString();
       }
     });
+  console.error(errorMessage);
   return errorMessage;
 }
