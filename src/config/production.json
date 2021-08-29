@@ -4,7 +4,7 @@
     "SUBSCAN_URL": "https://kusama.api.subscan.io/api/scan/",
     "BLOCK_EXPLORER_URL": "https://kusama.subscan.io/block/",
     "ADDRESS_BLOCK_EXPLORER_URL": "https://kusama.subscan.io/account/",
-    "APP_BASE_URL": "https://calamari.crowdloan.manta.network/",
+    "APP_BASE_URL": "https://crowdloan.calamari.manta.network/",
     "CROWDLOAN_START_TIMESTAMP": 1630036801000,
     "PARA_ID": 2084,
     "FUND_ID": "2084-27",
