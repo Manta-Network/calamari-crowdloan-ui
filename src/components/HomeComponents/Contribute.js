@@ -129,7 +129,7 @@ function Contribute ({
     if (!accountBalanceKSM) {
       return Kusama.zero();
     }
-    const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(0.1));
+    const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(config.DEFENSIVE_FEE_ESTIMATE_KSM));
     return accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero());
   };
   const userMaxContributionKSM = getUserMaxContributionKSM();
@@ -218,6 +218,7 @@ function Contribute ({
     && crowdloanRemainingFundsKSM.lt(contributeAmountKSM)
     && contributeAmountInput.length > 0
   );
+
   const insufficientFunds = (
     contributeAmountKSM
     && contributeAmountKSM.gt(userMaxContributionKSM)

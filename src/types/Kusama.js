@@ -136,9 +136,9 @@ class Kusama {
 
     toUnformattedString () {
       if (this.denomination === Kusama.ATOMIC_UNITS) {
-        return this.value.toNumber().toFixed(0);
+        return this.value.toNearest(1, Decimal.ROUND_DOWN).toNumber().toFixed(0);
       } else if (this.denomination === Kusama.KSM) {
-        return this.value.toNumber().toFixed(2);
+        return this.value.toNearest(0.01, Decimal.ROUND_DOWN).toNumber().toFixed(2);
       }
     }
 }
