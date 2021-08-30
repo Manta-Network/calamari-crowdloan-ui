@@ -133,6 +133,14 @@ class Kusama {
         return string;
       }
     }
+
+    toUnformattedString () {
+      if (this.denomination === Kusama.ATOMIC_UNITS) {
+        return this.value.toNumber().toFixed(0);
+      } else if (this.denomination === Kusama.KSM) {
+        return this.value.toNumber().toFixed(2);
+      }
+    }
 }
 
 export default Kusama;

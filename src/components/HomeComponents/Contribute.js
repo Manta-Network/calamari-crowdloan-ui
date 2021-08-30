@@ -143,7 +143,7 @@ function Contribute ({
   const maxContributionKSM = userMaxContributionKSM.min(crowdloanRemainingFundsKSM);
 
   const onClickMax = () => {
-    accountBalanceKSM && setContributeAmountInput(maxContributionKSM.toString(false));
+    accountBalanceKSM && setContributeAmountInput(maxContributionKSM.toUnformattedString());
   };
 
   const onChangeContributeAmountInput = e => {
