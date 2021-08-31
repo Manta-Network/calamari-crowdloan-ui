@@ -50,5 +50,6 @@
     "Referral code invalid": "无效的推荐码",
     "Cannot refer self": "无法推荐自己",
     "Create an account in polkadot.js to continue": "请在 polkadot.js 创建账户以继续",
-    "Contribution exceeds crowdloan target": "贡献超过众贷目标"
+    "Contribution exceeds crowdloan target": "贡献超过众贷目标",
+    "Calamari crowdloan has finished stage 1, thank you! New rewards are suspended until stage 2. Click for details.": "Calamari 众筹第一阶段完成，感谢您的贡献！ 直到第二阶段开始，众筹回报会暂停。 点击了解详情。"
 }
