@@ -18,6 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { web3Enable, web3Accounts } from '@polkadot/extension-dapp';
 import initAxios from 'utils/InitAxios';
+import Header from 'components/Layouts/Header';
 import VersionTag from 'components/Layouts/VersionTag';
 import getFromAccount from '../../utils/GetFromAccount';
 import { getLastAccessedAccount } from '../../utils/LocalStorageValue';
@@ -225,58 +226,61 @@ function Main () {
   }
 
   return (
-    <div className="home-page px-6 sm:px-16 xl:px-40">
-      <Navbar
-        keyringIsInit={keyringIsInit}
-        accountPair={accountPair}
-        accountAddress={accountAddress}
-        setAccountAddress={setAccountAddress}
-        accountBalanceKSM={accountBalanceKSM}
-      />
-      <div className="home-content py-6">
-        <Grid columns="three">
-          <Grid.Row className="flex-wrap flex-col flex">
-            <Grid.Column className="flex-wrap item flex">
-              <Contribute
-                keyringIsInit={keyringIsInit}
-                accountAddress={accountAddress}
-                allContributors={allContributors}
-                urlReferralCode={referralCode}
-                fromAccount={fromAccount}
-                accountBalanceKSM={accountBalanceKSM}
-                totalContributionsKSM={totalContributionsKSM}
-                setUserContributions={setUserContributions}
-                setAccountAddress={setAccountAddress}
-                accountPair={accountPair}
-                userContributions={userContributions}
-              />
-            </Grid.Column>
-            <Grid.Column className="flex-wrap item flex">
-              <Details
-                keyringIsInit={keyringIsInit}
-                accountAddress={accountAddress}
-                userContributions={userContributions}
-                allContributions={allContributions}
-                allContributors={allContributors}
-                allReferrals={allReferrals}
-                setAccountAddress={setAccountAddress}
-                accountPair={accountPair}
-              />
-            </Grid.Column>
-            <Grid.Column className="flex-wrap item flex">
-              <Crowdloan
-                totalContributionsKSM={totalContributionsKSM}
-                allContributions={allContributions}
-                allContributors={allContributors}
-                allReferrals={allReferrals}
-              />
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
+    <>
+      <Header totalContributionsKSM={totalContributionsKSM}/>
+      <div style={{paddingTop: '1em'}} className="home-page px-6 sm:px-16 xl:px-40">
+        <Navbar
+          keyringIsInit={keyringIsInit}
+          accountPair={accountPair}
+          accountAddress={accountAddress}
+          setAccountAddress={setAccountAddress}
+          accountBalanceKSM={accountBalanceKSM}
+        />
+        <div className="home-content py-6">
+          <Grid columns="three">
+            <Grid.Row className="flex-wrap flex-col flex">
+              <Grid.Column className="flex-wrap item flex">
+                <Contribute
+                  keyringIsInit={keyringIsInit}
+                  accountAddress={accountAddress}
+                  allContributors={allContributors}
+                  urlReferralCode={referralCode}
+                  fromAccount={fromAccount}
+                  accountBalanceKSM={accountBalanceKSM}
+                  totalContributionsKSM={totalContributionsKSM}
+                  setUserContributions={setUserContributions}
+                  setAccountAddress={setAccountAddress}
+                  accountPair={accountPair}
+                  userContributions={userContributions}
+                />
+              </Grid.Column>
+              <Grid.Column className="flex-wrap item flex">
+                <Details
+                  keyringIsInit={keyringIsInit}
+                  accountAddress={accountAddress}
+                  userContributions={userContributions}
+                  allContributions={allContributions}
+                  allContributors={allContributors}
+                  allReferrals={allReferrals}
+                  setAccountAddress={setAccountAddress}
+                  accountPair={accountPair}
+                />
+              </Grid.Column>
+              <Grid.Column className="flex-wrap item flex">
+                <Crowdloan
+                  totalContributionsKSM={totalContributionsKSM}
+                  allContributions={allContributions}
+                  allContributors={allContributors}
+                  allReferrals={allReferrals}
+                />
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
+        </div>
+        <ContributeActivity allContributions={allContributions} allContributors={allContributors} />
+        <VersionTag />
       </div>
-      <ContributeActivity allContributions={allContributions} allContributors={allContributors} />
-      <VersionTag />
-    </div>
+    </>
   );
 }
 
