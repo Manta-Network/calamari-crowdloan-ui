@@ -9,6 +9,10 @@ import { useTranslation } from 'react-i18next';
 import Calamari from 'types/Calamari';
 import config from 'config';
 import ReferralCode from 'types/ReferralCode';
+import {
+  getLatestReferralCode,
+  setLatestReferralCode,
+} from 'utils/LocalStorageValue';
 import Contribution from 'types/Contribution';
 import TxStatus from '../../types/TxStatus';
 import TxStatusDisplay from '../Layouts/TxStatusDisplay';
@@ -33,14 +37,16 @@ const InstallPJSPrompt = () => {
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <a className="mb-2 text-md xl:text-base" href='https://polkadot.js.org/extension/'>
+      <a
+        className="mb-2 text-md xl:text-base"
+        href="https://polkadot.js.org/extension/">
         {t('Install polkadot.js wallet to continue')}
       </a>
     </div>
   );
 };
 
-function Contribute ({
+function Contribute({
   fromAccount,
   accountBalanceKSM,
   urlReferralCode,
@@ -48,7 +54,7 @@ function Contribute ({
   accountAddress,
   keyringIsInit,
   totalContributionsKSM,
-  userContributions
+  userContributions,
 }) {
   const [contributionStatus, setContributionStatus] = useState(null);
   const [contributeAmountInput, setContributeAmountInput] = useState('');
@@ -73,13 +79,17 @@ function Contribute ({
     if (!allContributors || !contributeAmountKSM) {
       return Calamari.zero();
     } else if (
-      allContributors.length < config.EARLY_BONUS_TIER_1_CUTOFF
-      || allContributors.slice(0, config.EARLY_BONUS_TIER_1_CUTOFF).includes(accountAddress)
+      allContributors.length < config.EARLY_BONUS_TIER_1_CUTOFF ||
+      allContributors
+        .slice(0, config.EARLY_BONUS_TIER_1_CUTOFF)
+        .includes(accountAddress)
     ) {
       return contributeAmountKSM.toKMABonusRewardTier1();
     } else if (
-      allContributors.length < config.EARLY_BONUS_TIER_2_CUTOFF
-      || allContributors.slice(0, config.EARLY_BONUS_TIER_2_CUTOFF).includes(accountAddress)
+      allContributors.length < config.EARLY_BONUS_TIER_2_CUTOFF ||
+      allContributors
+        .slice(0, config.EARLY_BONUS_TIER_2_CUTOFF)
+        .includes(accountAddress)
     ) {
       return contributeAmountKSM.toKMABonusRewardTier2();
     } else {
@@ -90,14 +100,20 @@ function Contribute ({
 
   const getReferalBonus = () => {
     if (!contributeAmountKSM && !userContributions) return null;
-    const previousReferral = userContributions?.some(contribution => contribution.referral);
-    return (referralCode || previousReferral) ? contributeAmountKSM.toKMAWasReferredReward() : Calamari.zero();
+    const previousReferral = userContributions?.some(
+      (contribution) => contribution.referral,
+    );
+    return referralCode || previousReferral
+      ? contributeAmountKSM.toKMAWasReferredReward()
+      : Calamari.zero();
   };
   const referralBonus = getReferalBonus();
 
   const getBaseReward = () => {
     if (!contributeAmountKSM) return null;
-    return contributeAmountKSM ? contributeAmountKSM.toKMABaseReward() : Calamari.zero();
+    return contributeAmountKSM
+      ? contributeAmountKSM.toKMABaseReward()
+      : Calamari.zero();
   };
   const baseReward = getBaseReward();
 
@@ -107,48 +123,58 @@ function Contribute ({
     totalReward = baseReward.add(referralBonus.add(earlyBonus));
   }
 
-  const onContributeSuccess = block => {
+  const onContributeSuccess = (block) => {
     setContributionStatus(TxStatus.finalized(block));
+    if (referralCode) {
+      setLatestReferralCode(referralCode, accountAddress);
+    }
   };
   const onContributeFailure = (block, error) => {
     console.error(error);
     setContributionStatus(TxStatus.failed(block, error));
   };
-  const onContributeUpdate = message => {
+  const onContributeUpdate = (message) => {
     setContributionStatus(TxStatus.processing(message));
   };
 
   const buildReferralTx = () => {
     const memo = api.createType('Memo', referralCode.bytes);
-    return api.tx.crowdloan.addMemo(
-      config.PARA_ID, memo.toHex()
-    );
+    return api.tx.crowdloan.addMemo(config.PARA_ID, memo.toHex());
   };
 
   const getUserMaxContributionKSM = () => {
     if (!accountBalanceKSM) {
       return Kusama.zero();
     }
-    const estimatedFeeAmount = new Kusama(Kusama.KSM, new Decimal(config.DEFENSIVE_FEE_ESTIMATE_KSM));
+    const estimatedFeeAmount = new Kusama(
+      Kusama.KSM,
+      new Decimal(config.DEFENSIVE_FEE_ESTIMATE_KSM),
+    );
     return accountBalanceKSM.minus(estimatedFeeAmount).max(Kusama.zero());
   };
   const userMaxContributionKSM = getUserMaxContributionKSM();
 
   const getCrowdloanRemainingFundsKSM = () => {
-    const crowdloanKSMTarget = new Kusama(Kusama.KSM, new Decimal(config.CROWDLOAN_KSM_TARGET));
+    const crowdloanKSMTarget = new Kusama(
+      Kusama.KSM,
+      new Decimal(config.CROWDLOAN_KSM_TARGET),
+    );
     return crowdloanKSMTarget.minus(totalContributionsKSM).max(Kusama.zero());
   };
   const crowdloanRemainingFundsKSM = getCrowdloanRemainingFundsKSM();
 
-  const maxContributionKSM = userMaxContributionKSM.min(crowdloanRemainingFundsKSM);
+  const maxContributionKSM = userMaxContributionKSM.min(
+    crowdloanRemainingFundsKSM,
+  );
 
   const onClickMax = () => {
-    accountBalanceKSM && setContributeAmountInput(maxContributionKSM.toUnformattedString());
+    accountBalanceKSM &&
+      setContributeAmountInput(maxContributionKSM.toUnformattedString());
   };
 
-  const onChangeContributeAmountInput = e => {
+  const onChangeContributeAmountInput = (e) => {
     const input = e.target.value;
-    if ((isNaN(input) && input !== '') || (parseFloat(e.target.value) < 0)) {
+    if ((isNaN(input) && input !== '') || parseFloat(e.target.value) < 0) {
       return;
     }
     setContributeAmountInput(input);
@@ -159,8 +185,8 @@ function Contribute ({
       ...formatPayloadForSubstrate([
         config.PARA_ID,
         new BN(contributeAmountAtomicUnits.value.toString()),
-        null
-      ])
+        null,
+      ]),
     );
   };
 
@@ -195,7 +221,7 @@ function Contribute ({
     handleReferralCodeInputChange();
   }, [accountAddress, referralCodeInput]);
 
-  const onChangeReferralCodeInput = value => {
+  const onChangeReferralCodeInput = (value) => {
     if (value.startsWith(`${config.APP_BASE_URL}?referral=`)) {
       value = value.replace(`${config.APP_BASE_URL}?referral=`, '');
     }
@@ -204,44 +230,82 @@ function Contribute ({
 
   useMemo(() => {
     const setReferralCodeFromURL = () => {
-      if (urlReferralCode) {
+      if (urlReferralCode && !getLatestReferralCode(accountAddress)) {
         onChangeReferralCodeInput(urlReferralCode);
       }
     };
     setReferralCodeFromURL();
-  }, [urlReferralCode]);
+  }, [urlReferralCode, accountAddress]);
 
-  const formIsDisabled = contributionStatus && contributionStatus.isProcessing();
+  useEffect(() => {
+    const setReferralCodeFromHistory = () => {
+      if (contributionStatus) {
+        return;
+      }
+      let latestReferral = getLatestReferralCode(accountAddress);
+      if (!latestReferral) {
+        userContributions?.forEach((contribution) => {
+          if (contribution.referral) {
+            latestReferral = contribution.referral;
+            setLatestReferralCode(contribution.referral, accountAddress);
+          }
+        });
+      }
+      if (latestReferral) {
+        onChangeReferralCodeInput(latestReferral.toString());
+      }
+    };
+    setReferralCodeFromHistory();
+  }, [userContributions, accountAddress, contributionStatus]);
 
-  const exceedsTarget = (
-    contributeAmountKSM
-    && crowdloanRemainingFundsKSM.lt(contributeAmountKSM)
-    && contributeAmountInput.length > 0
-  );
+  const formIsDisabled =
+    contributionStatus && contributionStatus.isProcessing();
 
-  const insufficientFunds = (
-    contributeAmountKSM
-    && contributeAmountKSM.gt(userMaxContributionKSM)
-    && contributeAmountInput.length > 0
-  );
-  const belowMinContribution = (
-    contributeAmountKSM
-    && contributeAmountKSM.lt(new Kusama(Kusama.KSM, new Decimal(config.MIN_CONTRIBUTION)))
-    && contributeAmountInput.length > 0
-  );
+  const referralCodeInputIsDisabled =
+    formIsDisabled || getLatestReferralCode(accountAddress);
+
+  const exceedsTarget =
+    contributeAmountKSM &&
+    crowdloanRemainingFundsKSM.lt(contributeAmountKSM) &&
+    contributeAmountInput.length > 0;
+
+  const insufficientFunds =
+    contributeAmountKSM &&
+    contributeAmountKSM.gt(userMaxContributionKSM) &&
+    contributeAmountInput.length > 0;
+  const belowMinContribution =
+    contributeAmountKSM &&
+    contributeAmountKSM.lt(
+      new Kusama(Kusama.KSM, new Decimal(config.MIN_CONTRIBUTION)),
+    ) &&
+    contributeAmountInput.length > 0;
 
   const onClickClaimButton = async () => {
-    if (!contributeAmountKSM || insufficientFunds || belowMinContribution || exceedsTarget) {
+    if (
+      !contributeAmountKSM ||
+      insufficientFunds ||
+      belowMinContribution ||
+      exceedsTarget
+    ) {
       return;
     }
     try {
       setContributionStatus(TxStatus.processing(''));
-      const txResHandler = makeTxResHandler(api, onContributeSuccess, onContributeFailure, onContributeUpdate);
+      const txResHandler = makeTxResHandler(
+        api,
+        onContributeSuccess,
+        onContributeFailure,
+        onContributeUpdate,
+      );
       const contributeTx = buildContributeTx();
       const referralTx = referralCode && buildReferralTx();
       if (referralTx) {
-        const transactions = referralTx ? [contributeTx, referralTx] : [contributeTx];
-        api.tx.utility.batch(transactions).signAndSend(fromAccount, txResHandler);
+        const transactions = referralTx
+          ? [contributeTx, referralTx]
+          : [contributeTx];
+        api.tx.utility
+          .batch(transactions)
+          .signAndSend(fromAccount, txResHandler);
       } else {
         contributeTx.signAndSend(fromAccount, txResHandler);
       }
@@ -261,11 +325,12 @@ function Contribute ({
   if (contributionStatus) {
     amountLabel = t('Enter your contribution amount');
   } else if (insufficientFunds) {
-    amountLabel  = '❌ ' + t('Insufficient funds');
+    amountLabel = '❌ ' + t('Insufficient funds');
   } else if (belowMinContribution) {
-    amountLabel  = '❌ ' + t(`Minimum contribution is ${config.MIN_CONTRIBUTION} KSM`);
+    amountLabel =
+      '❌ ' + t(`Minimum contribution is ${config.MIN_CONTRIBUTION} KSM`);
   } else if (exceedsTarget) {
-    amountLabel  = '❌ ' + t('Contribution exceeds crowdloan target');
+    amountLabel = '❌ ' + t('Contribution exceeds crowdloan target');
   } else {
     amountLabel = t('Enter your contribution amount');
   }
@@ -273,19 +338,19 @@ function Contribute ({
   return (
     <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
       <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
-      <p className="mb-2 text-sm xl:text-base">
-        {amountLabel}
-      </p>
+      <p className="mb-2 text-sm xl:text-base">{amountLabel}</p>
       <div className="flex items-center">
         <div className="form-input w-4/5 amount relative h-20">
           <Input
             className="h-full w-full outline-none"
             value={contributeAmountInput && contributeAmountInput.toString()}
-            type='numher'
+            type="numher"
             onChange={onChangeContributeAmountInput}
             disabled={formIsDisabled}
           />
-          <span onClick={onClickMax} className="uppercase cursor-pointer text-xl xl:text-2xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
+          <span
+            onClick={onClickMax}
+            className="uppercase cursor-pointer text-xl xl:text-2xl mt-4 right-0 mr-4 max-btn font-semibold absolute px-5 py-3 rounded-md">
             {t('Max')}
           </span>
         </div>
@@ -293,16 +358,18 @@ function Contribute ({
       </div>
       <div className="pt-8">
         <p className="mb-2 text-sm xl:text-base">
-          {(!referralCodeInvalid && !userReferredSelf) && t('Enter your referral code (optional)')}
+          {!referralCodeInvalid &&
+            !userReferredSelf &&
+            t('Enter your referral code (optional)')}
           {userReferredSelf && '❌ ' + t('Cannot refer self')}
           {referralCodeInvalid && '❌ ' + t('Referral code invalid')}
         </p>
         <div className="w-full form-input relative h-20">
           <Input
             value={referralCodeInput}
-            onChange={e => onChangeReferralCodeInput(e.target.value)}
+            onChange={(e) => onChangeReferralCodeInput(e.target.value)}
             className="w-full h-full outline-none"
-            disabled={formIsDisabled}
+            disabled={referralCodeInputIsDisabled}
           />
         </div>
       </div>
@@ -312,7 +379,9 @@ function Contribute ({
           <div className="artibute rounded-t-lg calamari-text bg-white">
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-4 pb-2">
               <span>{t('Base')}</span>
-              <span className="font-semibold">{baseReward && baseReward.toString()}</span>
+              <span className="font-semibold">
+                {baseReward && baseReward.toString()}
+              </span>
             </div>
             <div className="flex text-base xl:text-lg items-center justify-between px-3 xl:px-6 py-2 bg-gray">
               <div className="flex items-center">
@@ -321,11 +390,15 @@ function Contribute ({
                   {t('Limited Time')}
                 </span>
               </div>
-              <span className="font-semibold">{earlyBonus && earlyBonus.toString()}</span>
+              <span className="font-semibold">
+                {earlyBonus && earlyBonus.toString()}
+              </span>
             </div>
             <div className="flex text-base xl:text-lg justify-between px-3 xl:px-6 pt-2 pb-4">
               <span>{t('Referral')}</span>
-              <span className="font-semibold">{referralBonus && referralBonus.toString()}</span>
+              <span className="font-semibold">
+                {referralBonus && referralBonus.toString()}
+              </span>
             </div>
           </div>
           <div className="flex text-xl p-6 result justify-between text-white">
@@ -341,7 +414,10 @@ function Contribute ({
           {t('Contribute')}
         </div>
       ) : (
-        <TxStatusDisplay txStatus={contributionStatus} transactionType={'Contribution'} />
+        <TxStatusDisplay
+          txStatus={contributionStatus}
+          transactionType={'Contribution'}
+        />
       )}
     </div>
   );
