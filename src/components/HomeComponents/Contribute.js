@@ -46,6 +46,15 @@ const InstallPJSPrompt = () => {
   );
 };
 
+const CrowdloanFinishedNote = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="content-item p-8 xl:p-10 h-full contribute flex-1">
+      <h1 className="title text-3xl md:text-4xl">{t('Contribute')}</h1>
+    </div>
+  );
+};
+
 function Contribute({
   fromAccount,
   accountBalanceKSM,
@@ -279,13 +288,17 @@ function Contribute({
       new Kusama(Kusama.KSM, new Decimal(config.MIN_CONTRIBUTION)),
     ) &&
     contributeAmountInput.length > 0;
+  const crowdloanIsFinished = totalContributionsKSM.gt(
+    new Kusama(Kusama.KSM, new Decimal(config.STAGE_2_TARGET_KSM)),
+  );
 
   const onClickClaimButton = async () => {
     if (
       !contributeAmountKSM ||
       insufficientFunds ||
       belowMinContribution ||
-      exceedsTarget
+      exceedsTarget ||
+      crowdloanIsFinished
     ) {
       return;
     }
@@ -315,7 +328,9 @@ function Contribute({
     }
   };
 
-  if (!keyringIsInit) {
+  if (crowdloanIsFinished) {
+    return <CrowdloanFinishedNote />;
+  } else if (!keyringIsInit) {
     return <InstallPJSPrompt />;
   } else if (!fromAccount) {
     return <CreateAccountPrompt />;
